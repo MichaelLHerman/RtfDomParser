@@ -9,15 +9,13 @@
 
 using System;
 using System.ComponentModel;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 
 namespace RtfDomParser
 {
+
     /// <summary>
     /// RTF Document format information
     /// </summary>
-    [Serializable()]
     public class DocumentFormatInfo
     {
         /// <summary>
@@ -31,7 +29,6 @@ namespace RtfDomParser
         /// <summary>
         /// If this instance is create by Clone , return the parent instance
         /// </summary>
-        [Browsable(false)]
         public DocumentFormatInfo Parent
         {
             get
@@ -110,13 +107,13 @@ namespace RtfDomParser
             }
         }
 
-        private System.Drawing.Color intBorderColor
-            = System.Drawing.Color.Black;
+        private Color intBorderColor
+            = Color.Black;
         /// <summary>
         /// Border line color
         /// </summary>
-        [DefaultValue(typeof(System.Drawing.Color), "Black")]
-        public System.Drawing.Color BorderColor
+        [DefaultValue(typeof(Color), "Black")]
+        public Color BorderColor
         {
             get
             {
@@ -146,19 +143,16 @@ namespace RtfDomParser
         }
 
         private DashStyle _BorderStyle = DashStyle.Solid;
-        /// <summary>
-        /// 边框线样式
-        /// </summary>
-        [DefaultValue( DashStyle.Solid )]
+        [DefaultValue(DashStyle.Solid)]
         public DashStyle BorderStyle
         {
-            get 
+            get
             {
-                return _BorderStyle; 
+                return _BorderStyle;
             }
             set
             {
-                _BorderStyle = value; 
+                _BorderStyle = value;
             }
         }
 
@@ -370,13 +364,13 @@ namespace RtfDomParser
         /// </summary>
         public int NativeLevel = 0;
 
-        public void SetAlign(System.Drawing.StringAlignment align)
+        public void SetAlign(StringAlignment align)
         {
-            if (align == System.Drawing.StringAlignment.Center)
+            if (align == StringAlignment.Center)
             {
                 this.Align = RTFAlignment.Center;
             }
-            else if (align == System.Drawing.StringAlignment.Far)
+            else if (align == StringAlignment.Far)
             {
                 this.Align = RTFAlignment.Right;
             }
@@ -386,8 +380,7 @@ namespace RtfDomParser
             }
         }
 
-        [Browsable(false)]
-        public System.Drawing.Font Font
+        public Font Font
         {
             set
             {
@@ -403,7 +396,7 @@ namespace RtfDomParser
             }
         }
 
-        private string strFontName = System.Windows.Forms.Control.DefaultFont.Name;
+        private string strFontName = "Microsoft Sans Serif";
         /// <summary>
         /// font name
         /// </summary>
@@ -522,12 +515,12 @@ namespace RtfDomParser
             }
         }
 
-        private System.Drawing.Color intTextColor = System.Drawing.Color.Black;
+        private Color intTextColor = Color.Black;
         /// <summary>
         /// text color
         /// </summary>
-        [DefaultValue(typeof(System.Drawing.Color), "Black")]
-        public System.Drawing.Color TextColor
+        [DefaultValue(typeof(Color), "Black")]
+        public Color TextColor
         {
             get
             {
@@ -539,12 +532,12 @@ namespace RtfDomParser
             }
         }
 
-        private System.Drawing.Color intBackColor = System.Drawing.Color.Empty;
+        private Color intBackColor = Color.Empty;
         /// <summary>
         /// back color
         /// </summary>
-        [DefaultValue(typeof(System.Drawing.Color), "Empty")]
-        public System.Drawing.Color BackColor
+        [DefaultValue(typeof(Color), "Empty")]
+        public Color BackColor
         {
             get
             {
@@ -559,7 +552,7 @@ namespace RtfDomParser
         ///// <summary>
         ///// 边框线颜色
         ///// </summary>
-        //public System.Drawing.Color BorderColor = System.Drawing.Color.Empty;
+        //public Color BorderColor = Color.Empty;
         private string strLink = null;
         /// <summary>
         /// link
@@ -801,14 +794,14 @@ namespace RtfDomParser
 
         public void ResetText()
         {
-            this.FontName = System.Windows.Forms.Control.DefaultFont.Name;
+            this.FontName = "Microsoft Sans Serif";
             this.FontSize = 12;
             this.Bold = false;
             this.Italic = false;
             this.Underline = false;
             this.Strikeout = false;
-            this.TextColor = System.Drawing.Color.Black;
-            this.BackColor = System.Drawing.Color.Empty;
+            this.TextColor = Color.Black;
+            this.BackColor = Color.Empty;
             //this.Link = null ;
             this.Subscript = false;
             this.Superscript = false;
@@ -847,7 +840,7 @@ namespace RtfDomParser
             //this.TopBorder = false;
             //this.RightBorder = false;
             //this.BottomBorder = false;
-            //this.BorderColor = System.Drawing.Color.Transparent;
+            //this.BorderColor = Color.Transparent;
         }
 
         public void Reset()
@@ -861,14 +854,14 @@ namespace RtfDomParser
             this.SpacingBefore = 0;
             this.SpacingAfter = 0;
             this.Align = 0;
-            this.FontName = System.Windows.Forms.Control.DefaultFont.Name;
+            this.FontName = "Microsoft Sans Serif";
             this.FontSize = 12;
             this.Bold = false;
             this.Italic = false;
             this.Underline = false;
             this.Strikeout = false;
-            this.TextColor = System.Drawing.Color.Black;
-            this.BackColor = System.Drawing.Color.Empty;
+            this.TextColor = Color.Black;
+            this.BackColor = Color.Empty;
             this.Link = null;
             this.Subscript = false;
             this.Superscript = false;
@@ -881,7 +874,6 @@ namespace RtfDomParser
             this.TopBorder = false;
             this.RightBorder = false;
             this.BottomBorder = false;
-            this.BorderStyle = DashStyle.Solid;
             this.BorderSpacing = 0;
             this.BorderThickness = false;
             this.BorderColor = Color.Black;
@@ -928,7 +920,7 @@ namespace RtfDomParser
 //    /// <summary>
 //    /// RTF Document format information
 //    /// </summary>
-//    [Serializable()]
+//
 //    public class DocumentFormatInfo
 //    {
 //        /// <summary>
@@ -942,7 +934,7 @@ namespace RtfDomParser
 //        /// <summary>
 //        /// If this instance is create by Clone , return the parent instance
 //        /// </summary>
-//        [Browsable( false )]
+//
 //        public DocumentFormatInfo Parent
 //        {
 //            get
@@ -1128,7 +1120,7 @@ namespace RtfDomParser
 //            }
 //        }
         
-//        [Browsable( false )]
+//
 //        public System.Drawing.Font Font
 //        {
 //            set
@@ -1264,12 +1256,12 @@ namespace RtfDomParser
 //            }
 //        }
 
-//        private System.Drawing.Color intTextColor = System.Drawing.Color.Black;
+//        private Color intTextColor = Color.Black;
 //        /// <summary>
 //        /// text color
 //        /// </summary>
-//        [DefaultValue(typeof(System.Drawing.Color), "Black")]
-//        public System.Drawing.Color TextColor
+//        [DefaultValue(typeof(Color), "Black")]
+//        public Color TextColor
 //        {
 //            get
 //            {
@@ -1281,12 +1273,12 @@ namespace RtfDomParser
 //            }
 //        }
 
-//        private System.Drawing.Color intBackColor = System.Drawing.Color.Empty;
+//        private Color intBackColor = Color.Empty;
 //        /// <summary>
 //        /// back color
 //        /// </summary>
-//        [DefaultValue(typeof(System.Drawing.Color), "Empty")]
-//        public System.Drawing.Color BackColor
+//        [DefaultValue(typeof(Color), "Empty")]
+//        public Color BackColor
 //        {
 //            get
 //            {
@@ -1301,7 +1293,7 @@ namespace RtfDomParser
 //        ///// <summary>
 //        ///// 边框线颜色
 //        ///// </summary>
-//        //public System.Drawing.Color BorderColor = System.Drawing.Color.Empty;
+//        //public Color BorderColor = Color.Empty;
 //        private string strLink = null;
 //        /// <summary>
 //        /// link
@@ -1528,8 +1520,8 @@ namespace RtfDomParser
 //            this.Italic = false;
 //            this.Underline = false;
 //            this.Strikeout = false;
-//            this.TextColor = System.Drawing.Color.Black;
-//            this.BackColor = System.Drawing.Color.Empty;
+//            this.TextColor = Color.Black;
+//            this.BackColor = Color.Empty;
 //            //this.Link = null ;
 //            this.Subscript = false;
 //            this.Superscript = false;
@@ -1551,7 +1543,7 @@ namespace RtfDomParser
 //            //this.TopBorder = false;
 //            //this.RightBorder = false;
 //            //this.BottomBorder = false;
-//            //this.BorderColor = System.Drawing.Color.Transparent;
+//            //this.BorderColor = Color.Transparent;
 //        }
 
 //        public void Reset()
@@ -1568,8 +1560,8 @@ namespace RtfDomParser
 //            this.Italic = false;
 //            this.Underline = false;
 //            this.Strikeout = false;
-//            this.TextColor = System.Drawing.Color.Black;
-//            this.BackColor = System.Drawing.Color.Empty;
+//            this.TextColor = Color.Black;
+//            this.BackColor = Color.Empty;
 //            this.Link = null;
 //            this.Subscript = false;
 //            this.Superscript = false;

@@ -12,6 +12,7 @@ using System;
 using System.Text;
 using System.Collections;
 using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace RtfDomParser
 {
@@ -50,11 +51,11 @@ namespace RtfDomParser
                 return defaultValue ;
         }
 
-        private RTFDomElementList myElements = new RTFDomElementList();
+        private List<RTFDomElement> myElements = new List<RTFDomElement>();
         /// <summary>
         /// child elements list
         /// </summary>
-        public RTFDomElementList Elements
+        public List<RTFDomElement> Elements
         {
             get
             {
@@ -66,7 +67,7 @@ namespace RtfDomParser
         /// <summary>
         /// the docuemnt which owned this element
         /// </summary>
-        [System.ComponentModel.Browsable( false )]
+
         [System.Xml.Serialization.XmlIgnore()]
         public RTFDomDocument OwnerDocument
         {
@@ -88,12 +89,12 @@ namespace RtfDomParser
         /// </summary>
         /// <param name="element">child element</param>
         /// <returns>index of element</returns>
-        public int AppendChild(RTFDomElement element)
+        public void AppendChild(RTFDomElement element)
         {
             CheckLocked();
             element.myParent = this;
             element.OwnerDocument = this.myOwnerDocument;
-            return myElements.Add(element);
+            myElements.Add(element);
         }
 
         /// <summary>
@@ -111,7 +112,7 @@ namespace RtfDomParser
         /// <summary>
         /// parent element
         /// </summary>
-        [System.ComponentModel.Browsable( false )]
+
         public RTFDomElement Parent
         {
             get
@@ -120,7 +121,7 @@ namespace RtfDomParser
             }
         }
 
-        [System.ComponentModel.Browsable( false )]
+
         public virtual string InnerText
         {
             get
@@ -151,7 +152,7 @@ namespace RtfDomParser
         /// Whether element is locked , if element is lock , it can not append chidl element
         /// </summary>
         [System.Xml.Serialization.XmlIgnore( )]
-        [System.ComponentModel.Browsable( false )]
+
         public bool Locked
         {
             get 
@@ -176,10 +177,6 @@ namespace RtfDomParser
             }
         }
 
-        public void PrintDomString()
-        {
-            System.Console.WriteLine(this.ToDomString());
-        }
 
         public virtual string ToDomString()
         {
@@ -189,7 +186,7 @@ namespace RtfDomParser
             return builder.ToString();
         }
 
-        protected void ToDomString(RTFDomElementList elements, System.Text.StringBuilder builder, int level)
+        protected void ToDomString(List<RTFDomElement> elements, System.Text.StringBuilder builder, int level)
         {
             foreach (RTFDomElement element in elements)
             {
@@ -203,7 +200,7 @@ namespace RtfDomParser
         /// <summary>
         /// Native level in RTF document
         /// </summary>
-        [NonSerialized()]
+
         internal int NativeLevel = -1;
     }
 }

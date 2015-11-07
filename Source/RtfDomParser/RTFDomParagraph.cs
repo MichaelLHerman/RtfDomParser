@@ -17,7 +17,7 @@ namespace RtfDomParser
     /// <summary>
     /// paragraph element
     /// </summary>
-    [Serializable()]
+
     public class RTFDomParagraph : RTFDomElement
     {
         /// <summary>

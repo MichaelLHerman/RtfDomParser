@@ -9,6 +9,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace RtfDomParser
 {
@@ -215,14 +217,10 @@ namespace RtfDomParser
 		{
 		}
 
-        public RTFReader(string fileName)
-        {
-            LoadRTFFile(fileName);
-        }
 
         public RTFReader(System.IO.Stream stream)
         {
-            System.IO.StreamReader reader = new System.IO.StreamReader(stream, System.Text.Encoding.ASCII);
+            System.IO.StreamReader reader = new System.IO.StreamReader(stream, System.Text.Encoding.GetEncoding("us-ascii"));
             LoadReader(reader);
             myBaseStream = stream;
         }
@@ -258,19 +256,19 @@ namespace RtfDomParser
 		/// </summary>
 		/// <param name="strFileName">spcial file name</param>
 		/// <returns>is operation successful</returns>
-		public bool LoadRTFFile( string strFileName )
+		public async Task LoadStream(Stream stream )
 		{
 			//myTokenStack.Clear();
 			myCurrentToken = null ;
-			if( System.IO.File.Exists( strFileName ))
-			{
-				System.IO.FileStream stream = new System.IO.FileStream( strFileName , System.IO.FileMode.Open , System.IO.FileAccess.Read );
-				myReader = new System.IO.StreamReader( stream , System.Text.Encoding.ASCII );
-                myBaseStream = stream;
-				myLex = new RTFLex( myReader );
-				return true ;
-			}
-			return false;
+            //var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(strFileName);
+            //var randomAccessStream = await file.OpenReadAsync();
+            
+            //var stream = randomAccessStream.AsStreamForRead();
+
+            //System.IO.FileStream stream = new System.IO.FileStream( strFileName , System.IO.FileMode.Open , System.IO.FileAccess.Read );
+            myReader = new System.IO.StreamReader(stream, System.Text.Encoding.GetEncoding("us-ascii"));
+            myBaseStream = stream;
+			myLex = new RTFLex( myReader );
 		}
 		/// <summary>
 		/// load rtf document
@@ -312,7 +310,7 @@ namespace RtfDomParser
 		{
 			if( myReader != null )
 			{
-				myReader.Close();
+				myReader.Dispose();
 				myReader = null ;
 			}
 		}

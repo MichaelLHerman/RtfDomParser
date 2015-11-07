@@ -8,6 +8,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 
 namespace RtfDomParser
 {
@@ -15,16 +16,9 @@ namespace RtfDomParser
     /// RTF node list , this source code evolution from other software.
 	/// </summary>
     [System.Diagnostics.DebuggerDisplay("Count={ Count }")]
-    [System.Diagnostics.DebuggerTypeProxy(typeof(RTFInstanceDebugView))]
-    public class RTFNodeList : System.Collections.CollectionBase 
+    public class RTFNodeList : List<RTFNode> 
 	{
-		/// <summary>
-		/// get node special index
-		/// </summary>
-		public RTFNode this[ int index ]
-		{
-			get{ return ( RTFNode ) this.List[ index ] ;}
-		}
+
 		/// <summary>
 		/// get node special keyword
 		/// </summary>
@@ -105,45 +99,5 @@ namespace RtfDomParser
 			return this[ Key ] != null;
 		}
 
-		/// <summary>
-		/// get index of node in this list
-		/// </summary>
-		/// <param name="node">node</param>
-		/// <returns>index , if node does no in this list , return -1</returns>
-		public int IndexOf( RTFNode node )
-		{
-			return this.List.IndexOf( node );
-		}
-
-		internal void AddRange( RTFNodeList list )
-		{
-			this.InnerList.AddRange( list );
-		}
-		/// <summary>
-		/// add node
-		/// </summary>
-		/// <param name="node">node</param>
-		internal void Add( RTFNode node )
-		{
-			//node.OwnerList = this ;
-			this.List.Add( node );
-		}
-		/// <summary>
-		/// remvoe node
-		/// </summary>
-		/// <param name="node">node</param>
-		internal void Remove( RTFNode node )
-		{
-			this.Remove( node );
-		}
-		/// <summary>
-		/// insert node
-		/// </summary>
-		/// <param name="index">index</param>
-		/// <param name="node">node</param>
-		internal void Insert( int index , RTFNode node )
-		{
-			this.List.Insert( index , node );
-		}
 	}
 }

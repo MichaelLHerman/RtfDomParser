@@ -8,6 +8,9 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace RtfDomParser
 {
@@ -17,20 +20,6 @@ namespace RtfDomParser
 	public class RTFRawDocument : RTFNodeGroup
 	{ 
 
-		/// <summary>
-		/// test 
-		/// </summary>
-		internal static void Test()
-		{
-			RTFRawDocument doc = new RTFRawDocument();
-			doc.Load(@"d:\abc.rtf");
-			//System.Console.WriteLine( doc.Text );
-			RTFWriter writer = new RTFWriter(@"d:\a.rtf");
-			writer.Indent = true ;
-			doc.Write( writer );
-			writer.Close();
-
-		}
 		
 		/// <summary>
 		/// initialize instance
@@ -182,7 +171,7 @@ namespace RtfDomParser
                 {
                     if (r >= 0 && g >= 0 && b >= 0)
                     {
-                        System.Drawing.Color c = System.Drawing.Color.FromArgb(255, r, g, b);
+                        Color c = Color.FromArgb(255, r, g, b);
                         myColorTable.Add(c);
                         r = -1;
                         g = -1;
@@ -193,7 +182,7 @@ namespace RtfDomParser
             if (r >= 0 && g >= 0 && b >= 0)
             {
                 // read the last color
-                System.Drawing.Color c = System.Drawing.Color.FromArgb(255, r, g, b);
+                Color c = Color.FromArgb(255, r, g, b);
                 myColorTable.Add(c);
             }
         }
@@ -273,17 +262,16 @@ namespace RtfDomParser
 		/// load rtf file
 		/// </summary>
 		/// <param name="strFileName">file name</param>
-		public void Load( string strFileName )
+		public async Task Load(Stream stream )
 		{
 			myEncoding = null ;
 			using( RTFReader reader = new RTFReader() )
 			{
-				if( reader.LoadRTFFile( strFileName ) )
-				{
-					Load( reader );
-					reader.Close();
-				}
+                await reader.LoadStream(stream);
+				
+				Load( reader );
 				reader.Close();
+				
 			}
 		}
 
@@ -300,11 +288,12 @@ namespace RtfDomParser
 					RTFNode node = myNodes[ RTFConsts._ansicpg ];
 					if( node != null && node.HasParameter )
 					{
-						myEncoding = System.Text.Encoding.GetEncoding( node.Parameter );
+                        //todo look up code in encoding dictionary
+						//myEncoding = System.Text.Encoding.GetEncoding( node.Parameter );
 					}
 				}
 				if( myEncoding == null )
-					myEncoding = System.Text.Encoding.Default ;
+                    myEncoding = System.Text.Encoding.UTF8;
 				return myEncoding ;
 			}
 		}
@@ -349,7 +338,7 @@ namespace RtfDomParser
 		public void Load( RTFReader reader )
 		{
 			myNodes.Clear();
-			System.Collections.Stack groups = new System.Collections.Stack();
+			Stack<RTFNodeGroup> groups = new Stack<RTFNodeGroup>();
 			RTFNodeGroup NewGroup = null ;
 			RTFNode NewNode = null;
 			while( reader.ReadToken() != null )
@@ -458,18 +447,7 @@ namespace RtfDomParser
 			base.Write (writer);
 		}
 
-		/// <summary>
-		/// save rtf file
-		/// </summary>
-		/// <param name="strFileName">file name</param>
-		public void Save( string strFileName )
-		{
-			using( RTFWriter writer = new RTFWriter( strFileName ))
-			{
-				this.Write( writer );
-				writer.Close();
-			}
-		}
+
 		/// <summary>
 		/// Save rtf to a stream
 		/// </summary>

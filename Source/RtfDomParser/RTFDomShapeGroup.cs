@@ -14,15 +14,8 @@ using System.Text;
 
 namespace RtfDomParser
 {
-    /// <summary>
-    /// shape group
-    /// </summary>
-    [Serializable()]
     public class RTFDomShapeGroup : RTFDomElement
     {
-        /// <summary>
-        /// initialize instance
-        /// </summary>
         public RTFDomShapeGroup()
         {
         }

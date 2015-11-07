@@ -11,14 +11,15 @@
 
 using System;
 using System.Collections ;
+using System.Collections.Generic;
 
 namespace RtfDomParser
 {
+    
 	/// <summary>
 	/// rtf color table
 	/// </summary>
     [System.Diagnostics.DebuggerDisplay("Count={Count}")]
-    [System.Diagnostics.DebuggerTypeProxy(typeof(RTFInstanceDebugView))]
 	public class RTFColorTable
 	{
 		/// <summary>
@@ -28,15 +29,15 @@ namespace RtfDomParser
 		{
 		}
 
-		private ArrayList myItems = new ArrayList();
+		private List<Color> myItems = new List<Color>();
 		/// <summary>
 		/// get color at special index
 		/// </summary>
-		public System.Drawing.Color this[ int index ]
+		public Color this[ int index ]
 		{
 			get
             {
-                return ( System.Drawing.Color ) myItems[ index ] ;
+                return myItems[ index ] ;
             }
 		}
 
@@ -46,12 +47,12 @@ namespace RtfDomParser
 		/// <param name="index">index</param>
 		/// <param name="DefaultValue">default value</param>
 		/// <returns>color value</returns>
-		public System.Drawing.Color GetColor( int index , System.Drawing.Color DefaultValue )
+		public Color GetColor( int index , Color DefaultValue )
 		{
 			index -- ;
             if (index >= 0 && index < myItems.Count)
             {
-                return (System.Drawing.Color)myItems[index];
+                return (Color)myItems[index];
             }
             else
             {
@@ -79,7 +80,7 @@ namespace RtfDomParser
 		/// add color to list
 		/// </summary>
 		/// <param name="c">new color value</param>
-		public void Add( System.Drawing.Color c )
+		public void Add( Color c )
 		{
 			if( c.IsEmpty )
 				return ;
@@ -88,7 +89,7 @@ namespace RtfDomParser
 			
 			if( c.A != 255 )
 			{
-				c = System.Drawing.Color.FromArgb( 255 , c );
+				c = Color.FromArgb( 255 , c );
 			}
 
             if (bolCheckValueExistWhenAdd)
@@ -107,7 +108,7 @@ namespace RtfDomParser
 		/// delete special color
 		/// </summary>
 		/// <param name="c">color value</param>
-		public void Remove( System.Drawing.Color c )
+		public void Remove(Color c )
 		{
 			int index = IndexOf( c );
 			if( index >= 0 )
@@ -118,7 +119,7 @@ namespace RtfDomParser
 		/// </summary>
 		/// <param name="c">color</param>
 		/// <returns>index , if not found , return -1</returns>
-		public int IndexOf( System.Drawing.Color c )
+		public int IndexOf( Color c )
 		{
             if (c.A == 0)
             {
@@ -126,11 +127,11 @@ namespace RtfDomParser
             }
 			if( c.A != 255 )
 			{
-				c = System.Drawing.Color.FromArgb( 255 , c );
+				c = Color.FromArgb( 255 , c );
 			}
             for (int iCount = 0; iCount < myItems.Count; iCount++)
             {
-                System.Drawing.Color color = (System.Drawing.Color)myItems[iCount];
+                Color color = (Color)myItems[iCount];
                 if (color.ToArgb() == c.ToArgb())
                 {
                     return iCount;
@@ -164,7 +165,7 @@ namespace RtfDomParser
 			writer.WriteRaw(";");
 			for( int iCount = 0 ; iCount < myItems.Count ; iCount ++ )
 			{
-				System.Drawing.Color c = ( System.Drawing.Color ) myItems[ iCount ] ;
+				Color c = ( Color ) myItems[ iCount ] ;
 				writer.WriteKeyword( "red" + c.R );
 				writer.WriteKeyword( "green" + c.G );
 				writer.WriteKeyword( "blue" + c.B );
@@ -182,7 +183,7 @@ namespace RtfDomParser
             RTFColorTable table = new RTFColorTable();
             for (int iCount = 0; iCount < myItems.Count; iCount++)
             {
-                System.Drawing.Color c = ( System.Drawing.Color ) myItems[ iCount ] ;
+                Color c = ( Color ) myItems[ iCount ] ;
                 table.myItems.Add(c);
             }
             return table;

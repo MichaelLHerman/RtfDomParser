@@ -13,10 +13,6 @@ using System.Text;
 
 namespace RtfDomParser
 {
-    /// <summary>
-    /// document field element
-    /// </summary>
-    [Serializable()]
     public class RTFDomField : RTFDomElement
     {
         /// <summary>

@@ -17,7 +17,7 @@ namespace RtfDomParser
     /// <summary>
     /// line element
     /// </summary>
-    [Serializable()]
+
     public class RTFDomLineBreak : RTFDomElement
     {
         /// <summary>

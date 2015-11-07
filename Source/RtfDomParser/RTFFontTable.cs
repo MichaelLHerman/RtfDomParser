@@ -21,8 +21,7 @@ namespace RtfDomParser
     /// font table
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Count={ Count }")]
-    [System.Diagnostics.DebuggerTypeProxy(typeof(RTFInstanceDebugView))]
-	public class RTFFontTable : System.Collections.CollectionBase
+	public class RTFFontTable : List<RTFFont>
 	{
 
 		/// <summary>
@@ -94,7 +93,7 @@ namespace RtfDomParser
 		/// <param name="f">font name</param>
 		public RTFFont Add( string f )
 		{
-            return Add(this.Count, f, Encoding.Default);
+            return Add(this.Count, f, Encoding.UTF8);
 		}
 
         /// <summary>
@@ -120,16 +119,12 @@ namespace RtfDomParser
                 {
                     font.Charset = RTFFont.GetCharset(encoding);
                 }
-                this.List.Add(font);
-                return font ;
+                this.Add(font);
+                return font;
             }
             return this[f];
         }
 
-        public void Add(RTFFont f)
-        {
-            this.List.Add(f);
-        }
 
 		/// <summary>
 		/// Remove font
@@ -139,7 +134,7 @@ namespace RtfDomParser
 		{
             RTFFont item = this[f];
             if (item != null)
-                this.List.Remove( item );
+                this.Remove( item );
 		}
 
 		/// <summary>
@@ -202,7 +197,7 @@ namespace RtfDomParser
             foreach (RTFFont item in this )
             {
                 RTFFont newItem = item.Clone();
-                table.List.Add(newItem);
+                table.Add(newItem);
             }
             return table;
         }
@@ -289,23 +284,29 @@ namespace RtfDomParser
                 _EncodingCharsets = new Dictionary<int, Encoding>();
                 //_EncodingCharsets[0] = ANSIEncoding.Instance;
                 //_EncodingCharsets[1] = Encoding.Default;
-                _EncodingCharsets[77] = Encoding.GetEncoding(10000);//Mac ,macintosh Î÷Å·×Ö·û(Mac)
-                _EncodingCharsets[128] = Encoding.GetEncoding(932);//Shift Jis ;ANSI/OEM - Japanese, Shift-JIS 
-                _EncodingCharsets[130] = Encoding.GetEncoding(1361);//Johab;Korean (Johab) 
-                _EncodingCharsets[134] = Encoding.GetEncoding(936);//GB2312
-                _EncodingCharsets[136] = Encoding.GetEncoding(10002);//Big5
-                _EncodingCharsets[161] = Encoding.GetEncoding(1253);//Greek
-                _EncodingCharsets[162] = Encoding.GetEncoding(1254);//Turkish
-                _EncodingCharsets[163] = Encoding.GetEncoding(1258);//Vietnamese;ANSI/OEM - Vietnamese 
-                _EncodingCharsets[177] = Encoding.GetEncoding(1255);//Hebrw
-                _EncodingCharsets[178] = Encoding.GetEncoding(864);//Arabic
-                _EncodingCharsets[179] = Encoding.GetEncoding(864);//Arabic Traditional
-                _EncodingCharsets[180] = Encoding.GetEncoding(864);//Arabic user
-                _EncodingCharsets[181] = Encoding.GetEncoding(864);//Hebrew user
-                _EncodingCharsets[186] = Encoding.GetEncoding(775);//Baltic
-                _EncodingCharsets[204] = Encoding.GetEncoding(866);//Russian
-                _EncodingCharsets[222] = Encoding.GetEncoding(874);//Thai
-                _EncodingCharsets[255] = Encoding.GetEncoding(437);//OEM
+                //_EncodingCharsets[77] = Encoding.GetEncoding("macintosh");//Mac ,macintosh Î÷Å·×Ö·û(Mac)
+                //_EncodingCharsets[128] = Encoding.GetEncoding("shift_jis");//Shift Jis ;ANSI/OEM - Japanese, Shift-JIS 
+                //_EncodingCharsets[130] = Encoding.GetEncoding("Johab");//Johab;Korean (Johab) 
+                //_EncodingCharsets[134] = Encoding.GetEncoding("gb2312");//GB2312
+
+                //_EncodingCharsets[77] = Encoding.GetEncoding(10000);//Mac ,macintosh Î÷Å·×Ö·û(Mac)
+                //_EncodingCharsets[128] = Encoding.GetEncoding(932);//Shift Jis ;ANSI/OEM - Japanese, Shift-JIS 
+                //_EncodingCharsets[130] = Encoding.GetEncoding(1361);//Johab;Korean (Johab) 
+                //_EncodingCharsets[134] = Encoding.GetEncoding(936);//GB2312
+                //_EncodingCharsets[136] = Encoding.GetEncoding(10002);//Big5
+                //_EncodingCharsets[161] = Encoding.GetEncoding(1253);//Greek
+                //_EncodingCharsets[162] = Encoding.GetEncoding(1254);//Turkish
+                //_EncodingCharsets[163] = Encoding.GetEncoding(1258);//Vietnamese;ANSI/OEM - Vietnamese 
+                //_EncodingCharsets[177] = Encoding.GetEncoding(1255);//Hebrw
+                //_EncodingCharsets[178] = Encoding.GetEncoding(864);//Arabic
+                //_EncodingCharsets[179] = Encoding.GetEncoding(864);//Arabic Traditional
+                //_EncodingCharsets[180] = Encoding.GetEncoding(864);//Arabic user
+                //_EncodingCharsets[181] = Encoding.GetEncoding(864);//Hebrew user
+                //_EncodingCharsets[186] = Encoding.GetEncoding(775);//Baltic
+                //_EncodingCharsets[204] = Encoding.GetEncoding(866);//Russian
+                //_EncodingCharsets[222] = Encoding.GetEncoding(874);//Thai
+                //_EncodingCharsets[255] = Encoding.GetEncoding(437);//OEM
+                _EncodingCharsets[255] = Encoding.GetEncoding("IBM437");//OEM
 
 
 
@@ -333,7 +334,7 @@ namespace RtfDomParser
             }
             else if (fchartset == 1)
             {
-                return Encoding.Default;
+                return Encoding.UTF8;
             }
             else
             {

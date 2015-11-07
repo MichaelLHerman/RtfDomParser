@@ -13,13 +13,14 @@ using System;
 using System.Text;
 using System.ComponentModel;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace RtfDomParser
 {
     /// <summary>
     /// table row
     /// </summary>
-    [Serializable()]
+
     public class RTFDomTableRow : RTFDomElement
     {
         /// <summary>
@@ -29,24 +30,7 @@ namespace RtfDomParser
         {
         }
 
-        [NonSerialized()]
-        private ArrayList myCellSettings = new ArrayList();
-        /// <summary>
-        /// cell settings
-        /// </summary>
-        [Browsable( false )]
-        [System.Xml.Serialization.XmlIgnore()]
-        internal ArrayList CellSettings
-        {
-            get
-            {
-                return myCellSettings;
-            }
-            set
-            {
-                myCellSettings = value;
-            }
-        }
+        internal List<object> CellSettings { get; set; }
 
         private DocumentFormatInfo myFormat = new DocumentFormatInfo();
         /// <summary>

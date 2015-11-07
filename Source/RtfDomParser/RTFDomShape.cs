@@ -18,7 +18,7 @@ namespace RtfDomParser
     /// <summary>
     /// shape element
     /// </summary>
-    [Serializable()]
+
     public class RTFDomShape : RTFDomElement
     {
         /// <summary>

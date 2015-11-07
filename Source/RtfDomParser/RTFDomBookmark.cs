@@ -17,7 +17,7 @@ namespace RtfDomParser
     /// <summary>
     /// rtf bookmark
     /// </summary>
-    [Serializable()]
+
     public class RTFDomBookmark : RTFDomElement
     {
         public RTFDomBookmark()

@@ -8,6 +8,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace RtfDomParser
@@ -15,7 +16,6 @@ namespace RtfDomParser
     /// <summary>
     /// string attribute
     /// </summary>
-    [Serializable()]
     public class StringAttribute
     {
         /// <summary>
@@ -64,9 +64,8 @@ namespace RtfDomParser
         }
     }
 
-    [Serializable()]
-    [System.Diagnostics.DebuggerTypeProxy(typeof(RTFInstanceDebugView))]
-    public class StringAttributeCollection : System.Collections.CollectionBase
+
+    public class StringAttributeCollection : List<StringAttribute>
     {
         public StringAttributeCollection()
         {
@@ -92,7 +91,7 @@ namespace RtfDomParser
                     if (item.Name == name)
                     {
                         if (value == null)
-                            this.List.Remove(item);
+                            this.Remove(item);
                         else
                             item.Value = value;
                         return;
@@ -103,19 +102,10 @@ namespace RtfDomParser
                     StringAttribute newItem = new StringAttribute();
                     newItem.Name = name;
                     newItem.Value = value;
-                    this.List.Add(newItem);
+                    this.Add(newItem);
                 }
             }
         }
 
-        public int Add(StringAttribute item)
-        {
-            return this.List.Add(item);
-        }
-
-        public void Remove(StringAttribute item)
-        {
-            this.List.Remove(item);
-        }
     }
 }

@@ -10,8 +10,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Drawing ;
-using System.Drawing.Drawing2D;
 using System.ComponentModel;
 
 namespace RtfDomParser
@@ -67,19 +65,14 @@ namespace RtfDomParser
         }
 
         private bool _Thickness = false;
-        /// <summary>
-        /// 粗边框样式
-        /// </summary>
-        [DefaultValue( false)]
+
         public bool Thickness
         {
             get { return _Thickness; }
             set { _Thickness = value; }
         }
-        /// <summary>
-        /// 复制对象
-        /// </summary>
-        /// <returns>复制品</returns>
+
+
         public RTFBorderStyle Clone()
         {
             RTFBorderStyle b = new RTFBorderStyle();

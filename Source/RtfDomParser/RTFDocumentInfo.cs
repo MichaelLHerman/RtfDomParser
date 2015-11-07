@@ -9,18 +9,29 @@
 
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RtfDomParser
 {
+
+    public static class DictionaryExtension
+    {
+        public static TValue ValueOrDefault<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key)
+        {
+            TValue value = default(TValue);
+            dictionary.TryGetValue(key, out value);
+            return value;
+        }
+    }
+
 	/// <summary>
 	/// Document information
 	/// </summary>
-    [Serializable()]
-    [System.Diagnostics.DebuggerTypeProxy(typeof(RTFInstanceDebugView))]
 	public class RTFDocumentInfo 
 	{
-		private System.Collections.Specialized.StringDictionary myInfo = 
-			new System.Collections.Specialized.StringDictionary();
+		private Dictionary<string,string> myInfo =
+            new Dictionary<string, string>();
 		/// <summary>
 		/// get information specify name
 		/// </summary>
@@ -28,7 +39,7 @@ namespace RtfDomParser
 		/// <returns>value</returns>
 		public string GetInfo( string strName )
 		{
-			return myInfo[ strName ] ;
+			return myInfo.ValueOrDefault(strName);
 		}
 
 		/// <summary>
@@ -45,57 +56,57 @@ namespace RtfDomParser
 		/// </summary>
 		public string Title
 		{
-			get{ return myInfo["title"] ;}
+			get{ return myInfo.ValueOrDefault("title") ;}
 			set{ myInfo["title"] = value;}
 		}
 		public string Subject
 		{
-			get{ return myInfo["subject"] ;}
+			get{ return myInfo.ValueOrDefault("subject") ;}
 			set{ myInfo["subject"] = value;}
 		}
 		public string Author
 		{
-			get{ return myInfo["author"] ;}
+			get{ return myInfo.ValueOrDefault("author") ;}
 			set{ myInfo["author"] = value;}
 		}
 		public string Manager
 		{
-			get{ return myInfo["manager"] ;}
+			get{ return myInfo.ValueOrDefault("manager") ;}
 			set{ myInfo["manager"] = value;}
 		}
 		public string Company
 		{
-			get{ return myInfo["company"] ;}
+			get{ return myInfo.ValueOrDefault("company") ;}
 			set{ myInfo["company"] = value;}
 		}
 		public string Operator
 		{
-			get{ return myInfo["operator"] ;}
+			get{ return myInfo.ValueOrDefault("operator") ;}
 			set{ myInfo["operator"] = value;}
 		}
 		public string Category
 		{
-			get{ return myInfo["category"] ;}
+			get{ return myInfo.ValueOrDefault("category") ;}
 			set{ myInfo["categroy"] = value;}
 		}
 		public string Keywords
 		{
-			get{ return myInfo["keywords"] ;}
+			get{ return myInfo.ValueOrDefault("keywords") ;}
 			set{ myInfo["keywords"] = value;}
 		}
 		public string Comment
 		{
-			get{ return myInfo["comment"] ;}
+			get{ return myInfo.ValueOrDefault("comment");}
 			set{ myInfo["comment"] = value;}
 		}
 		public string Doccomm
 		{
-			get{ return myInfo["doccomm"] ;}
+			get{ return myInfo.ValueOrDefault("doccomm") ;}
 			set{ myInfo["doccomm"] = value;}
 		}
 		public string HLinkbase
 		{
-			get{ return myInfo["hlinkbase"] ;}
+			get{ return myInfo.ValueOrDefault("hlinkbase") ;}
 			set{ myInfo["hlinkbase"] = value;}
 		}
 
@@ -221,7 +232,7 @@ namespace RtfDomParser
         {
             get
             {
-                System.Collections.ArrayList list = new System.Collections.ArrayList();
+                var list = new List<string>();
                 foreach (string key in myInfo.Keys)
                 {
                     list.Add(key + "=" + myInfo[key]);
@@ -230,7 +241,7 @@ namespace RtfDomParser
                 list.Add("Revtim="+ this.Revtim.ToString("yyyy-MM-dd HH:mm:ss"));
                 list.Add("Printim="+ this.Printim.ToString("yyyy-MM-dd HH:mm:ss"));
                 list.Add("Buptim="+ this.Buptim.ToString("yyyy-MM-dd HH:mm:ss"));
-                return ( string[]) list.ToArray(typeof(string));
+                return list.ToArray();
             }
         }
 

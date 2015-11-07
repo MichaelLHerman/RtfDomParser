@@ -12,8 +12,8 @@ using System.Collections;
 using System.Text;
 using System.ComponentModel ;
 using System.Collections.Generic;
-using System.Drawing ;
-using System.Drawing.Drawing2D ;
+using System.Linq;
+using System.Reflection;
 
 namespace RtfDomParser
 {
@@ -67,7 +67,7 @@ namespace RtfDomParser
             }
         }
 
-        private System.Text.Encoding myDefaultEncoding = System.Text.Encoding.Default ;
+        private System.Text.Encoding myDefaultEncoding = System.Text.Encoding.UTF8;
         /// <summary>
         /// text encoding of current font
         /// </summary>
@@ -98,7 +98,7 @@ namespace RtfDomParser
         /// <summary>
         /// default font name
         /// </summary>
-        private static string DefaultFontName = System.Windows.Forms.Control.DefaultFont.Name;
+        private static string DefaultFontName = "Microsoft Sans Serif";
 
 
         private RTFFontTable myFontTable = new RTFFontTable();
@@ -343,7 +343,6 @@ namespace RtfDomParser
         /// <summary>
         /// client area width,unit twips
         /// </summary>
-        [Browsable( false )]
         public int ClientWidth
         {
             get
@@ -401,19 +400,19 @@ namespace RtfDomParser
         }
 
 
-        /// <summary>
-        /// load a rtf file and parse
-        /// </summary>
-        /// <param name="fileName">file name</param>
-        public void Load(string fileName)
-        {
-            using (System.IO.FileStream stream = new System.IO.FileStream(
-                fileName,
-                System.IO.FileMode.Open, System.IO.FileAccess.Read))
-            {
-                Load(stream);
-            }
-        }
+        ///// <summary>
+        ///// load a rtf file and parse
+        ///// </summary>
+        ///// <param name="fileName">file name</param>
+        //public void Load(string fileName)
+        //{
+        //    using (System.IO.FileStream stream = new System.IO.FileStream(
+        //        fileName,
+        //        System.IO.FileMode.Open, System.IO.FileAccess.Read))
+        //    {
+        //        Load(stream);
+        //    }
+        //}
 
         /// <summary>
         /// load a rtf document from a stream and parse content
@@ -495,7 +494,7 @@ namespace RtfDomParser
         public void FixForParagraphs( RTFDomElement parentElement )
         {
             RTFDomParagraph lastParagraph = null;
-            RTFDomElementList list = new RTFDomElementList();
+            List<RTFDomElement> list = new List<RTFDomElement>();
             foreach (RTFDomElement element in parentElement.Elements)
             {
                 if (element is RTFDomHeader
@@ -541,7 +540,7 @@ namespace RtfDomParser
         private void FixElements(RTFDomElement parentElement)
         {
             // combin text element , decrease number of RTFDomText instance
-            ArrayList result = new ArrayList();
+            List<RTFDomElement> result = new List<RTFDomElement>();
             foreach (RTFDomElement element in parentElement.Elements)
             {
                 if (element is RTFDomParagraph)
@@ -659,7 +658,7 @@ namespace RtfDomParser
                     }
                 }
                 result.Add(element);
-                element = element.Elements.LastElement;
+                element = element.Elements.LastOrDefault();
             }
             if (checkLockState)
             {
@@ -674,31 +673,14 @@ namespace RtfDomParser
             return result.ToArray();
         }
 
-        public RTFDomElement GetLastElement(Type elementType)
+        public T GetLastElement<T>()
         {
-            RTFDomElement[] elements = GetLastElements(true );
-            for (int iCount = elements.Length - 1; iCount >= 0; iCount--)
-            {
-                if (elementType.IsInstanceOfType(elements[iCount]))
-                    return elements[iCount];
-            }
-            return null;
+            return GetLastElements(true).OfType<T>().LastOrDefault();
         }
 
-        public RTFDomElement GetLastElement(Type elementType, bool lockStatus)
+        public T GetLastElement<T>(bool lockStatus) where T : RTFDomElement
         {
-            RTFDomElement[] elements = GetLastElements( true );
-            for (int iCount = elements.Length - 1; iCount >= 0; iCount--)
-            {
-                if (elementType.IsInstanceOfType(elements[iCount]))
-                {
-                    if (elements[iCount].Locked == lockStatus)
-                    {
-                        return elements[iCount];
-                    }
-                }
-            }
-            return null;
+            return GetLastElements(true).OfType<T>().LastOrDefault(i => i.Locked == lockStatus);
         }
 
         public RTFDomElement GetLastElement()
@@ -910,8 +892,8 @@ namespace RtfDomParser
         /// <param name="parentElement">父元素对象</param>
         private void CombinTable(RTFDomElement parentElement)
         {
-            ArrayList result = new ArrayList();
-            ArrayList rows = new ArrayList();
+            List<RTFDomElement> result = new List<RTFDomElement>();
+            List<RTFDomTableRow> rows = new List<RTFDomTableRow>();
             int lastRowWidth = -1;
             RTFDomTableRow lastRow = null;
             foreach (RTFDomElement element in parentElement.Elements)
@@ -920,7 +902,7 @@ namespace RtfDomParser
                 {
                     RTFDomTableRow row = (RTFDomTableRow)element;
                     row.Locked = false;
-                    ArrayList cellSettings = row.CellSettings;
+                    var cellSettings = row.CellSettings;
                     if (cellSettings.Count == 0)
                     {
                         if (lastRow != null && lastRow.CellSettings.Count == row.Elements.Count)
@@ -1039,7 +1021,7 @@ namespace RtfDomParser
         /// </summary>
         /// <param name="rows">table rows</param>
         /// <returns>new table</returns>
-        private RTFDomTable CreateTable(ArrayList rows)
+        private RTFDomTable CreateTable(List<RTFDomTableRow> rows)
         {
             if (rows.Count > 0)
             {
@@ -1090,7 +1072,7 @@ namespace RtfDomParser
             // flag of cell merge
             bool merge = false;
             // right position of all cells
-            ArrayList rights = new ArrayList();
+            List<int> rights = new List<int>();
 
             // right position of table
             int tableLeft = 0;
@@ -1243,7 +1225,7 @@ namespace RtfDomParser
                     for (int iCount = cell.Attributes.Count - 1; iCount >= 0; iCount--)
                     {
                         // 根据 brdrtbl 指令来隐藏某条单元格边框线
-                        string name3 = cell.Attributes.GetItem(iCount).Name;
+                        string name3 = cell.Attributes[iCount].Name;
                         if ( name3 == RTFConsts._brdrtbl 
                             || name3 == RTFConsts._brdrnone 
                             || name3 == RTFConsts._brdrnil )
@@ -1251,7 +1233,7 @@ namespace RtfDomParser
                             // 某个边框不显示
                             for (int iCount2 = iCount - 1; iCount2 >= 0; iCount2--)
                             {
-                                string name2 = cell.Attributes.GetItem(iCount2).Name;
+                                string name2 = cell.Attributes[iCount2].Name;
                                 if (name2 == RTFConsts._clbrdrl)
                                 {
                                     cell.Format.LeftBorder = false;
@@ -1433,7 +1415,7 @@ namespace RtfDomParser
                                 // then set colspan
                                 cell.ColSpan = intColSpan;
                             }
-                            if (row.Elements.LastElement == cell)
+                            if (row.Elements.LastOrDefault() == cell)
                             {
                                 cell.ColSpan = table.Columns.Count - row.Elements.Count + 1;
                                 intColSpan = cell.ColSpan;
@@ -1454,11 +1436,7 @@ namespace RtfDomParser
                         if (row.Elements.Count != table.Columns.Count)
                         {
                             // If the last cell has been merged. then supply new cells.
-                            RTFDomTableCell lastCell = (RTFDomTableCell)row.Elements.LastElement;
-                            if (lastCell == null)
-                            {
-                                System.Console.WriteLine("");
-                            }
+                            RTFDomTableCell lastCell = (RTFDomTableCell)row.Elements.LastOrDefault();
                             //if (lastCell.OverrideCell == null && lastCell.ColSpan > 1)
                             //{
                             //    lastCell.ColSpan = table.Columns.Count - row.Elements.IndexOf(lastCell);
@@ -1490,10 +1468,6 @@ namespace RtfDomParser
                             rowIndex++)
                         {
                             RTFDomTableRow row2 = (RTFDomTableRow)table.Elements[rowIndex];
-                            if (colIndex >= row2.Elements.Count)
-                            {
-                                System.Console.Write("");
-                            }
                             RTFDomTableCell cell2 = (RTFDomTableCell)row2.Elements[colIndex];
                             if (cell2.HasAttribute(RTFConsts._clvmrg))
                             {
@@ -1582,7 +1556,7 @@ namespace RtfDomParser
                 //    return false ;
                 //}
                 // if current element is image element , then finish handle image element
-                RTFDomImage img = (RTFDomImage)GetLastElement( typeof( RTFDomImage )) ;
+                RTFDomImage img = GetLastElement<RTFDomImage>() ;
                 if( img != null && img.Locked == false )
                 {
                     img.Data = HexToBytes(strText);
@@ -1713,7 +1687,8 @@ namespace RtfDomParser
                             break;
                         case RTFConsts._ansicpg :
                             // read default encoding
-                            myDefaultEncoding = Encoding.GetEncoding(reader.Parameter);
+                            //todo: look up in encoding dictionary
+                            //myDefaultEncoding = Encoding.GetEncoding(reader.Parameter);
                             break;
                         case RTFConsts._fonttbl :
                             // read font table
@@ -1985,7 +1960,7 @@ namespace RtfDomParser
                             {
                                 bolStartContent = true;
                                 // new paragraph
-                                if (GetLastElement(typeof(RTFDomParagraph)) == null)
+                                if (GetLastElement<RTFDomParagraph>() == null)
                                 {
                                     RTFDomParagraph p = new RTFDomParagraph();
                                     p.Format = _ParagraphFormat ;
@@ -2267,7 +2242,7 @@ namespace RtfDomParser
                                 {
                                     if (reader.HasParam)
                                     {
-                                        format.TextColor = this.ColorTable.GetColor( reader.Parameter, System.Drawing.Color.Black);
+                                        format.TextColor = this.ColorTable.GetColor( reader.Parameter, Color.Black);
                                     }
                                 }
                                 break;
@@ -2282,7 +2257,7 @@ namespace RtfDomParser
                                 {
                                     if ( reader.HasParam )
                                     {
-                                        format.BackColor = this.ColorTable.GetColor(reader.Parameter, System.Drawing.Color.Empty);
+                                        format.BackColor = this.ColorTable.GetColor(reader.Parameter, Color.Empty);
                                     }
                                 }
                                 break;
@@ -2324,7 +2299,7 @@ namespace RtfDomParser
                                     {
                                         format.BackColor = this.ColorTable.GetColor(
                                             reader.Parameter ,
-                                            System.Drawing.Color.Empty );
+                                            Color.Empty );
                                     }
                                 }
                                 break;
@@ -2418,7 +2393,7 @@ namespace RtfDomParser
                         case RTFConsts._brdrcf:
                             {
                                 bolStartContent = true;
-                                RTFDomElement element = this.GetLastElement( typeof( RTFDomTableRow ) , false );
+                                RTFDomElement element = this.GetLastElement<RTFDomTableRow>(false );
                                 if (element is RTFDomTableRow)
                                 {
                                     // reading a table row
@@ -2585,7 +2560,7 @@ namespace RtfDomParser
                             break;
                         case RTFConsts._picscalex:
                             {
-                                RTFDomImage img = (RTFDomImage)GetLastElement(typeof(RTFDomImage));
+                                RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
                                 {
                                     img.ScaleX = reader.Parameter;
@@ -2594,7 +2569,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._picscaley:
                             {
-                                RTFDomImage img = (RTFDomImage)GetLastElement(typeof(RTFDomImage));
+                                RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
                                 {
                                     img.ScaleY = reader.Parameter;
@@ -2603,7 +2578,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._picwgoal:
                             {
-                                RTFDomImage img = (RTFDomImage)GetLastElement(typeof(RTFDomImage));
+                                RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
                                 {
                                     img.DesiredWidth = reader.Parameter;
@@ -2612,7 +2587,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._pichgoal:
                             {
-                                RTFDomImage img = (RTFDomImage)GetLastElement(typeof(RTFDomImage));
+                                RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
                                 {
                                     img.DesiredHeight = reader.Parameter;
@@ -2621,7 +2596,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._blipuid:
                             {
-                                RTFDomImage img = (RTFDomImage)GetLastElement(typeof(RTFDomImage));
+                                RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
                                 {
                                     img.ID = ReadInnerText(reader, true);
@@ -2630,7 +2605,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._emfblip :
                             {
-                                RTFDomImage img = (RTFDomImage)GetLastElement(typeof(RTFDomImage));
+                                RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
                                 {
                                     img.PicType = RTFPicType.Emfblip;
@@ -2639,7 +2614,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._pngblip :
                             {
-                                RTFDomImage img = (RTFDomImage)GetLastElement(typeof(RTFDomImage));
+                                RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
                                 {
                                     img.PicType = RTFPicType.Pngblip;
@@ -2648,7 +2623,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._jpegblip :
                             {
-                                RTFDomImage img = (RTFDomImage)GetLastElement(typeof(RTFDomImage));
+                                RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
                                 {
                                     img.PicType = RTFPicType.Jpegblip;
@@ -2657,7 +2632,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._macpict :
                             {
-                                RTFDomImage img = (RTFDomImage)GetLastElement(typeof(RTFDomImage));
+                                RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
                                 {
                                     img.PicType = RTFPicType.Macpict;
@@ -2666,7 +2641,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._pmmetafile:
                             {
-                                RTFDomImage img = (RTFDomImage)GetLastElement(typeof(RTFDomImage));
+                                RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
                                 {
                                     img.PicType = RTFPicType.Pmmetafile;
@@ -2675,7 +2650,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._wmetafile :
                             {
-                                RTFDomImage img = (RTFDomImage)GetLastElement(typeof(RTFDomImage));
+                                RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
                                 {
                                     img.PicType = RTFPicType.Wmetafile;
@@ -2684,7 +2659,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._dibitmap :
                             {
-                                RTFDomImage img = (RTFDomImage)GetLastElement(typeof(RTFDomImage));
+                                RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
                                 {
                                     img.PicType = RTFPicType.Dibitmap;
@@ -2693,7 +2668,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._wbitmap :
                             {
-                                RTFDomImage img = (RTFDomImage)GetLastElement(typeof(RTFDomImage));
+                                RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
                                 {
                                     img.PicType = RTFPicType.Wbitmap;
@@ -2732,14 +2707,14 @@ namespace RtfDomParser
                                         vValue = ReadInnerText(reader, true);
                                     }
                                 }//while
-                                RTFDomShape shape = (RTFDomShape)GetLastElement(typeof(RTFDomShape));
+                                RTFDomShape shape = GetLastElement<RTFDomShape>();
                                 if (shape != null)
                                 {
                                     shape.ExtAttrbutes[vName] = vValue;
                                 }
                                 else
                                 {
-                                    RTFDomShapeGroup g = (RTFDomShapeGroup)GetLastElement(typeof(RTFDomShapeGroup));
+                                    RTFDomShapeGroup g = GetLastElement<RTFDomShapeGroup>();
                                     if (g != null)
                                     {
                                         g.ExtAttrbutes[vName] = vValue;
@@ -2768,7 +2743,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._shpleft:
                             {
-                                RTFDomShape shape = (RTFDomShape)GetLastElement(typeof(RTFDomShape));
+                                RTFDomShape shape = GetLastElement<RTFDomShape>();
                                 if (shape != null)
                                 {
                                     shape.Left = reader.Parameter;
@@ -2777,7 +2752,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._shptop:
                             {
-                                RTFDomShape shape = (RTFDomShape)GetLastElement(typeof(RTFDomShape));
+                                RTFDomShape shape = GetLastElement<RTFDomShape>();
                                 if (shape != null)
                                 {
                                     shape.Top = reader.Parameter;
@@ -2786,7 +2761,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._shpright:
                             {
-                                RTFDomShape shape = (RTFDomShape)GetLastElement(typeof(RTFDomShape));
+                                RTFDomShape shape = GetLastElement<RTFDomShape>();
                                 if (shape != null)
                                 {
                                     shape.Width = reader.Parameter - shape.Left;
@@ -2795,7 +2770,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._shpbottom:
                             {
-                                RTFDomShape shape = (RTFDomShape)GetLastElement(typeof(RTFDomShape));
+                                RTFDomShape shape = GetLastElement<RTFDomShape>();
                                 if (shape != null)
                                 {
                                     shape.Height = reader.Parameter - shape.Top;
@@ -2804,7 +2779,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._shplid:
                             {
-                                RTFDomShape shape = (RTFDomShape)GetLastElement(typeof(RTFDomShape));
+                                RTFDomShape shape = GetLastElement<RTFDomShape>();
                                 if (shape != null)
                                 {
                                     shape.ShapeID = reader.Parameter;
@@ -2813,7 +2788,7 @@ namespace RtfDomParser
                             }
                         case RTFConsts._shpz:
                             {
-                                RTFDomShape shape = (RTFDomShape)GetLastElement(typeof(RTFDomShape));
+                                RTFDomShape shape = GetLastElement<RTFDomShape>();
                                 if (shape != null)
                                 {
                                     shape.ZIndex = reader.Parameter;
@@ -2936,7 +2911,7 @@ namespace RtfDomParser
                                             // nested row
                                             RTFDomTableRow newRow = new RTFDomTableRow();
                                             newRow.Level = reader.Parameter;
-                                            RTFDomTableCell parentCell = (RTFDomTableCell)GetLastElement(typeof(RTFDomTableCell), false);
+                                            RTFDomTableCell parentCell = GetLastElement<RTFDomTableCell>(false);
                                             if (parentCell == null)
                                                 this.AddContentElement(newRow);
                                             else
@@ -3014,7 +2989,7 @@ namespace RtfDomParser
                             {
                                 // meet row control word , not parse at first , just save it 
                                 bolStartContent = true;
-                                RTFDomTableRow row = (RTFDomTableRow)GetLastElement(typeof(RTFDomTableRow), false);
+                                RTFDomTableRow row = (RTFDomTableRow)GetLastElement<RTFDomTableRow>(false);
                                 if (row != null)
                                 {
                                     row.Attributes.Add( reader.Keyword , reader.Parameter );
@@ -3043,7 +3018,7 @@ namespace RtfDomParser
                             {
                                 // meet cell control word , no parse at first , just save it
                                 bolStartContent = true;
-                                RTFDomTableRow row = (RTFDomTableRow)GetLastElement(typeof(RTFDomTableRow), false);
+                                RTFDomTableRow row = (RTFDomTableRow)GetLastElement<RTFDomTableRow>(false);
                                 //if (row != null && row.Locked == false )
                                 {
                                     RTFAttributeList style = null;
@@ -3431,7 +3406,7 @@ namespace RtfDomParser
                         }
                         else if (reader.Keyword == "fnil")
                         {
-                            name = System.Windows.Forms.Control.DefaultFont.Name;
+                            name = "Microsoft Sans Serif";
                             nilFlag = true;
                         }
                         else if (reader.Keyword == RTFConsts._fcharset)
@@ -3469,7 +3444,7 @@ namespace RtfDomParser
                         name = name.Trim();
                         if (string.IsNullOrEmpty(name))
                         {
-                            name = System.Windows.Forms.Control.DefaultFont.Name;
+                            name = "Microsoft Sans Serif";
                         }
                         //System.Console.WriteLine( "Index:" + index + "  Name:" + name );
                         RTFFont font = new RTFFont(index, name);
@@ -3512,7 +3487,7 @@ namespace RtfDomParser
                     case ";":
                         if (r >= 0 && g >= 0 && b >= 0)
                         {
-                            System.Drawing.Color c = System.Drawing.Color.FromArgb(255, r, g, b);
+                            Color c = Color.FromArgb(255, r, g, b);
                             myColorTable.Add(c);
                             r = -1;
                             g = -1;
@@ -3524,7 +3499,7 @@ namespace RtfDomParser
             if (r >= 0 && g >= 0 && b >= 0)
             {
                 // read the last color
-                System.Drawing.Color c = System.Drawing.Color.FromArgb(255, r, g, b);
+                Color c = Color.FromArgb(255, r, g, b);
                 myColorTable.Add(c);
             }
         }
@@ -4002,7 +3977,7 @@ namespace RtfDomParser
             builder.Append( Environment.NewLine + "   ColorTable(" + myColorTable.Count + ")");
             for (int iCount = 0; iCount < myColorTable.Count; iCount ++ )
             {
-                System.Drawing.Color c = myColorTable[iCount];
+                Color c = myColorTable[iCount];
                 builder.Append(Environment.NewLine + "      " + iCount + ":" + c.R + " " + c.G + " " + c.B );
             }
             builder.Append(Environment.NewLine + "   FontTable(" + myFontTable.Count + ")");

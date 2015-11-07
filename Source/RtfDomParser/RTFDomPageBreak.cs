@@ -13,18 +13,10 @@ using System.Text;
 
 namespace RtfDomParser
 {
-    /// <summary>
-    /// 强制分页符
-    /// </summary>
-    [Serializable()]
     public class RTFDomPageBreak:RTFDomElement
     {
-        /// <summary>
-        /// 初始化对象
-        /// </summary>
         public RTFDomPageBreak()
         {
-            //对象不能有子元素
             this.Locked = true;
         }
 

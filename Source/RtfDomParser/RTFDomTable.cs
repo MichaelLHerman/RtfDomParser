@@ -9,14 +9,11 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace RtfDomParser
 {
-    /// <summary>
-    /// table
-    /// </summary>
-    [Serializable()]
     public class RTFDomTable : RTFDomElement
     {
         /// <summary>
@@ -26,11 +23,11 @@ namespace RtfDomParser
         {
         }
 
-        private RTFDomElementList myColumns = new RTFDomElementList();
+        private List<RTFDomElement> myColumns = new List<RTFDomElement>();
         /// <summary>
         /// column list
         /// </summary>
-        public RTFDomElementList Columns
+        public List<RTFDomElement> Columns
         {
             get
             {

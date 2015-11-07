@@ -10,6 +10,7 @@
 
 
 using System;
+using System.IO;
 
 namespace RtfDomParser
 {
@@ -19,6 +20,7 @@ namespace RtfDomParser
 	public class RTFWriter : System.IDisposable
 	{
 	
+        /*
 		#region test ******************************************************
          
 		/// <summary>
@@ -55,12 +57,12 @@ namespace RtfDomParser
 		/// <param name="w">RTF text writer</param>
 		private static void TestBuildRTF( RTFWriter w )
 		{
-			w.Encoding = System.Text.Encoding.GetEncoding( 936 );
+			w.Encoding = System.Text.Encoding.GetEncoding("gb2312");
 			// write header
 			w.WriteStartGroup();
 			w.WriteKeyword("rtf1");
 			w.WriteKeyword("ansi");
-			w.WriteKeyword("ansicpg" + w.Encoding.CodePage );
+			//w.WriteKeyword("ansicpg" + w.Encoding.CodePage );
 			// wirte font table
 			w.WriteStartGroup();
 			w.WriteKeyword("fonttbl");
@@ -104,6 +106,8 @@ namespace RtfDomParser
 
 		#endregion
 
+         */
+
 		/// <summary>
 		/// Initialize instance
 		/// </summary>
@@ -117,18 +121,17 @@ namespace RtfDomParser
 		/// Initialize instance
 		/// </summary>
 		/// <param name="strFileName">file name</param>
-		public RTFWriter( string strFileName )
+		public RTFWriter( Stream strFileName )
 		{
 			myWriter = new System.IO.StreamWriter(
-				strFileName , 
-				false , 
-				System.Text.Encoding.ASCII );
+				strFileName ,
+				System.Text.Encoding.GetEncoding("us-ascii") );
 		}
 
         /// <summary>
         /// for chinese , can use System.Text.Encoding.GetEncoding( 936 );
         /// </summary>
-        private System.Text.Encoding myEncoding = System.Text.Encoding.Default ;
+        private System.Text.Encoding myEncoding = System.Text.Encoding.UTF8;
 		/// <summary>
 		/// text encoding
 		/// </summary>
@@ -137,6 +140,9 @@ namespace RtfDomParser
 			get{ return myEncoding ;}
 			set{ myEncoding = value;}
 		}
+
+        private int codePageNumber = 1252;
+        public int CodePageNumber { get { return codePageNumber; } set { codePageNumber = value; } }
 
 		/// <summary>
 		/// inner text writer
@@ -204,7 +210,7 @@ namespace RtfDomParser
 				throw new System.Exception("Some group does not finish");
 			if( myWriter != null )
 			{
-				myWriter.Close();
+				myWriter.Dispose();
 				myWriter = null;
 			}
 		}

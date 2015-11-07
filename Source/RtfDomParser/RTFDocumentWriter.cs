@@ -11,6 +11,8 @@
 
 using System;
 using System.Collections ;
+using System.Collections.Generic;
+using System.IO;
 //using DCSoft.Drawing ;
 //using DCSoft.Printing ;
 
@@ -36,33 +38,27 @@ namespace RtfDomParser
 			Open( writer );
 		}
 
-		public RTFDocumentWriter( string strFileName )
-		{
-            myColorTable.CheckValueExistWhenAdd = true;
-			Open( strFileName );
-		}
-
 		public RTFDocumentWriter( System.IO.Stream stream )
 		{
             myColorTable.CheckValueExistWhenAdd = true;
 			System.IO.StreamWriter writer = new System.IO.StreamWriter( 
                 stream ,
-                System.Text.Encoding.ASCII );
+                System.Text.Encoding.GetEncoding("us-ascii") );
 			Open( writer );
 		}
 
 		public virtual bool Open( System.IO.TextWriter writer )
 		{
 			myWriter = new RTFWriter( writer );
-			myWriter.Encoding = System.Text.Encoding.GetEncoding( 936 );
+			myWriter.Encoding = System.Text.Encoding.UTF8;
 			myWriter.Indent = false;
 			return true ;
 		}
 
-		public virtual bool Open( string strFileName )
+		public virtual bool Open( Stream strFileName )
 		{
 			myWriter = new RTFWriter( strFileName );
-			myWriter.Encoding = System.Text.Encoding.GetEncoding( 936 );
+            myWriter.Encoding = System.Text.Encoding.UTF8;
 			myWriter.Indent = false ;
 			return true ;
 		}
@@ -83,8 +79,8 @@ namespace RtfDomParser
 		/// <summary>
 		/// document information
 		/// </summary>
-		private Hashtable myInfo = new Hashtable();
-		public Hashtable Info
+        private Dictionary<string, object> myInfo = new Dictionary<string, object>();
+        public Dictionary<string, object> Info
 		{
 			get
 			{
@@ -206,23 +202,23 @@ namespace RtfDomParser
                 }
             }
         }
-		public void WriteBorderLineDashStyle( System.Drawing.Drawing2D.DashStyle style )
+		public void WriteBorderLineDashStyle(DashStyle style )
 		{
 			if( bolCollectionInfo == false )
 			{
-				if( style == System.Drawing.Drawing2D.DashStyle.Dot )
+				if( style == DashStyle.Dot )
 				{
 					this.WriteKeyword("brdrdot");
 				}
-				else if( style == System.Drawing.Drawing2D.DashStyle.DashDot )
+				else if( style == DashStyle.DashDot )
 				{
 					this.WriteKeyword("brdrdashd");
 				}
-				else if( style == System.Drawing.Drawing2D.DashStyle.DashDotDot )
+				else if( style == DashStyle.DashDotDot )
 				{
 					this.WriteKeyword("brdrdashdd");
 				}
-				else if( style == System.Drawing.Drawing2D.DashStyle.Dash )
+				else if( style == DashStyle.Dash )
 				{
 					this.WriteKeyword("brdrdash");
 				}
@@ -234,9 +230,7 @@ namespace RtfDomParser
 		}
 
         private bool _DebugMode = true;
-        /// <summary>
-        /// 处于调试模式
-        /// </summary>
+
         public bool DebugMode
         {
             get { return _DebugMode; }
@@ -255,14 +249,14 @@ namespace RtfDomParser
 				myInfo.Clear();
 				myFontTable.Clear();
 				myColorTable.Clear();
-				myFontTable.Add( System.Windows.Forms.Control.DefaultFont.Name );
+                myFontTable.Add("Microsoft Sans Serif");
 			}
 			else
 			{
 				myWriter.WriteStartGroup();
 				myWriter.WriteKeyword( RTFConsts._rtf );
 				myWriter.WriteKeyword("ansi");
-				myWriter.WriteKeyword("ansicpg" + myWriter.Encoding.CodePage );
+				myWriter.WriteKeyword("ansicpg" + myWriter.CodePageNumber );
 				// write document information
 				if( myInfo.Count > 0 )
 				{
@@ -326,7 +320,7 @@ namespace RtfDomParser
 				myWriter.WriteRaw(";");
 				for( int iCount = 0 ; iCount < myColorTable.Count ; iCount ++ )
 				{
-					System.Drawing.Color c = myColorTable[ iCount ] ;
+					Color c = myColorTable[ iCount ] ;
 					myWriter.WriteKeyword( "red" + c.R );
 					myWriter.WriteKeyword( "green" + c.G );
 					myWriter.WriteKeyword( "blue" + c.B );
@@ -673,7 +667,7 @@ namespace RtfDomParser
 		/// write font format
 		/// </summary>
 		/// <param name="font">font</param>
-		public void WriteFont( System.Drawing.Font font )
+		public void WriteFont(Font font )
 		{
 			if( font == null )
 			{
@@ -867,21 +861,22 @@ namespace RtfDomParser
 					if( strText != null )
 					{
 						strText = strText.Replace( "\n" , "");
-						System.IO.StringReader reader = new System.IO.StringReader( strText );
-						string strLine = reader.ReadLine();
-						int iCount = 0 ;
-						while( strLine != null )
-						{
-							if( iCount > 0 )
-							{
-								myWriter.WriteKeyword("line");
-							}
+                        using (System.IO.StringReader reader = new System.IO.StringReader(strText))
+                        {
+                            string strLine = reader.ReadLine();
+                            int iCount = 0;
+                            while (strLine != null)
+                            {
+                                if (iCount > 0)
+                                {
+                                    myWriter.WriteKeyword("line");
+                                }
 
-							iCount ++ ;
-							myWriter.WriteText( strLine );
-							strLine = reader.ReadLine();
-						}
-						reader.Close();
+                                iCount++;
+                                myWriter.WriteText(strLine);
+                                strLine = reader.ReadLine();
+                            }
+                        }
 					}
 				}
 				else
@@ -940,6 +935,8 @@ namespace RtfDomParser
 				myWriter.WriteKeyword("line");
 			}
 		}
+
+        /*
 		/// <summary>
 		/// write image
 		/// </summary>
@@ -974,5 +971,6 @@ namespace RtfDomParser
 				myWriter.WriteEndGroup();
 			}
 		}
+         */
 	}
 }

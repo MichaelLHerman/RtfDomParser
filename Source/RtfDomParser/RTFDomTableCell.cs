@@ -14,10 +14,6 @@ using System.Text;
 
 namespace RtfDomParser
 {
-    /// <summary>
-    /// cell 
-    /// </summary>
-    [Serializable()]
     public class RTFDomTableCell : RTFDomElement
     {
         /// <summary>
@@ -82,7 +78,6 @@ namespace RtfDomParser
         /// <summary>
         /// left padding in fact
         /// </summary>
-        [System.ComponentModel.Browsable(false)]
         [System.Xml.Serialization.XmlIgnore()]
         public int RuntimePaddingLeft
         {
@@ -124,7 +119,6 @@ namespace RtfDomParser
         /// <summary>
         /// top padding in fact
         /// </summary>
-        [System.ComponentModel.Browsable(false)]
         [System.Xml.Serialization.XmlIgnore()]
         public int RuntimePaddingTop
         {
@@ -166,7 +160,6 @@ namespace RtfDomParser
         /// <summary>
         /// right padding in fact
         /// </summary>
-        [System.ComponentModel.Browsable(false)]
         [System.Xml.Serialization.XmlIgnore()]
         public int RuntimePaddingRight
         {
@@ -208,7 +201,6 @@ namespace RtfDomParser
         /// <summary>
         /// bottom padding in fact
         /// </summary>
-        [System.ComponentModel.Browsable(false)]
         [System.Xml.Serialization.XmlIgnore()]
         public int RuntimePaddingBottom
         {
@@ -338,12 +330,12 @@ namespace RtfDomParser
             }
         }
 
-        //private System.Drawing.Color intBorderColor = System.Drawing.Color.Black;
+        //private Color intBorderColor = Color.Black;
         ///// <summary>
         ///// border color
         ///// </summary>
-        //[System.ComponentModel.DefaultValue(typeof(System.Drawing.Color), "Black")]
-        //public System.Drawing.Color BorderColor
+        //[System.ComponentModel.DefaultValue(typeof(Color), "Black")]
+        //public Color BorderColor
         //{
         //    get
         //    {
@@ -355,12 +347,12 @@ namespace RtfDomParser
         //    }
         //}
 
-        //private System.Drawing.Color intBackColor = System.Drawing.Color.Transparent;
+        //private Color intBackColor = Color.Transparent;
         ///// <summary>
         ///// back color
         ///// </summary>
-        //[System.ComponentModel.DefaultValue(typeof(System.Drawing.Color), "Transparent")]
-        //public System.Drawing.Color BackColor
+        //[System.ComponentModel.DefaultValue(typeof(Color), "Transparent")]
+        //public Color BackColor
         //{
         //    get
         //    {
@@ -428,7 +420,7 @@ namespace RtfDomParser
         /// <summary>
         /// this cell merged by another cell which this property specify
         /// </summary>
-        [System.ComponentModel.Browsable( false )]
+
         [System.Xml.Serialization.XmlIgnore()]
         public RTFDomTableCell OverrideCell
         {

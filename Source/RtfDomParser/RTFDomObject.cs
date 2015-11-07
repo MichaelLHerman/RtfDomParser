@@ -13,23 +13,14 @@ using System.Text;
 
 namespace RtfDomParser
 {
-    /// <summary>
-    /// 内嵌对象
-    /// </summary>
-    [Serializable]
     public class RTFDomObject : RTFDomElement
     {
-        /// <summary>
-        /// 初始化对象
-        /// </summary>
         public RTFDomObject()
         {
         }
 
         private Dictionary<string, string> _CustomAttributes = new Dictionary<string, string>();
-        /// <summary>
-        /// 用户自定义的属性列表
-        /// </summary>
+
         public Dictionary<string, string> CustomAttributes
         {
             get
@@ -109,7 +100,7 @@ namespace RtfDomParser
         /// <summary>
         /// 文本格式的内容
         /// </summary>
-        [System.ComponentModel.Browsable( false )]
+
         public string ContentText
         {
             get
@@ -120,7 +111,7 @@ namespace RtfDomParser
                 }
                 else
                 {
-                    return System.Text.Encoding.Default.GetString(_Content);
+                    return System.Text.Encoding.UTF8.GetString(_Content, 0, _Content.Length);
                 }
             }
         }

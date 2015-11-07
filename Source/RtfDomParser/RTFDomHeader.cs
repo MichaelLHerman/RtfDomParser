@@ -13,16 +13,10 @@ using System.Text;
 
 namespace RtfDomParser
 {
-    /// <summary>
-    /// 页眉元素
-    /// </summary>
-    [Serializable()]
     public class RTFDomHeader : RTFDomElement
     {
         private HeaderFooterStyle _Style = HeaderFooterStyle.AllPages;
-        /// <summary>
-        /// 页眉页脚样式
-        /// </summary>
+
         [System.ComponentModel.DefaultValue( HeaderFooterStyle.AllPages )]
         public HeaderFooterStyle Style
         {
@@ -52,16 +46,10 @@ namespace RtfDomParser
         }
     }
 
-    /// <summary>
-    /// 页脚元素
-    /// </summary>
-    [Serializable()]
     public class RTFDomFooter : RTFDomElement
     {
         private HeaderFooterStyle _Style = HeaderFooterStyle.AllPages;
-        /// <summary>
-        /// 页眉页脚样式
-        /// </summary>
+
         [System.ComponentModel.DefaultValue(HeaderFooterStyle.AllPages)]
         public HeaderFooterStyle Style
         {

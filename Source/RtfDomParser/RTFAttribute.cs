@@ -10,6 +10,7 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace RtfDomParser
@@ -17,7 +18,7 @@ namespace RtfDomParser
     /// <summary>
     /// rtf attribute
     /// </summary>
-    [Serializable()]
+
     public class RTFAttribute
     {
         /// <summary>
@@ -66,24 +67,13 @@ namespace RtfDomParser
         }
     }
 
-    /// <summary>
-    /// RTF attribute list
-    /// </summary>
-    [Serializable()]
-    [System.Diagnostics.DebuggerTypeProxy(typeof(RTFInstanceDebugView))]
-    public class RTFAttributeList : System.Collections.CollectionBase
+    public class RTFAttributeList : List<RTFAttribute>
     {
-        /// <summary>
-        /// initialize instance
-        /// </summary>
+
         public RTFAttributeList()
         {
         }
 
-        public RTFAttribute GetItem(int index)
-        {
-            return (RTFAttribute)this.List[index];
-        }
 
         public int this[string name]
         {
@@ -109,43 +99,29 @@ namespace RtfDomParser
                 RTFAttribute item = new RTFAttribute();
                 item.Name = name;
                 item.Value = value;
-                this.List.Add(item);
+                Add(item);
             }
         }
 
-        public int Add(RTFAttribute item)
-        {
-            return this.List.Add(item);
-        }
 
-        public int Add(string name, int v)
+        public void Add(string name, int v)
         {
             RTFAttribute item = new RTFAttribute();
             item.Name = name;
             item.Value = v;
-            return this.List.Add(item);
-        }
-
-        public void Remove(RTFAttribute item)
-        {
-            this.List.Remove(item);
+            Add(item);
         }
 
         public void Remove(string name)
         {
             for (int iCount = this.Count - 1; iCount >= 0; iCount--)
             {
-                RTFAttribute item = (RTFAttribute)this.List[iCount];
+                RTFAttribute item = this[iCount];
                 if (item.Name == name)
                 {
-                    this.List.RemoveAt(iCount);
+                    RemoveAt(iCount);
                 }
             }
-        }
-
-        public bool Contains(RTFAttribute item)
-        {
-            return this.List.Contains(item);
         }
 
         public bool Contains(string name)
@@ -166,7 +142,7 @@ namespace RtfDomParser
                 RTFAttribute newItem = new RTFAttribute();
                 newItem.Name = item.Name;
                 newItem.Value = item.Value;
-                list.List.Add(newItem);
+                list.Add(newItem);
             }
             return list;
         }

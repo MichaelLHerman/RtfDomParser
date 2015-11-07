@@ -15,7 +15,6 @@ namespace RtfDomParser
     /// <summary>
     /// RTF element container
     /// </summary>
-    [Serializable()]
     public class RTFDomElementContainer : RTFDomElement
     {
         /// <summary>

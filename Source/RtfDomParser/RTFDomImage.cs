@@ -17,7 +17,7 @@ namespace RtfDomParser
     /// <summary>
     /// image element
     /// </summary>
-    [Serializable()]
+
     public class RTFDomImage : RTFDomElement
     {
         /// <summary>
@@ -48,7 +48,6 @@ namespace RtfDomParser
         /// <summary>
         /// data
         /// </summary>
-        [System.ComponentModel.Browsable( false )]
         [System.Xml.Serialization.XmlIgnore()]
         public byte[] Data
         {
@@ -62,9 +61,8 @@ namespace RtfDomParser
             }
         }
 
-        [System.ComponentModel.Browsable( false )]
+
         [System.Xml.Serialization.XmlElement()]
-        [System.ComponentModel.DesignerSerializationVisibility( System.ComponentModel.DesignerSerializationVisibility.Hidden )]
         public string Base64Data
         {
             get

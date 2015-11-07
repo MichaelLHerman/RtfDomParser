@@ -11,8 +11,6 @@
 using System;
 using System.Runtime.InteropServices ;
 using System.IO ;
-using System.Drawing ;
-using System.Drawing.Imaging ;
 using System.Text ;
 
 namespace RtfDomParser
@@ -49,6 +47,7 @@ namespace RtfDomParser
             return true;
         }
 
+        /*
 		/// <summary>
 		/// Use the EmfToWmfBits function in the GDI+ specification to convert a 
 		/// Enhanced Metafile to a Windows Metafile
@@ -193,6 +192,7 @@ namespace RtfDomParser
 					_stream.Close();
 			}
 		}
+         */
   
 
 		private RTFUtil()

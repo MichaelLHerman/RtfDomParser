@@ -14,10 +14,6 @@ using System.Text;
 
 namespace RtfDomParser
 {
-    /// <summary>
-    /// text element
-    /// </summary>
-    [Serializable()]
     public class RTFDomText : RTFDomElement
     {
         /// <summary>

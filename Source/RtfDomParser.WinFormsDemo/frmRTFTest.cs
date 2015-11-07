@@ -35,7 +35,8 @@ namespace RtfDomParser.Test
                     this.Update();
                     RtfDomParser.RTFDomDocument doc = new RtfDomParser.RTFDomDocument();
                     doc.Progress += new ProgressEventHandler(doc_Progress);
-                    doc.Load(dlg.FileName);
+                    var stream = new System.IO.FileStream(dlg.FileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+                    doc.Load(stream);
                     txtRTFDom.Text = doc.ToDomString();
                     this.Text = dlg.FileName;
                     myProgress.Value = 0;
