@@ -88,6 +88,7 @@
     <Compile Include="RTFUtil.cs" />
     <Compile Include="RTFVerticalAlignment.cs" />
     <Compile Include="RTFWriter.cs" />
+    <Compile Include="StringAlignment.cs" />
     <Compile Include="StringAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
