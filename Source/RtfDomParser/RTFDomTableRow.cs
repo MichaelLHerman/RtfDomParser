@@ -8,224 +8,133 @@
  */
 
 
-
-using System;
-using System.Text;
-using System.ComponentModel;
-using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace RtfDomParser
 {
     /// <summary>
     /// table row
     /// </summary>
-
     public class RTFDomTableRow : RTFDomElement
     {
-        /// <summary>
-        /// initialize instance
-        /// </summary>
+        private int _intLevel = 1;
+
+        private int _intPaddingBottom = int.MinValue;
+
+
+        private int _intPaddingLeft = int.MinValue;
+
+
+        private int _intPaddingRight = int.MinValue;
+
+        private int _intPaddingTop = int.MinValue;
+
+        private DocumentFormatInfo _myFormat = new DocumentFormatInfo();
+
         public RTFDomTableRow()
         {
+            Width = 0;
+            Height = 0;
+            Header = false;
+            IsLastRow = false;
+            RowIndex = 0;
         }
 
         internal List<object> CellSettings { get; set; }
 
-        private DocumentFormatInfo myFormat = new DocumentFormatInfo();
         /// <summary>
         /// format
         /// </summary>
         public DocumentFormatInfo Format
         {
-            get
-            {
-                return myFormat;
-            }
-            set
-            {
-                myFormat = value;
-            }
+            get { return _myFormat; }
+            set { _myFormat = value; }
         }
 
-        private int intLevel = 1;
         /// <summary>
         /// document level
         /// </summary>
-        [DefaultValue( 1 )]
+        [DefaultValue(1)]
         public int Level
         {
-            get 
-            {
-                return intLevel; 
-            }
-            set
-            {
-                intLevel = value;
-            }
+            get { return _intLevel; }
+            set { _intLevel = value; }
         }
 
-        private int intRowIndex = 0;
         /// <summary>
         /// row index
         /// </summary>
-        [DefaultValue( 0 )]
-        internal int RowIndex
-        {
-            get
-            {
-                return intRowIndex;
-            }
-            set
-            {
-                intRowIndex = value;
-            }
-        }
+        [DefaultValue(0)]
+        internal int RowIndex { get; set; }
 
-        private bool bolIsLastRow = false;
         /// <summary>
         /// is the last row
         /// </summary>
-        [DefaultValue( false )]
-        public bool IsLastRow
-        {
-            get
-            {
-                return bolIsLastRow;
-            }
-            set
-            {
-                bolIsLastRow = value;
-            }
-        }
+        [DefaultValue(false)]
+        public bool IsLastRow { get; set; }
 
-        private bool bolHeader = false;
         /// <summary>
         /// is header row
         /// </summary>
-        [DefaultValue( false )]
-        public bool Header
-        {
-            get
-            {
-                return bolHeader;
-            }
-            set
-            {
-                bolHeader = value;
-            }
-        }
-         
+        [DefaultValue(false)]
+        public bool Header { get; set; }
 
-        private int intHeight = 0;
         /// <summary>
         /// height
         /// </summary>
-        [System.ComponentModel.DefaultValue(0)]
-        public int Height
-        {
-            get
-            {
-                return intHeight;
-            }
-            set
-            {
-                intHeight = value;
-            }
-        }
+        [DefaultValue(0)]
+        public int Height { get; set; }
 
-
-        private int intPaddingLeft = int.MinValue;
         /// <summary>
         /// padding left
         /// </summary>
-        [System.ComponentModel.DefaultValue(int.MinValue)]
+        [DefaultValue(int.MinValue)]
         public int PaddingLeft
         {
-            get
-            {
-                return intPaddingLeft;
-            }
-            set
-            {
-                intPaddingLeft = value;
-            }
+            get { return _intPaddingLeft; }
+            set { _intPaddingLeft = value; }
         }
 
-        private int intPaddingTop = int.MinValue;
         /// <summary>
         /// top padding
         /// </summary>
-        [System.ComponentModel.DefaultValue(int.MinValue)]
+        [DefaultValue(int.MinValue)]
         public int PaddingTop
         {
-            get
-            {
-                return intPaddingTop;
-            }
-            set
-            {
-                intPaddingTop = value;
-            }
+            get { return _intPaddingTop; }
+            set { _intPaddingTop = value; }
         }
 
-        
-
-        private int intPaddingRight = int.MinValue;
         /// <summary>
         /// right padding
         /// </summary>
-        [System.ComponentModel.DefaultValue(int.MinValue)]
+        [DefaultValue(int.MinValue)]
         public int PaddingRight
         {
-            get
-            {
-                return intPaddingRight;
-            }
-            set
-            {
-                intPaddingRight = value;
-            }
+            get { return _intPaddingRight; }
+            set { _intPaddingRight = value; }
         }
 
-        private int intPaddingBottom = int.MinValue;
         /// <summary>
         /// bottom padding
         /// </summary>
-        [System.ComponentModel.DefaultValue(int.MinValue)]
+        [DefaultValue(int.MinValue)]
         public int PaddingBottom
         {
-            get
-            {
-                return intPaddingBottom;
-            }
-            set
-            {
-                intPaddingBottom = value;
-            }
+            get { return _intPaddingBottom; }
+            set { _intPaddingBottom = value; }
         }
 
-        private int intWidth = 0;
         /// <summary>
         /// width
         /// </summary>
-        [DefaultValue( 0 )]
-        public int Width
-        {
-            get
-            {
-                return intWidth; 
-            }
-            set
-            {
-                intWidth = value; 
-            }
-        }
+        [DefaultValue(0)]
+        public int Width { get; set; }
 
         public override string ToString()
         {
-            return "Row " + intRowIndex;
+            return "Row " + RowIndex;
         }
-
     }
 }

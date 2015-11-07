@@ -8,227 +8,210 @@
  */
 
 
-
-using System;
-
 namespace RtfDomParser
 {
-	/// <summary>
+    /// <summary>
     /// RTF parser node, this source code evolution from other software.
-	/// </summary>
-	public class RTFNode
-	{
-		/// <summary>
-		/// initialize instance
-		/// </summary>
-		public RTFNode()
-		{
-		}
-
-		public RTFNode( RTFNodeType type , string Key )
-		{
-			intType = type ;
-			this.strKeyword = Key ;
-		}
-		
-        public RTFNode( RTFToken token )
-		{
-			this.strKeyword = token.Key ;
-			this.bolHasParameter = token.HasParam ;
-			this.intParameter = token.Param ;
-			if( token.Type == RTFTokenType.Control )
-				intType = RTFNodeType.Control ;
-			else if( token.Type == RTFTokenType.Control )
-				intType = RTFNodeType.Control ;
-			else if( token.Type == RTFTokenType.Keyword  )
-				intType = RTFNodeType.Keyword ;
-			else if( token.Type == RTFTokenType.ExtKeyword )
-				intType = RTFNodeType.ExtKeyword ;
-			else if( token.Type == RTFTokenType.Text )
-				intType = RTFNodeType.Text ;
-			else
-				intType = RTFNodeType.Text ;
-		}
-
-		protected RTFNodeGroup myParent = null;
-		/// <summary>
-		/// parent node
-		/// </summary>
-		public virtual RTFNodeGroup Parent
-		{
-			get{ return myParent ;}
-			set{ myParent = value;}
-		}
-
-		protected RTFRawDocument myOwnerDocument = null ;
-		/// <summary>
-		/// raw document which owner this node
-		/// </summary>
-		public virtual RTFRawDocument OwnerDocument
-		{
-			get{ return myOwnerDocument ;}
-			set
-			{
-				myOwnerDocument = value;
-				if( this.Nodes != null )
-				{
-					foreach( RTFNode node in this.Nodes )
-					{
-						node.OwnerDocument = value ;
-					}
-				}
-			}
-		}
-
-		/// <summary>
-		/// key word
-		/// </summary>
-		protected string strKeyword = null;
-		/// <summary>
-		/// Keyword
-		/// </summary>
-		public virtual string Keyword
-		{
-			get
-            {
-                return strKeyword ;
-            }
-			set
-            {
-                strKeyword = value;
-            }
-		}
-
-		/// <summary>
-		/// Whether this node has parameter
-		/// </summary>
-		protected bool bolHasParameter = false;
-		/// <summary>
+    /// </summary>
+    public class RTFNode
+    {
+        /// <summary>
         /// Whether this node has parameter
-		/// </summary>
-		public virtual bool HasParameter
-		{
-			get
+        /// </summary>
+        protected bool BolHasParameter;
+
+        protected int IntParameter;
+
+        protected RTFNodeType IntType = RTFNodeType.None;
+
+        protected RTFRawDocument MyOwnerDocument;
+
+        protected RTFNodeGroup MyParent;
+
+        /// <summary>
+        /// key word
+        /// </summary>
+        protected string StrKeyword;
+
+        /// <summary>
+        /// initialize instance
+        /// </summary>
+        public RTFNode()
+        {
+        }
+
+        public RTFNode(RTFNodeType type, string key)
+        {
+            IntType = type;
+            StrKeyword = key;
+        }
+
+        public RTFNode(RTFToken token)
+        {
+            StrKeyword = token.Key;
+            BolHasParameter = token.HasParam;
+            IntParameter = token.Param;
+            if (token.Type == RTFTokenType.Control)
+                IntType = RTFNodeType.Control;
+            else if (token.Type == RTFTokenType.Control)
+                IntType = RTFNodeType.Control;
+            else if (token.Type == RTFTokenType.Keyword)
+                IntType = RTFNodeType.Keyword;
+            else if (token.Type == RTFTokenType.ExtKeyword)
+                IntType = RTFNodeType.ExtKeyword;
+            else if (token.Type == RTFTokenType.Text)
+                IntType = RTFNodeType.Text;
+            else
+                IntType = RTFNodeType.Text;
+        }
+
+        /// <summary>
+        /// parent node
+        /// </summary>
+        public virtual RTFNodeGroup Parent
+        {
+            get { return MyParent; }
+            set { MyParent = value; }
+        }
+
+        /// <summary>
+        /// raw document which owner this node
+        /// </summary>
+        public virtual RTFRawDocument OwnerDocument
+        {
+            get { return MyOwnerDocument; }
+            set
             {
-                return bolHasParameter ;
+                MyOwnerDocument = value;
+                if (Nodes != null)
+                {
+                    foreach (var node in Nodes)
+                    {
+                        node.OwnerDocument = value;
+                    }
+                }
             }
-			set
+        }
+
+        /// <summary>
+        /// Keyword
+        /// </summary>
+        public virtual string Keyword
+        {
+            get { return StrKeyword; }
+            set { StrKeyword = value; }
+        }
+
+        /// <summary>
+        /// Whether this node has parameter
+        /// </summary>
+        public virtual bool HasParameter
+        {
+            get { return BolHasParameter; }
+            set { BolHasParameter = value; }
+        }
+
+        /// <summary>
+        /// paramter value
+        /// </summary>
+        public virtual int Parameter
+        {
+            get { return IntParameter; }
+        }
+
+        /// <summary>
+        /// child nodes
+        /// </summary>
+        public virtual RTFNodeList Nodes
+        {
+            get { return null; }
+        }
+
+
+        /// <summary>
+        /// index
+        /// </summary>
+        public int Index
+        {
+            get
             {
-                bolHasParameter = value;
+                if (MyParent == null)
+                    return 0;
+                return MyParent.Nodes.IndexOf(this);
             }
-		}
+        }
 
-		protected int intParameter = 0;
-		/// <summary>
-		/// paramter value
-		/// </summary>
-		public virtual int Parameter
-		{
-			get
+        /// <summary>
+        /// node type
+        /// </summary>
+        public RTFNodeType Type
+        {
+            get { return IntType; }
+        }
+
+        /// <summary>
+        /// previous node in parent nodes list
+        /// </summary>
+        public RTFNode PreviousNode
+        {
+            get
             {
-                return intParameter ;
+                if (MyParent != null)
+                {
+                    var index = MyParent.Nodes.IndexOf(this);
+                    if (index > 0)
+                    {
+                        return MyParent.Nodes[index - 1];
+                    }
+                }
+                return null;
             }
-		}
+        }
 
-		/// <summary>
-		/// child nodes
-		/// </summary>
-		public virtual RTFNodeList Nodes
-		{
-			get{ return null; }
-		}
-
-
-		/// <summary>
-		/// index
-		/// </summary>
-		public int Index
-		{
-			get
-			{
-				if( myParent == null )
-					return 0 ;
-				else
-					return myParent.Nodes.IndexOf( this );
-			}
-		}
-
-		protected RTFNodeType intType = RTFNodeType.None ;
-		/// <summary>
-		/// node type
-		/// </summary>
-		public RTFNodeType Type
-		{
-			get
+        /// <summary>
+        /// next node in parent nodes list
+        /// </summary>
+        public RTFNode NextNode
+        {
+            get
             {
-                return intType ;
+                if (MyParent != null)
+                {
+                    var index = MyParent.Nodes.IndexOf(this);
+                    if (index >= 0 && index < MyParent.Nodes.Count - 1)
+                        return MyParent.Nodes[index + 1];
+                }
+                return null;
             }
-		}
+        }
 
-		/// <summary>
-		/// previous node in parent nodes list
-		/// </summary>
-		public RTFNode PreviousNode
-		{
-			get
-			{
-				if( myParent != null )
-				{
-					int index = myParent.Nodes.IndexOf( this );
-					if( index > 0 )
-					{
-						return myParent.Nodes[ index - 1 ];
-					}
-				}
-				return null;
-			}
-		}
-		/// <summary>
-		/// next node in parent nodes list
-		/// </summary>
-		public RTFNode NextNode
-		{
-			get
-			{
-				if( myParent != null )
-				{
-					int index = myParent.Nodes.IndexOf( this );
-					if( index >= 0 && index < myParent.Nodes.Count - 1 )
-						return myParent.Nodes[ index + 1 ] ;
-				}
-				return null;
-			}
-		}
-
-		/// <summary>
-		/// write to rtf document
-		/// </summary>
-		/// <param name="writer">RTF text writer</param>
-		public virtual void Write( RTFWriter writer )
-		{
-			if( intType == RTFNodeType.Control
-                || intType == RTFNodeType.Keyword
-                || intType == RTFNodeType.ExtKeyword )
-			{
-                if (this.bolHasParameter)
+        /// <summary>
+        /// write to rtf document
+        /// </summary>
+        /// <param name="writer">RTF text writer</param>
+        public virtual void Write(RTFWriter writer)
+        {
+            if (IntType == RTFNodeType.Control
+                || IntType == RTFNodeType.Keyword
+                || IntType == RTFNodeType.ExtKeyword)
+            {
+                if (BolHasParameter)
                 {
                     writer.WriteKeyword(
-                        this.strKeyword + this.intParameter, 
-                        this.intType == RTFNodeType.ExtKeyword);
+                        StrKeyword + IntParameter,
+                        IntType == RTFNodeType.ExtKeyword);
                 }
                 else
                 {
                     writer.WriteKeyword(
-                        this.strKeyword,
-                        this.intType == RTFNodeType.ExtKeyword);
+                        StrKeyword,
+                        IntType == RTFNodeType.ExtKeyword);
                 }
-			}
-            else if (intType == RTFNodeType.Text)
-            {
-                writer.WriteText(this.strKeyword);
             }
-		}
-	}
-
-	
+            else if (IntType == RTFNodeType.Text)
+            {
+                writer.WriteText(StrKeyword);
+            }
+        }
+    }
 }

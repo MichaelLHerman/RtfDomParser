@@ -8,183 +8,153 @@
  */
 
 
-
-using System;
-using System.Collections ;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace RtfDomParser
 {
-    
-	/// <summary>
-	/// rtf color table
-	/// </summary>
-    [System.Diagnostics.DebuggerDisplay("Count={Count}")]
-	public class RTFColorTable
-	{
-		/// <summary>
-		/// initialize instance
-		/// </summary>
-		public RTFColorTable()
-		{
-		}
+    /// <summary>
+    /// rtf color table
+    /// </summary>
+    [DebuggerDisplay("Count={Count}")]
+    public class RTFColorTable
+    {
+        private bool _bolCheckValueExistWhenAdd = true;
 
-		private List<Color> myItems = new List<Color>();
-		/// <summary>
-		/// get color at special index
-		/// </summary>
-		public Color this[ int index ]
-		{
-			get
-            {
-                return myItems[ index ] ;
-            }
-		}
+        private readonly List<Color> _myItems = new List<Color>();
 
-		/// <summary>
-		/// get color at special index , if index out of range , return default color
-		/// </summary>
-		/// <param name="index">index</param>
-		/// <param name="DefaultValue">default value</param>
-		/// <returns>color value</returns>
-		public Color GetColor( int index , Color DefaultValue )
-		{
-			index -- ;
-            if (index >= 0 && index < myItems.Count)
-            {
-                return (Color)myItems[index];
-            }
-            else
-            {
-                return DefaultValue;
-            }
-		}
+        /// <summary>
+        /// get color at special index
+        /// </summary>
+        public Color this[int index]
+        {
+            get { return _myItems[index]; }
+        }
 
-        private bool bolCheckValueExistWhenAdd = true ;
         /// <summary>
         /// check color value exist when add color to list
         /// </summary>
         public bool CheckValueExistWhenAdd
         {
-            get
-            {
-                return bolCheckValueExistWhenAdd; 
-            }
-            set
-            {
-                bolCheckValueExistWhenAdd = value; 
-            }
+            get { return _bolCheckValueExistWhenAdd; }
+            set { _bolCheckValueExistWhenAdd = value; }
         }
 
-		/// <summary>
-		/// add color to list
-		/// </summary>
-		/// <param name="c">new color value</param>
-		public void Add( Color c )
-		{
-			if( c.IsEmpty )
-				return ;
-			if( c.A == 0 )
-				return ;
-			
-			if( c.A != 255 )
-			{
-				c = Color.FromArgb( 255 , c );
-			}
+        public int Count
+        {
+            get { return _myItems.Count; }
+        }
 
-            if (bolCheckValueExistWhenAdd)
+        /// <summary>
+        /// get color at special index , if index out of range , return default color
+        /// </summary>
+        /// <param name="index">index</param>
+        /// <param name="defaultValue">default value</param>
+        /// <returns>color value</returns>
+        public Color GetColor(int index, Color defaultValue)
+        {
+            index --;
+            if (index >= 0 && index < _myItems.Count)
+            {
+                return _myItems[index];
+            }
+            return defaultValue;
+        }
+
+        /// <summary>
+        /// add color to list
+        /// </summary>
+        /// <param name="c">new color value</param>
+        public void Add(Color c)
+        {
+            if (c.IsEmpty)
+                return;
+            if (c.A == 0)
+                return;
+
+            if (c.A != 255)
+            {
+                c = Color.FromArgb(255, c);
+            }
+
+            if (_bolCheckValueExistWhenAdd)
             {
                 if (IndexOf(c) < 0)
                 {
-                    myItems.Add(c);
+                    _myItems.Add(c);
                 }
             }
             else
             {
-                myItems.Add(c);
+                _myItems.Add(c);
             }
-		}
-		/// <summary>
-		/// delete special color
-		/// </summary>
-		/// <param name="c">color value</param>
-		public void Remove(Color c )
-		{
-			int index = IndexOf( c );
-			if( index >= 0 )
-				myItems.RemoveAt( index );
-		}
-		/// <summary>
-		/// get color index
-		/// </summary>
-		/// <param name="c">color</param>
-		/// <returns>index , if not found , return -1</returns>
-		public int IndexOf( Color c )
-		{
+        }
+
+        /// <summary>
+        /// delete special color
+        /// </summary>
+        /// <param name="c">color value</param>
+        public void Remove(Color c)
+        {
+            var index = IndexOf(c);
+            if (index >= 0)
+                _myItems.RemoveAt(index);
+        }
+
+        /// <summary>
+        /// get color index
+        /// </summary>
+        /// <param name="c">color</param>
+        /// <returns>index , if not found , return -1</returns>
+        public int IndexOf(Color c)
+        {
             if (c.A == 0)
             {
                 return -1;
             }
-			if( c.A != 255 )
-			{
-				c = Color.FromArgb( 255 , c );
-			}
-            for (int iCount = 0; iCount < myItems.Count; iCount++)
+            if (c.A != 255)
             {
-                Color color = (Color)myItems[iCount];
+                c = Color.FromArgb(255, c);
+            }
+            for (var iCount = 0; iCount < _myItems.Count; iCount++)
+            {
+                var color = _myItems[iCount];
                 if (color.ToArgb() == c.ToArgb())
                 {
                     return iCount;
                 }
             }
-			return -1 ;
-		}
-		/// <summary>
-		/// 清空列表
-		/// </summary>
-		public void Clear()
-		{
-			myItems.Clear();
-		}
-		/// <summary>
-		/// 元素个数
-		/// </summary>
-		public int Count
-		{
-			get{ return myItems.Count ; }
-		}
+            return -1;
+        }
 
-		/// <summary>
-		/// 输出颜色表
-		/// </summary>
-		/// <param name="writer">RTF文档书写器</param>
-		public void Write( RTFWriter writer )
-		{
-			writer.WriteStartGroup();
-			writer.WriteKeyword( RTFConsts._colortbl );
-			writer.WriteRaw(";");
-			for( int iCount = 0 ; iCount < myItems.Count ; iCount ++ )
-			{
-				Color c = ( Color ) myItems[ iCount ] ;
-				writer.WriteKeyword( "red" + c.R );
-				writer.WriteKeyword( "green" + c.G );
-				writer.WriteKeyword( "blue" + c.B );
-				writer.WriteRaw(";");
-			}
-			writer.WriteEndGroup();
-		}
+        public void Clear()
+        {
+            _myItems.Clear();
+        }
 
-        /// <summary>
-        /// 复制对象
-        /// </summary>
-        /// <returns>复制品</returns>
+        public void Write(RTFWriter writer)
+        {
+            writer.WriteStartGroup();
+            writer.WriteKeyword(RTFConsts.Colortbl);
+            writer.WriteRaw(";");
+            for (var iCount = 0; iCount < _myItems.Count; iCount ++)
+            {
+                var c = _myItems[iCount];
+                writer.WriteKeyword("red" + c.R);
+                writer.WriteKeyword("green" + c.G);
+                writer.WriteKeyword("blue" + c.B);
+                writer.WriteRaw(";");
+            }
+            writer.WriteEndGroup();
+        }
+
         public RTFColorTable Clone()
         {
-            RTFColorTable table = new RTFColorTable();
-            for (int iCount = 0; iCount < myItems.Count; iCount++)
+            var table = new RTFColorTable();
+            for (var iCount = 0; iCount < _myItems.Count; iCount++)
             {
-                Color c = ( Color ) myItems[ iCount ] ;
-                table.myItems.Add(c);
+                var c = _myItems[iCount];
+                table._myItems.Add(c);
             }
             return table;
         }

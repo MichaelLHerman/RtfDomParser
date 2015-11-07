@@ -7,8 +7,7 @@
  * 
  */
 
-using System;
-using System.Text;
+using System.ComponentModel;
 
 namespace RtfDomParser
 {
@@ -17,32 +16,20 @@ namespace RtfDomParser
     /// </summary>
     public class RTFDomElementContainer : RTFDomElement
     {
-        /// <summary>
-        /// initialize instance
-        /// </summary>
         public RTFDomElementContainer()
         {
+            Name = null;
         }
-        private string strName = null;
+
         /// <summary>
         /// name
         /// </summary>
-        [System.ComponentModel.DefaultValue( null )]
-        public string Name
-        {
-            get
-            {
-                return strName; 
-            }
-            set
-            {
-                strName = value; 
-            }
-        }
+        [DefaultValue(null)]
+        public string Name { get; set; }
 
         public override string ToString()
         {
-            return "Container : " + strName;
+            return "Container : " + Name;
         }
     }
 }

@@ -8,78 +8,53 @@
  */
 
 
-
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel;
+using System.Linq;
 
 namespace RtfDomParser
 {
     /// <summary>
     /// rtf attribute
     /// </summary>
-
     public class RTFAttribute
     {
-        /// <summary>
-        /// initialize instance
-        /// </summary>
+        private int _intValue = int.MinValue;
+
         public RTFAttribute()
         {
+            Name = null;
         }
 
-        private string strName = null;
         /// <summary>
         /// attribute's name
         /// </summary>
-        [System.ComponentModel.DefaultValue( null)]
-        public string Name
-        {
-            get
-            {
-                return strName; 
-            }
-            set
-            {
-                strName = value; 
-            }
-        }
+        [DefaultValue(null)]
+        public string Name { get; set; }
 
-        private int intValue = int.MinValue ;
         /// <summary>
         /// value
         /// </summary>
-        [System.ComponentModel.DefaultValue( int.MinValue )]
+        [DefaultValue(int.MinValue)]
         public int Value
         {
-            get
-            {
-                return intValue; 
-            }
-            set
-            {
-                intValue = value; 
-            }
+            get { return _intValue; }
+            set { _intValue = value; }
         }
+
         public override string ToString()
         {
-            return strName + "=" + intValue;
+            return Name + "=" + _intValue;
         }
     }
 
     public class RTFAttributeList : List<RTFAttribute>
     {
-
-        public RTFAttributeList()
-        {
-        }
-
-
         public int this[string name]
         {
             get
             {
-                foreach (RTFAttribute a in this)
+                foreach (var a in this)
                 {
                     if (a.Name == name)
                         return a.Value;
@@ -88,7 +63,7 @@ namespace RtfDomParser
             }
             set
             {
-                foreach (RTFAttribute a in this)
+                foreach (var a in this)
                 {
                     if (a.Name == name)
                     {
@@ -96,7 +71,7 @@ namespace RtfDomParser
                         return;
                     }
                 }
-                RTFAttribute item = new RTFAttribute();
+                var item = new RTFAttribute();
                 item.Name = name;
                 item.Value = value;
                 Add(item);
@@ -106,7 +81,7 @@ namespace RtfDomParser
 
         public void Add(string name, int v)
         {
-            RTFAttribute item = new RTFAttribute();
+            var item = new RTFAttribute();
             item.Name = name;
             item.Value = v;
             Add(item);
@@ -114,9 +89,9 @@ namespace RtfDomParser
 
         public void Remove(string name)
         {
-            for (int iCount = this.Count - 1; iCount >= 0; iCount--)
+            for (var iCount = Count - 1; iCount >= 0; iCount--)
             {
-                RTFAttribute item = this[iCount];
+                var item = this[iCount];
                 if (item.Name == name)
                 {
                     RemoveAt(iCount);
@@ -126,20 +101,15 @@ namespace RtfDomParser
 
         public bool Contains(string name)
         {
-            foreach (RTFAttribute a in this)
-            {
-                if (a.Name == name)
-                    return true;
-            }
-            return false;
+            return this.Any(a => a.Name == name);
         }
 
         public RTFAttributeList Clone()
         {
-            RTFAttributeList list = new RTFAttributeList();
-            foreach (RTFAttribute item in this)
+            var list = new RTFAttributeList();
+            foreach (var item in this)
             {
-                RTFAttribute newItem = new RTFAttribute();
+                var newItem = new RTFAttribute();
                 newItem.Name = item.Name;
                 newItem.Value = item.Value;
                 list.Add(newItem);

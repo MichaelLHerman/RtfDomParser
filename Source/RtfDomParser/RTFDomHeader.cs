@@ -7,85 +7,60 @@
  * 
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel;
 
 namespace RtfDomParser
 {
     public class RTFDomHeader : RTFDomElement
     {
-        private HeaderFooterStyle _Style = HeaderFooterStyle.AllPages;
+        private HeaderFooterStyle _style = HeaderFooterStyle.AllPages;
 
-        [System.ComponentModel.DefaultValue( HeaderFooterStyle.AllPages )]
+        [DefaultValue(HeaderFooterStyle.AllPages)]
         public HeaderFooterStyle Style
         {
-            get
-            {
-                return _Style; 
-            }
-            set
-            {
-                _Style = value; 
-            }
-        }
-        public override string ToString()
-        {
-            return "Header " + this.Style;
+            get { return _style; }
+            set { _style = value; }
         }
 
-        /// <summary>
-        /// 判断元素是否有实际内容
-        /// </summary>
         public bool HasContentElement
         {
-            get
-            {
-                return RTFUtil.HasContentElement(this);
-            }
+            get { return RTFUtil.HasContentElement(this); }
+        }
+
+        public override string ToString()
+        {
+            return "Header " + Style;
         }
     }
 
     public class RTFDomFooter : RTFDomElement
     {
-        private HeaderFooterStyle _Style = HeaderFooterStyle.AllPages;
+        private HeaderFooterStyle _style = HeaderFooterStyle.AllPages;
 
-        [System.ComponentModel.DefaultValue(HeaderFooterStyle.AllPages)]
+        [DefaultValue(HeaderFooterStyle.AllPages)]
         public HeaderFooterStyle Style
         {
-            get
-            {
-                return _Style;
-            }
-            set
-            {
-                _Style = value;
-            }
+            get { return _style; }
+            set { _style = value; }
         }
 
 
-        /// <summary>
-        /// 判断元素是否有实际内容
-        /// </summary>
         public bool HasContentElement
         {
-            get
-            {
-                return RTFUtil.HasContentElement(this);
-            }
+            get { return RTFUtil.HasContentElement(this); }
         }
 
         public override string ToString()
         {
-            return "Footer " + this.Style;
+            return "Footer " + Style;
         }
     }
 
     public enum HeaderFooterStyle
     {
-        AllPages ,
-        LeftPages ,
-        RightPages ,
+        AllPages,
+        LeftPages,
+        RightPages,
         FirstPage
     }
 }

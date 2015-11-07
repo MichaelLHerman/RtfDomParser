@@ -8,16 +8,13 @@
  */
 
 
-
 using System;
-using System.Text;
 
 namespace RtfDomParser
 {
     /// <summary>
     /// line element
     /// </summary>
-
     public class RTFDomLineBreak : RTFDomElement
     {
         /// <summary>
@@ -25,16 +22,14 @@ namespace RtfDomParser
         /// </summary>
         public RTFDomLineBreak()
         {
-            this.Locked = true;
+            Locked = true;
         }
 
         public override string InnerText
         {
-            get
-            {
-                return Environment.NewLine;
-            }
+            get { return Environment.NewLine; }
         }
+
         public override string ToString()
         {
             return "linebreak";

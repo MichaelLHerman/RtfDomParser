@@ -8,219 +8,61 @@
  */
 
 
-
-using System;
-using System.Text;
+using System.ComponentModel;
+using System.Xml.Serialization;
 
 namespace RtfDomParser
 {
     public class RTFDomTableCell : RTFDomElement
     {
-        /// <summary>
-        /// initialize instance
-        /// </summary>
-        public RTFDomTableCell()
-        {
-            myFormat.BorderWidth = 1;
-        }
+        private bool _bolMultiline = true;
 
-        private int intRowSpan = 1;
-        /// <summary>
-        /// row span
-        /// </summary>
-        [System.ComponentModel.DefaultValue(1)]
-        public int RowSpan
-        {
-            get
-            {
-                return intRowSpan;
-            }
-            set
-            {
-                intRowSpan = value;
-            }
-        }
+        private int _intColSpan = 1;
 
-        private int intColSpan = 1;
-        /// <summary>
-        /// col span
-        /// </summary>
-        [System.ComponentModel.DefaultValue(1)]
-        public int ColSpan
-        {
-            get
-            {
-                return intColSpan;
-            }
-            set
-            {
-                intColSpan = value;
-            }
-        }
+        //private Color intBorderColor = Color.Black;
+        ///// <summary>
+        ///// border color
+        ///// </summary>
+        //[System.ComponentModel.DefaultValue(typeof(Color), "Black")]
+        //public Color BorderColor
+        //{
+        //    get
+        //    {
+        //        return intBorderColor;
+        //    }
+        //    set
+        //    {
+        //        intBorderColor = value;
+        //    }
+        //}
 
-        private int intPaddingLeft = int.MinValue;
-        /// <summary>
-        /// left padding
-        /// </summary>
-        [System.ComponentModel.DefaultValue(int.MinValue)]
-        public int PaddingLeft
-        {
-            get
-            {
-                return intPaddingLeft;
-            }
-            set
-            {
-                intPaddingLeft = value;
-            }
-        }
+        //private Color intBackColor = Color.Transparent;
+        ///// <summary>
+        ///// back color
+        ///// </summary>
+        //[System.ComponentModel.DefaultValue(typeof(Color), "Transparent")]
+        //public Color BackColor
+        //{
+        //    get
+        //    {
+        //        return intBackColor;
+        //    }
+        //    set
+        //    {
+        //        intBackColor = value;
+        //    }
+        //}
 
-        /// <summary>
-        /// left padding in fact
-        /// </summary>
-        [System.Xml.Serialization.XmlIgnore()]
-        public int RuntimePaddingLeft
-        {
-            get
-            {
-                if (intPaddingLeft != int.MinValue)
-                {
-                    return intPaddingLeft;
-                }
-                else if (this.Parent != null)
-                {
-                    int p = ((RTFDomTableRow)this.Parent).PaddingLeft;
-                    if (p != int.MinValue)
-                    {
-                        return p;
-                    }
-                }
-                return 0;
-            }
-        }
 
-        private int intPaddingTop = int.MinValue;
-        /// <summary>
-        /// top padding
-        /// </summary>
-        [System.ComponentModel.DefaultValue(int.MinValue)]
-        public int PaddingTop
-        {
-            get
-            {
-                return intPaddingTop;
-            }
-            set
-            {
-                intPaddingTop = value;
-            }
-        }
+        private int _intPaddingBottom = int.MinValue;
 
-        /// <summary>
-        /// top padding in fact
-        /// </summary>
-        [System.Xml.Serialization.XmlIgnore()]
-        public int RuntimePaddingTop
-        {
-            get
-            {
-                if (intPaddingTop != int.MinValue)
-                {
-                    return intPaddingTop;
-                }
-                else if (this.Parent != null)
-                {
-                    int p = ((RTFDomTableRow)this.Parent).PaddingTop;
-                    if (p != int.MinValue)
-                    {
-                        return p;
-                    }
-                }
-                return 0;
-            }
-        }
+        private int _intPaddingLeft = int.MinValue;
 
-        private int intPaddingRight = int.MinValue;
-        /// <summary>
-        /// right padding
-        /// </summary>
-        [System.ComponentModel.DefaultValue(int.MinValue)]
-        public int PaddingRight
-        {
-            get
-            {
-                return intPaddingRight;
-            }
-            set
-            {
-                intPaddingRight = value;
-            }
-        }
+        private int _intPaddingRight = int.MinValue;
 
-        /// <summary>
-        /// right padding in fact
-        /// </summary>
-        [System.Xml.Serialization.XmlIgnore()]
-        public int RuntimePaddingRight
-        {
-            get
-            {
-                if (intPaddingRight != int.MinValue)
-                {
-                    return intPaddingRight;
-                }
-                else if (this.Parent != null)
-                {
-                    int p = ((RTFDomTableRow)this.Parent).PaddingRight;
-                    if (p != int.MinValue)
-                    {
-                        return p;
-                    }
-                }
-                return 0;
-            }
-        }
+        private int _intPaddingTop = int.MinValue;
 
-        private int intPaddingBottom = int.MinValue;
-        /// <summary>
-        /// bottom padding
-        /// </summary>
-        [System.ComponentModel.DefaultValue(int.MinValue)]
-        public int PaddingBottom
-        {
-            get
-            {
-                return intPaddingBottom;
-            }
-            set
-            {
-                intPaddingBottom = value;
-            }
-        }
-
-        /// <summary>
-        /// bottom padding in fact
-        /// </summary>
-        [System.Xml.Serialization.XmlIgnore()]
-        public int RuntimePaddingBottom
-        {
-            get
-            {
-                if (intPaddingBottom != int.MinValue)
-                {
-                    return intPaddingBottom;
-                }
-                else if (this.Parent != null)
-                {
-                    int p = ((RTFDomTableRow)this.Parent).PaddingBottom;
-                    if (p != int.MinValue)
-                    {
-                        return p;
-                    }
-                }
-                return 0;
-            }
-        }
+        private int _intRowSpan = 1;
 
         //private bool bolLeftBorder = false;
         //[System.ComponentModel.DefaultValue(false)]
@@ -280,178 +122,242 @@ namespace RtfDomParser
         //    }
         //}
 
-        private RTFVerticalAlignment intVerticalAlignment = RTFVerticalAlignment.Top;
+        private RTFVerticalAlignment _intVerticalAlignment = RTFVerticalAlignment.Top;
+
+        private DocumentFormatInfo _myFormat = new DocumentFormatInfo();
+
         /// <summary>
-        /// vertial alignment
+        /// initialize instance
         /// </summary>
-        [System.ComponentModel.DefaultValue(RTFVerticalAlignment.Top)]
-        public RTFVerticalAlignment VerticalAlignment
+        public RTFDomTableCell()
+        {
+            OverrideCell = null;
+            Height = 0;
+            Width = 0;
+            Left = 0;
+            _myFormat.BorderWidth = 1;
+        }
+
+        /// <summary>
+        /// row span
+        /// </summary>
+        [DefaultValue(1)]
+        public int RowSpan
+        {
+            get { return _intRowSpan; }
+            set { _intRowSpan = value; }
+        }
+
+        /// <summary>
+        /// col span
+        /// </summary>
+        [DefaultValue(1)]
+        public int ColSpan
+        {
+            get { return _intColSpan; }
+            set { _intColSpan = value; }
+        }
+
+        /// <summary>
+        /// left padding
+        /// </summary>
+        [DefaultValue(int.MinValue)]
+        public int PaddingLeft
+        {
+            get { return _intPaddingLeft; }
+            set { _intPaddingLeft = value; }
+        }
+
+        /// <summary>
+        /// left padding in fact
+        /// </summary>
+        [XmlIgnore]
+        public int RuntimePaddingLeft
         {
             get
             {
-                return intVerticalAlignment;
-            }
-            set
-            {
-                intVerticalAlignment = value;
+                if (_intPaddingLeft != int.MinValue)
+                {
+                    return _intPaddingLeft;
+                }
+                if (Parent != null)
+                {
+                    var p = ((RTFDomTableRow) Parent).PaddingLeft;
+                    if (p != int.MinValue)
+                    {
+                        return p;
+                    }
+                }
+                return 0;
             }
         }
 
-        private DocumentFormatInfo myFormat = new DocumentFormatInfo();
+        /// <summary>
+        /// top padding
+        /// </summary>
+        [DefaultValue(int.MinValue)]
+        public int PaddingTop
+        {
+            get { return _intPaddingTop; }
+            set { _intPaddingTop = value; }
+        }
+
+        /// <summary>
+        /// top padding in fact
+        /// </summary>
+        [XmlIgnore]
+        public int RuntimePaddingTop
+        {
+            get
+            {
+                if (_intPaddingTop != int.MinValue)
+                {
+                    return _intPaddingTop;
+                }
+                if (Parent != null)
+                {
+                    var p = ((RTFDomTableRow) Parent).PaddingTop;
+                    if (p != int.MinValue)
+                    {
+                        return p;
+                    }
+                }
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// right padding
+        /// </summary>
+        [DefaultValue(int.MinValue)]
+        public int PaddingRight
+        {
+            get { return _intPaddingRight; }
+            set { _intPaddingRight = value; }
+        }
+
+        /// <summary>
+        /// right padding in fact
+        /// </summary>
+        [XmlIgnore]
+        public int RuntimePaddingRight
+        {
+            get
+            {
+                if (_intPaddingRight != int.MinValue)
+                {
+                    return _intPaddingRight;
+                }
+                if (Parent != null)
+                {
+                    var p = ((RTFDomTableRow) Parent).PaddingRight;
+                    if (p != int.MinValue)
+                    {
+                        return p;
+                    }
+                }
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// bottom padding
+        /// </summary>
+        [DefaultValue(int.MinValue)]
+        public int PaddingBottom
+        {
+            get { return _intPaddingBottom; }
+            set { _intPaddingBottom = value; }
+        }
+
+        /// <summary>
+        /// bottom padding in fact
+        /// </summary>
+        [XmlIgnore]
+        public int RuntimePaddingBottom
+        {
+            get
+            {
+                if (_intPaddingBottom != int.MinValue)
+                {
+                    return _intPaddingBottom;
+                }
+                if (Parent != null)
+                {
+                    var p = ((RTFDomTableRow) Parent).PaddingBottom;
+                    if (p != int.MinValue)
+                    {
+                        return p;
+                    }
+                }
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// vertial alignment
+        /// </summary>
+        [DefaultValue(RTFVerticalAlignment.Top)]
+        public RTFVerticalAlignment VerticalAlignment
+        {
+            get { return _intVerticalAlignment; }
+            set { _intVerticalAlignment = value; }
+        }
+
         /// <summary>
         /// format
         /// </summary>
         public DocumentFormatInfo Format
         {
-            get
-            {
-                return myFormat;
-            }
-            set
-            {
-                myFormat = value;
-            }
+            get { return _myFormat; }
+            set { _myFormat = value; }
         }
 
-        private bool bolMultiline = true;
         /// <summary>
         /// allow multiline
         /// </summary>
-        [System.ComponentModel.DefaultValue(false)]
+        [DefaultValue(false)]
         public bool Multiline
         {
-            get
-            {
-                return bolMultiline;
-            }
-            set
-            {
-                bolMultiline = value;
-            }
+            get { return _bolMultiline; }
+            set { _bolMultiline = value; }
         }
 
-        //private Color intBorderColor = Color.Black;
-        ///// <summary>
-        ///// border color
-        ///// </summary>
-        //[System.ComponentModel.DefaultValue(typeof(Color), "Black")]
-        //public Color BorderColor
-        //{
-        //    get
-        //    {
-        //        return intBorderColor;
-        //    }
-        //    set
-        //    {
-        //        intBorderColor = value;
-        //    }
-        //}
-
-        //private Color intBackColor = Color.Transparent;
-        ///// <summary>
-        ///// back color
-        ///// </summary>
-        //[System.ComponentModel.DefaultValue(typeof(Color), "Transparent")]
-        //public Color BackColor
-        //{
-        //    get
-        //    {
-        //        return intBackColor;
-        //    }
-        //    set
-        //    {
-        //        intBackColor = value;
-        //    }
-        //}
-         
-
-        private int intLeft = 0;
         /// <summary>
         /// left position
         /// </summary>
-        [System.ComponentModel.DefaultValue(0)]
-        public int Left
-        {
-            get 
-            {
-                return intLeft; 
-            }
-            set
-            {
-                intLeft = value; 
-            }
-        }
+        [DefaultValue(0)]
+        public int Left { get; set; }
 
-        private int intWidth = 0;
         /// <summary>
         /// width
         /// </summary>
-        [System.ComponentModel.DefaultValue( 0 )]
-        public int Width
-        {
-            get
-            {
-                return intWidth; 
-            }
-            set
-            {
-                intWidth = value; 
-            }
-        }
+        [DefaultValue(0)]
+        public int Width { get; set; }
 
-        private int intHeight = 0;
         /// <summary>
         /// height
         /// </summary>
-        [System.ComponentModel.DefaultValue(0)]
-        public int Height
-        {
-            get 
-            {
-                return intHeight; 
-            }
-            set 
-            {
-                intHeight = value; 
-            }
-        }
+        [DefaultValue(0)]
+        public int Height { get; set; }
 
-        private RTFDomTableCell myOverrideCell = null;
         /// <summary>
         /// this cell merged by another cell which this property specify
         /// </summary>
-
-        [System.Xml.Serialization.XmlIgnore()]
-        public RTFDomTableCell OverrideCell
-        {
-            get
-            {
-                return myOverrideCell;
-            }
-            set
-            {
-                myOverrideCell = value;
-            }
-        }
+        [XmlIgnore]
+        public RTFDomTableCell OverrideCell { get; set; }
 
         public override string ToString()
         {
-            if (myOverrideCell == null)
+            if (OverrideCell == null)
             {
-                if (intRowSpan != 1 || intColSpan != 1)
+                if (_intRowSpan != 1 || _intColSpan != 1)
                 {
-                    return "Cell: RowSpan:" + intRowSpan + " ColSpan:" + intColSpan + " Width:" + this.Width ;
+                    return "Cell: RowSpan:" + _intRowSpan + " ColSpan:" + _intColSpan + " Width:" + Width;
                 }
-                else
-                {
-                    return "Cell:Width:" + this.Width ;
-                }
+                return "Cell:Width:" + Width;
             }
-            else
-            {
-                return "Cell:Overrided";
-            }
+            return "Cell:Overrided";
         }
     }
-
 }

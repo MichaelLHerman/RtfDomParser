@@ -8,377 +8,368 @@
  */
 
 
-
 using System;
-using System.Collections ;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+
 //using DCSoft.Drawing ;
 //using DCSoft.Printing ;
 
 namespace RtfDomParser
 {
-	
-	/// <summary>
-	/// RTF document writer
-	/// </summary>
-	public class RTFDocumentWriter
-	{
-		/// <summary>
-		/// initialize instance
-		/// </summary>
-		public RTFDocumentWriter()
-		{
-            myColorTable.CheckValueExistWhenAdd = true ;
-		}
+    /// <summary>
+    /// RTF document writer
+    /// </summary>
+    public class RTFDocumentWriter
+    {
+        private bool _bolCollectionInfo = true;
 
-		public RTFDocumentWriter( System.IO.TextWriter writer )
-		{
-            myColorTable.CheckValueExistWhenAdd = true;
-			Open( writer );
-		}
+        private bool _bolFirstParagraph = true;
 
-		public RTFDocumentWriter( System.IO.Stream stream )
-		{
-            myColorTable.CheckValueExistWhenAdd = true;
-			System.IO.StreamWriter writer = new System.IO.StreamWriter( 
-                stream ,
-                System.Text.Encoding.GetEncoding("us-ascii") );
-			Open( writer );
-		}
+        private bool _debugMode = true;
 
-		public virtual bool Open( System.IO.TextWriter writer )
-		{
-			myWriter = new RTFWriter( writer );
-			myWriter.Encoding = System.Text.Encoding.UTF8;
-			myWriter.Indent = false;
-			return true ;
-		}
+        private RTFListOverrideTable _listOverrideTable = new RTFListOverrideTable();
 
-		public virtual bool Open( Stream strFileName )
-		{
-			myWriter = new RTFWriter( strFileName );
-            myWriter.Encoding = System.Text.Encoding.UTF8;
-			myWriter.Indent = false ;
-			return true ;
-		}
-		public virtual void Close()
-		{
-			myWriter.Close();
-		}
-		private RTFWriter myWriter = null;
-		/// <summary>
-		/// base writer
-		/// </summary>
-		public RTFWriter Writer
-		{
-			get{ return myWriter ;}
-			set{ myWriter = value;}
-		}
+        private RTFListTable _listTable = new RTFListTable();
 
-		/// <summary>
-		/// document information
-		/// </summary>
-        private Dictionary<string, object> myInfo = new Dictionary<string, object>();
+        /// <summary>
+        /// rtf color table
+        /// </summary>
+        private readonly RTFColorTable _myColorTable = new RTFColorTable();
+
+        /// <summary>
+        /// rtf font table
+        /// </summary>
+        private readonly RTFFontTable _myFontTable = new RTFFontTable();
+
+        /// <summary>
+        /// document information
+        /// </summary>
+        private readonly Dictionary<string, object> _myInfo = new Dictionary<string, object>();
+
+        private DocumentFormatInfo _myLastParagraphInfo;
+
+        /// <summary>
+        /// initialize instance
+        /// </summary>
+        public RTFDocumentWriter()
+        {
+            Writer = null;
+            _myColorTable.CheckValueExistWhenAdd = true;
+        }
+
+        public RTFDocumentWriter(TextWriter writer)
+        {
+            Writer = null;
+            _myColorTable.CheckValueExistWhenAdd = true;
+            Open(writer);
+        }
+
+        public RTFDocumentWriter(Stream stream)
+        {
+            Writer = null;
+            _myColorTable.CheckValueExistWhenAdd = true;
+            var writer = new StreamWriter(
+                stream,
+                Encoding.GetEncoding("us-ascii"));
+            Open(writer);
+        }
+
+        /// <summary>
+        /// base writer
+        /// </summary>
+        public RTFWriter Writer { get; set; }
+
         public Dictionary<string, object> Info
-		{
-			get
-			{
-				return myInfo ;
-			}
-		}
+        {
+            get { return _myInfo; }
+        }
 
-		/// <summary>
-		/// rtf font table
-		/// </summary>
-		private RTFFontTable myFontTable = new RTFFontTable();
-		/// <summary>
-		/// rtf font table
-		/// </summary>
-		public RTFFontTable FontTable
-		{
-			get
-			{
-				return myFontTable ;
-			}
-		}
-
-        private RTFListTable _ListTable = new RTFListTable();
+        /// <summary>
+        /// rtf font table
+        /// </summary>
+        public RTFFontTable FontTable
+        {
+            get { return _myFontTable; }
+        }
 
         public RTFListTable ListTable
         {
-            get { return _ListTable; }
-            set { _ListTable = value; }
+            get { return _listTable; }
+            set { _listTable = value; }
         }
-
-        private RTFListOverrideTable _ListOverrideTable = new RTFListOverrideTable();
 
         public RTFListOverrideTable ListOverrideTable
         {
-            get { return _ListOverrideTable; }
-            set { _ListOverrideTable = value; }
+            get { return _listOverrideTable; }
+            set { _listOverrideTable = value; }
         }
-		/// <summary>
-		/// rtf color table
-		/// </summary>
-		private RTFColorTable myColorTable = new RTFColorTable();
-		/// <summary>
-		/// rtf color table
-		/// </summary>
-		public RTFColorTable ColorTable
-		{
-			get
-			{
-				return myColorTable ;
-			}
-		}
 
-		private bool bolCollectionInfo = true ;
-		/// <summary>
-		/// system collectiong document's information , maby generating
+        /// <summary>
+        /// rtf color table
+        /// </summary>
+        public RTFColorTable ColorTable
+        {
+            get { return _myColorTable; }
+        }
+
+        /// <summary>
+        /// system collectiong document's information , maby generating
         /// font table and color table , not writting content.
-		/// </summary>
-		public bool CollectionInfo
-		{
-			get
-			{
-				return bolCollectionInfo ;
-			}
-			set
-			{
-				bolCollectionInfo = value;
-			}
-		}
+        /// </summary>
+        public bool CollectionInfo
+        {
+            get { return _bolCollectionInfo; }
+            set { _bolCollectionInfo = value; }
+        }
 
         public int GroupLevel
         {
-            get
+            get { return Writer.GroupLevel; }
+        }
+
+        public bool DebugMode
+        {
+            get { return _debugMode; }
+            set { _debugMode = value; }
+        }
+
+        public virtual bool Open(TextWriter writer)
+        {
+            Writer = new RTFWriter(writer);
+            Writer.Encoding = Encoding.UTF8;
+            Writer.Indent = false;
+            return true;
+        }
+
+        public virtual bool Open(Stream strFileName)
+        {
+            Writer = new RTFWriter(strFileName);
+            Writer.Encoding = Encoding.UTF8;
+            Writer.Indent = false;
+            return true;
+        }
+
+        public virtual void Close()
+        {
+            Writer.Close();
+        }
+
+        public void WriteStartGroup()
+        {
+            if (_bolCollectionInfo == false)
             {
-                return myWriter.GroupLevel;
+                Writer.WriteStartGroup();
             }
         }
 
-		public void WriteStartGroup()
-		{
-			if( bolCollectionInfo == false )
-			{
-				myWriter.WriteStartGroup();
-			}
-		}
-		public void WriteEndGroup()
-		{
-			if( bolCollectionInfo == false )
-			{
-				myWriter.WriteEndGroup();
-			}
-		}
-		/// <summary>
-		/// write rtf keyword
-		/// </summary>
-		/// <param name="Keyword">keyword</param>
-		public void WriteKeyword( string Keyword )
-		{
-			if( bolCollectionInfo == false )
-			{
-				myWriter.WriteKeyword( Keyword );
-			}
-		}
-
-        public void WriteKeyword(string keyWord, bool Ext )
+        public void WriteEndGroup()
         {
-            if (bolCollectionInfo == false)
+            if (_bolCollectionInfo == false)
             {
-                myWriter.WriteKeyword(keyWord, Ext);
+                Writer.WriteEndGroup();
+            }
+        }
+
+        /// <summary>
+        /// write rtf keyword
+        /// </summary>
+        /// <param name="keyword">keyword</param>
+        public void WriteKeyword(string keyword)
+        {
+            if (_bolCollectionInfo == false)
+            {
+                Writer.WriteKeyword(keyword);
+            }
+        }
+
+        public void WriteKeyword(string keyWord, bool ext)
+        {
+            if (_bolCollectionInfo == false)
+            {
+                Writer.WriteKeyword(keyWord, ext);
             }
         }
 
         public void WriteRaw(string txt)
         {
-            if (bolCollectionInfo == false)
+            if (_bolCollectionInfo == false)
             {
                 if (txt != null)
                 {
-                    myWriter.WriteRaw(txt);
+                    Writer.WriteRaw(txt);
                 }
             }
         }
-		public void WriteBorderLineDashStyle(DashStyle style )
-		{
-			if( bolCollectionInfo == false )
-			{
-				if( style == DashStyle.Dot )
-				{
-					this.WriteKeyword("brdrdot");
-				}
-				else if( style == DashStyle.DashDot )
-				{
-					this.WriteKeyword("brdrdashd");
-				}
-				else if( style == DashStyle.DashDotDot )
-				{
-					this.WriteKeyword("brdrdashdd");
-				}
-				else if( style == DashStyle.Dash )
-				{
-					this.WriteKeyword("brdrdash");
-				}
-				else
-				{
-					this.WriteKeyword("brdrs");
-				}
-			}
-		}
 
-        private bool _DebugMode = true;
-
-        public bool DebugMode
+        public void WriteBorderLineDashStyle(DashStyle style)
         {
-            get { return _DebugMode; }
-            set { _DebugMode = value; }
+            if (_bolCollectionInfo == false)
+            {
+                if (style == DashStyle.Dot)
+                {
+                    WriteKeyword("brdrdot");
+                }
+                else if (style == DashStyle.DashDot)
+                {
+                    WriteKeyword("brdrdashd");
+                }
+                else if (style == DashStyle.DashDotDot)
+                {
+                    WriteKeyword("brdrdashdd");
+                }
+                else if (style == DashStyle.Dash)
+                {
+                    WriteKeyword("brdrdash");
+                }
+                else
+                {
+                    WriteKeyword("brdrs");
+                }
+            }
         }
 
-		/// <summary>
-		/// start write document
-		/// </summary>
-		public void WriteStartDocument()
-		{
-			this.myLastParagraphInfo = null ;
-			this.bolFirstParagraph = true ;
-			if( bolCollectionInfo )
-			{
-				myInfo.Clear();
-				myFontTable.Clear();
-				myColorTable.Clear();
-                myFontTable.Add("Microsoft Sans Serif");
-			}
-			else
-			{
-				myWriter.WriteStartGroup();
-				myWriter.WriteKeyword( RTFConsts._rtf );
-				myWriter.WriteKeyword("ansi");
-				myWriter.WriteKeyword("ansicpg" + myWriter.CodePageNumber );
-				// write document information
-				if( myInfo.Count > 0 )
-				{
-					myWriter.WriteStartGroup();
-					myWriter.WriteKeyword("info");
-					foreach( string strKey in myInfo.Keys )
-					{
-						myWriter.WriteStartGroup();
+        /// <summary>
+        /// start write document
+        /// </summary>
+        public void WriteStartDocument()
+        {
+            _myLastParagraphInfo = null;
+            _bolFirstParagraph = true;
+            if (_bolCollectionInfo)
+            {
+                _myInfo.Clear();
+                _myFontTable.Clear();
+                _myColorTable.Clear();
+                _myFontTable.Add("Microsoft Sans Serif");
+            }
+            else
+            {
+                Writer.WriteStartGroup();
+                Writer.WriteKeyword(RTFConsts.RTF);
+                Writer.WriteKeyword("ansi");
+                Writer.WriteKeyword("ansicpg" + Writer.CodePageNumber);
+                // write document information
+                if (_myInfo.Count > 0)
+                {
+                    Writer.WriteStartGroup();
+                    Writer.WriteKeyword("info");
+                    foreach (var strKey in _myInfo.Keys)
+                    {
+                        Writer.WriteStartGroup();
 
-						object v = myInfo[ strKey ] ;
-						if( v is string )
-						{
-							myWriter.WriteKeyword( strKey );
-							myWriter.WriteText( ( string ) v );
-						}
-						else if( v is int )
-						{
-							myWriter.WriteKeyword( strKey + v );
-						}
-						else if( v is DateTime )
-						{
-							DateTime dtm = ( DateTime ) v ;
-							myWriter.WriteKeyword( strKey );
-							myWriter.WriteKeyword( "yr" + dtm.Year );
-							myWriter.WriteKeyword( "mo" + dtm.Month );
-							myWriter.WriteKeyword( "dy" + dtm.Day );
-							myWriter.WriteKeyword( "hr" + dtm.Hour );
-							myWriter.WriteKeyword( "min" + dtm.Minute );
-							myWriter.WriteKeyword( "sec" + dtm.Second );
-						}
-						else
-						{
-							myWriter.WriteKeyword( strKey );
-						}
-						
-						myWriter.WriteEndGroup();
-					}
-					myWriter.WriteEndGroup();
-				}
-				// writing font table
-				myWriter.WriteStartGroup();
-				myWriter.WriteKeyword( RTFConsts._fonttbl );
-				for( int iCount = 0 ; iCount < myFontTable.Count ; iCount ++ )
-				{
-					//string f = myFontTable[ iCount ] ;
-					myWriter.WriteStartGroup();
-					myWriter.WriteKeyword( "f" + iCount );
-                    RTFFont f = myFontTable[iCount];
-                    myWriter.WriteText( f.Name );
+                        var v = _myInfo[strKey];
+                        if (v is string)
+                        {
+                            Writer.WriteKeyword(strKey);
+                            Writer.WriteText((string) v);
+                        }
+                        else if (v is int)
+                        {
+                            Writer.WriteKeyword(strKey + v);
+                        }
+                        else if (v is DateTime)
+                        {
+                            var dtm = (DateTime) v;
+                            Writer.WriteKeyword(strKey);
+                            Writer.WriteKeyword("yr" + dtm.Year);
+                            Writer.WriteKeyword("mo" + dtm.Month);
+                            Writer.WriteKeyword("dy" + dtm.Day);
+                            Writer.WriteKeyword("hr" + dtm.Hour);
+                            Writer.WriteKeyword("min" + dtm.Minute);
+                            Writer.WriteKeyword("sec" + dtm.Second);
+                        }
+                        else
+                        {
+                            Writer.WriteKeyword(strKey);
+                        }
+
+                        Writer.WriteEndGroup();
+                    }
+                    Writer.WriteEndGroup();
+                }
+                // writing font table
+                Writer.WriteStartGroup();
+                Writer.WriteKeyword(RTFConsts.Fonttbl);
+                for (var iCount = 0; iCount < _myFontTable.Count; iCount ++)
+                {
+                    //string f = myFontTable[ iCount ] ;
+                    Writer.WriteStartGroup();
+                    Writer.WriteKeyword("f" + iCount);
+                    var f = _myFontTable[iCount];
+                    Writer.WriteText(f.Name);
                     if (f.Charset != 1)
                     {
-                        myWriter.WriteKeyword("fcharset" + f.Charset);
+                        Writer.WriteKeyword("fcharset" + f.Charset);
                     }
-                    myWriter.WriteEndGroup();
-				}
-				myWriter.WriteEndGroup();
+                    Writer.WriteEndGroup();
+                }
+                Writer.WriteEndGroup();
 
-				// write color table
-				myWriter.WriteStartGroup();
-				myWriter.WriteKeyword( RTFConsts._colortbl );
-				myWriter.WriteRaw(";");
-				for( int iCount = 0 ; iCount < myColorTable.Count ; iCount ++ )
-				{
-					Color c = myColorTable[ iCount ] ;
-					myWriter.WriteKeyword( "red" + c.R );
-					myWriter.WriteKeyword( "green" + c.G );
-					myWriter.WriteKeyword( "blue" + c.B );
-					myWriter.WriteRaw(";");
-				}
-				myWriter.WriteEndGroup();
+                // write color table
+                Writer.WriteStartGroup();
+                Writer.WriteKeyword(RTFConsts.Colortbl);
+                Writer.WriteRaw(";");
+                for (var iCount = 0; iCount < _myColorTable.Count; iCount ++)
+                {
+                    var c = _myColorTable[iCount];
+                    Writer.WriteKeyword("red" + c.R);
+                    Writer.WriteKeyword("green" + c.G);
+                    Writer.WriteKeyword("blue" + c.B);
+                    Writer.WriteRaw(";");
+                }
+                Writer.WriteEndGroup();
 
                 // write list table
-                if (this.ListTable != null && this.ListTable.Count > 0)
+                if (ListTable != null && ListTable.Count > 0)
                 {
-                    if (this.DebugMode)
+                    if (DebugMode)
                     {
-                        myWriter.WriteRaw(Environment.NewLine);
+                        Writer.WriteRaw(Environment.NewLine);
                     }
-                    myWriter.WriteStartGroup();
-                    myWriter.WriteKeyword("listtable", true );
-                    foreach (RTFList list in this.ListTable)
+                    Writer.WriteStartGroup();
+                    Writer.WriteKeyword("listtable", true);
+                    foreach (var list in ListTable)
                     {
-                        if (this.DebugMode)
+                        if (DebugMode)
                         {
-                            myWriter.WriteRaw(Environment.NewLine);
+                            Writer.WriteRaw(Environment.NewLine);
                         }
-                        myWriter.WriteStartGroup();
-                        myWriter.WriteKeyword("list");
-                        myWriter.WriteKeyword("listtemplateid" + list.ListTemplateID);
+                        Writer.WriteStartGroup();
+                        Writer.WriteKeyword("list");
+                        Writer.WriteKeyword("listtemplateid" + list.ListTemplateId);
                         if (list.ListHybrid)
                         {
-                            myWriter.WriteKeyword("listhybrid");
+                            Writer.WriteKeyword("listhybrid");
                         }
-                        if (this.DebugMode)
+                        if (DebugMode)
                         {
-                            myWriter.WriteRaw(Environment.NewLine);
+                            Writer.WriteRaw(Environment.NewLine);
                         }
-                        myWriter.WriteStartGroup();
-                        myWriter.WriteKeyword("listlevel");
-                        myWriter.WriteKeyword("levelfollow" + list.LevelFollow);
-                        myWriter.WriteKeyword("leveljc" + list.LevelJc);
-                        myWriter.WriteKeyword("levelstartat" + list.LevelStartAt);
-                        myWriter.WriteKeyword("levelnfc" + Convert.ToInt32( list.LevelNfc));
-                        myWriter.WriteKeyword("levelnfcn" + Convert.ToInt32(list.LevelNfc));
-                        myWriter.WriteKeyword("leveljc" + list.LevelJc);
-                        
+                        Writer.WriteStartGroup();
+                        Writer.WriteKeyword("listlevel");
+                        Writer.WriteKeyword("levelfollow" + list.LevelFollow);
+                        Writer.WriteKeyword("leveljc" + list.LevelJc);
+                        Writer.WriteKeyword("levelstartat" + list.LevelStartAt);
+                        Writer.WriteKeyword("levelnfc" + Convert.ToInt32(list.LevelNfc));
+                        Writer.WriteKeyword("levelnfcn" + Convert.ToInt32(list.LevelNfc));
+                        Writer.WriteKeyword("leveljc" + list.LevelJc);
+
                         //if (list.LevelNfc == LevelNumberType.Bullet)
                         {
                             if (string.IsNullOrEmpty(list.LevelText) == false)
                             {
-                                myWriter.WriteStartGroup();
-                                myWriter.WriteKeyword("leveltext");
-                                myWriter.WriteKeyword("'0" + list.LevelText.Length);
+                                Writer.WriteStartGroup();
+                                Writer.WriteKeyword("leveltext");
+                                Writer.WriteKeyword("'0" + list.LevelText.Length);
                                 if (list.LevelNfc == LevelNumberType.Bullet)
                                 {
-                                    myWriter.WriteUnicodeText(list.LevelText);
+                                    Writer.WriteUnicodeText(list.LevelText);
                                 }
                                 else
                                 {
-                                    myWriter.WriteText(list.LevelText , false );
-
-
+                                    Writer.WriteText(list.LevelText, false);
                                 }
                                 //myWriter.WriteStartGroup();
                                 //myWriter.WriteKeyword("uc1");
@@ -388,158 +379,154 @@ namespace RtfDomParser
                                 //myWriter.WriteRaw(" ?");
                                 //myWriter.WriteEndGroup();
                                 //myWriter.WriteRaw(";");
-                                myWriter.WriteEndGroup();
+                                Writer.WriteEndGroup();
                                 if (list.LevelNfc == LevelNumberType.Bullet)
                                 {
-                                    RTFFont f = this.FontTable["Wingdings"];
+                                    var f = FontTable["Wingdings"];
                                     if (f != null)
                                     {
-                                        myWriter.WriteKeyword("f" + f.Index);
+                                        Writer.WriteKeyword("f" + f.Index);
                                     }
                                 }
                                 else
                                 {
-                                    myWriter.WriteStartGroup();
-                                    myWriter.WriteKeyword("levelnumbers");
-                                    myWriter.WriteKeyword("'01");
-                                    myWriter.WriteEndGroup();
+                                    Writer.WriteStartGroup();
+                                    Writer.WriteKeyword("levelnumbers");
+                                    Writer.WriteKeyword("'01");
+                                    Writer.WriteEndGroup();
                                 }
                             }
                         }
-                        myWriter.WriteEndGroup();
+                        Writer.WriteEndGroup();
 
-                        myWriter.WriteKeyword("listid" + list.ListID);
-                        myWriter.WriteEndGroup();
+                        Writer.WriteKeyword("listid" + list.ListId);
+                        Writer.WriteEndGroup();
                     }
-                    myWriter.WriteEndGroup();
+                    Writer.WriteEndGroup();
                 }
 
                 // write list overried table
-                if (this.ListOverrideTable != null && this.ListOverrideTable.Count > 0)
+                if (ListOverrideTable != null && ListOverrideTable.Count > 0)
                 {
-                    if (this.DebugMode)
+                    if (DebugMode)
                     {
-                        myWriter.WriteRaw(Environment.NewLine);
+                        Writer.WriteRaw(Environment.NewLine);
                     }
-                    myWriter.WriteStartGroup();
-                    myWriter.WriteKeyword("listoverridetable");
-                    foreach (RTFListOverride lo in this.ListOverrideTable)
+                    Writer.WriteStartGroup();
+                    Writer.WriteKeyword("listoverridetable");
+                    foreach (var lo in ListOverrideTable)
                     {
-                        if (this.DebugMode)
+                        if (DebugMode)
                         {
-                            myWriter.WriteRaw(Environment.NewLine);
+                            Writer.WriteRaw(Environment.NewLine);
                         }
-                        myWriter.WriteStartGroup();
-                        myWriter.WriteKeyword("listoverride");
-                        myWriter.WriteKeyword("listid" + lo.ListID);
-                        myWriter.WriteKeyword("listoverridecount" + lo.ListOverriedCount);
-                        myWriter.WriteKeyword("ls" + lo.ID);
-                        myWriter.WriteEndGroup();
+                        Writer.WriteStartGroup();
+                        Writer.WriteKeyword("listoverride");
+                        Writer.WriteKeyword("listid" + lo.ListId);
+                        Writer.WriteKeyword("listoverridecount" + lo.ListOverriedCount);
+                        Writer.WriteKeyword("ls" + lo.Id);
+                        Writer.WriteEndGroup();
                     }
-                    myWriter.WriteEndGroup();
+                    Writer.WriteEndGroup();
                 }
 
-                if (this.DebugMode)
+                if (DebugMode)
                 {
-                    myWriter.WriteRaw(Environment.NewLine);
+                    Writer.WriteRaw(Environment.NewLine);
                 }
-                myWriter.WriteKeyword("viewkind1");
-			}
-		}
+                Writer.WriteKeyword("viewkind1");
+            }
+        }
 
-		/// <summary>
-		/// end write document
-		/// </summary>
-		public void WriteEndDocument()
-		{
-			if( this.bolCollectionInfo == false )
-			{
-				myWriter.WriteEndGroup();
-			}
-            myWriter.Flush();
-		}
-
-		/// <summary>
-		/// start write header
-		/// </summary>
-		public void WriteStartHeader()
-		{
-			if( this.bolCollectionInfo == false )
-			{
-				myWriter.WriteStartGroup();
-				myWriter.WriteKeyword("header");
-			}
-		}
-
-		/// <summary>
-		/// end write header
-		/// </summary>
-		public void WriteEndHeader()
-		{
-			if( this.bolCollectionInfo == false )
-			{
-				myWriter.WriteEndGroup();
-			}
-		}
-		
-		/// <summary>
-		/// start write footer
-		/// </summary>
-		public void WriteStartFooter()
-		{
-			if( this.bolCollectionInfo == false )
-			{
-				myWriter.WriteStartGroup();
-				myWriter.WriteKeyword("footer");
-			}
-		}
-
-		/// <summary>
-		/// end write end footer
-		/// </summary>
-		public void WriteEndFooter()
-		{
-			if( this.bolCollectionInfo == false )
-			{
-				myWriter.WriteEndGroup();
-			}
-		}
-		 
-		private DocumentFormatInfo myLastParagraphInfo = null;
-
-		private bool bolFirstParagraph = true ;
-
-		public void WriteStartParagraph( )
-		{
-			WriteStartParagraph( new DocumentFormatInfo());
-		}
-
-		/// <summary>
-		/// write write paragraph
-		/// </summary>
-		/// <param name="info">format</param>
-		public void WriteStartParagraph( DocumentFormatInfo info )
-		{
-			if( this.bolCollectionInfo )
-			{
-				//myFontTable.Add("Wingdings");
-			}
-			else
+        /// <summary>
+        /// end write document
+        /// </summary>
+        public void WriteEndDocument()
+        {
+            if (_bolCollectionInfo == false)
             {
-                if (bolFirstParagraph)
+                Writer.WriteEndGroup();
+            }
+            Writer.Flush();
+        }
+
+        /// <summary>
+        /// start write header
+        /// </summary>
+        public void WriteStartHeader()
+        {
+            if (_bolCollectionInfo == false)
+            {
+                Writer.WriteStartGroup();
+                Writer.WriteKeyword("header");
+            }
+        }
+
+        /// <summary>
+        /// end write header
+        /// </summary>
+        public void WriteEndHeader()
+        {
+            if (_bolCollectionInfo == false)
+            {
+                Writer.WriteEndGroup();
+            }
+        }
+
+        /// <summary>
+        /// start write footer
+        /// </summary>
+        public void WriteStartFooter()
+        {
+            if (_bolCollectionInfo == false)
+            {
+                Writer.WriteStartGroup();
+                Writer.WriteKeyword("footer");
+            }
+        }
+
+        /// <summary>
+        /// end write end footer
+        /// </summary>
+        public void WriteEndFooter()
+        {
+            if (_bolCollectionInfo == false)
+            {
+                Writer.WriteEndGroup();
+            }
+        }
+
+        public void WriteStartParagraph()
+        {
+            WriteStartParagraph(new DocumentFormatInfo());
+        }
+
+        /// <summary>
+        /// write write paragraph
+        /// </summary>
+        /// <param name="info">format</param>
+        public void WriteStartParagraph(DocumentFormatInfo info)
+        {
+            if (_bolCollectionInfo)
+            {
+                //myFontTable.Add("Wingdings");
+            }
+            else
+            {
+                if (_bolFirstParagraph)
                 {
-                    bolFirstParagraph = false;
-                    myWriter.WriteRaw(System.Environment.NewLine);
+                    _bolFirstParagraph = false;
+                    Writer.WriteRaw(Environment.NewLine);
                     //myWriter.WriteKeyword("par");
                 }
                 else
                 {
-                    myWriter.WriteKeyword("par");
+                    Writer.WriteKeyword("par");
                 }
-                if (info.ListID >= 0)
+                if (info.ListId >= 0)
                 {
-                    myWriter.WriteKeyword("pard");
-                    myWriter.WriteKeyword("ls" + info.ListID.ToString());
+                    Writer.WriteKeyword("pard");
+                    Writer.WriteKeyword("ls" + info.ListId);
                 }
                 //if( lo != null && listInfo != null )
                 //{
@@ -583,11 +570,11 @@ namespace RtfDomParser
                 //}
                 //else
                 {
-                    if (myLastParagraphInfo != null)
+                    if (_myLastParagraphInfo != null)
                     {
-                        if (myLastParagraphInfo.ListID >= 0)
+                        if (_myLastParagraphInfo.ListId >= 0)
                         {
-                            myWriter.WriteKeyword("pard");
+                            Writer.WriteKeyword("pard");
                         }
                     }
                 }
@@ -595,16 +582,16 @@ namespace RtfDomParser
                 switch (info.Align)
                 {
                     case RTFAlignment.Left:
-                        myWriter.WriteKeyword("ql");
+                        Writer.WriteKeyword("ql");
                         break;
                     case RTFAlignment.Center:
-                        myWriter.WriteKeyword("qc");
+                        Writer.WriteKeyword("qc");
                         break;
                     case RTFAlignment.Right:
-                        myWriter.WriteKeyword("qr");
+                        Writer.WriteKeyword("qr");
                         break;
                     case RTFAlignment.Justify:
-                        myWriter.WriteKeyword("qj");
+                        Writer.WriteKeyword("qj");
                         break;
                 }
                 //
@@ -619,178 +606,178 @@ namespace RtfDomParser
                 {
                     if (info.ParagraphFirstLineIndent != 0)
                     {
-                        myWriter.WriteKeyword("fi" + Convert.ToInt32(
-                            info.ParagraphFirstLineIndent * 400 / info.StandTabWidth));
+                        Writer.WriteKeyword("fi" + Convert.ToInt32(
+                            info.ParagraphFirstLineIndent*400/info.StandTabWidth));
                     }
                     else
                     {
-                        myWriter.WriteKeyword("fi0");
+                        Writer.WriteKeyword("fi0");
                     }
                 }
                 //if( info.NumberedList == false && info.BulletedList == false )
                 {
                     if (info.LeftIndent != 0)
                     {
-                        myWriter.WriteKeyword("li" + Convert.ToInt32(
-                            info.LeftIndent * 400 / info.StandTabWidth));
+                        Writer.WriteKeyword("li" + Convert.ToInt32(
+                            info.LeftIndent*400/info.StandTabWidth));
                     }
                     else
                     {
-                        myWriter.WriteKeyword("li0");
+                        Writer.WriteKeyword("li0");
                     }
                 }
-                myWriter.WriteKeyword("plain");
+                Writer.WriteKeyword("plain");
             }
-			myLastParagraphInfo = info ;
-		}
+            _myLastParagraphInfo = info;
+        }
 
-		/// <summary>
-		/// end write paragraph
-		/// </summary>
-		public void WriteEndParagraph()
-		{
-		}
+        /// <summary>
+        /// end write paragraph
+        /// </summary>
+        public void WriteEndParagraph()
+        {
+        }
 
-		/// <summary>
-		/// write plain text
-		/// </summary>
-		/// <param name="strText">text</param>
-		public void WriteText( string strText )
-		{
-			if( strText != null && this.bolCollectionInfo == false )
-			{
-				myWriter.WriteText( strText );
-			}
-		}
+        /// <summary>
+        /// write plain text
+        /// </summary>
+        /// <param name="strText">text</param>
+        public void WriteText(string strText)
+        {
+            if (strText != null && _bolCollectionInfo == false)
+            {
+                Writer.WriteText(strText);
+            }
+        }
 
-		/// <summary>
-		/// write font format
-		/// </summary>
-		/// <param name="font">font</param>
-		public void WriteFont(Font font )
-		{
-			if( font == null )
-			{
-				throw new ArgumentNullException("font");
-			}
-			if( this.bolCollectionInfo )
-			{
-				myFontTable.Add( font.Name );
-			}
-			else
-			{
-				int index = myFontTable.IndexOf( font.Name );
-				if( index >= 0 )
-				{
-					myWriter.WriteKeyword( "f" + index );
-				}
-				if( font.Bold )
-				{
-					myWriter.WriteKeyword("b");
-				}
-				if( font.Italic )
-				{
-					myWriter.WriteKeyword("i");
-				}
-				if( font.Underline )
-				{
-					myWriter.WriteKeyword("ul");
-				}
-				if( font.Strikeout )
-				{
-					myWriter.WriteKeyword("strike");
-				}
-				myWriter.WriteKeyword("fs" + Convert.ToInt32( font.Size * 2 ));
-			}
-		}
+        /// <summary>
+        /// write font format
+        /// </summary>
+        /// <param name="font">font</param>
+        public void WriteFont(Font font)
+        {
+            if (font == null)
+            {
+                throw new ArgumentNullException("font");
+            }
+            if (_bolCollectionInfo)
+            {
+                _myFontTable.Add(font.Name);
+            }
+            else
+            {
+                var index = _myFontTable.IndexOf(font.Name);
+                if (index >= 0)
+                {
+                    Writer.WriteKeyword("f" + index);
+                }
+                if (font.Bold)
+                {
+                    Writer.WriteKeyword("b");
+                }
+                if (font.Italic)
+                {
+                    Writer.WriteKeyword("i");
+                }
+                if (font.Underline)
+                {
+                    Writer.WriteKeyword("ul");
+                }
+                if (font.Strikeout)
+                {
+                    Writer.WriteKeyword("strike");
+                }
+                Writer.WriteKeyword("fs" + Convert.ToInt32(font.Size*2));
+            }
+        }
 
-		/// <summary>
-		/// start write formatted text
-		/// </summary>
-		/// <param name="info">format</param>
-		/// <remarks>
+        /// <summary>
+        /// start write formatted text
+        /// </summary>
+        /// <param name="info">format</param>
+        /// <remarks>
         /// This function must assort with WriteEndString strict
-		/// </remarks>
+        /// </remarks>
         public void WriteStartString(DocumentFormatInfo info)
         {
-            if (this.bolCollectionInfo)
+            if (_bolCollectionInfo)
             {
-                myFontTable.Add(info.FontName);
-                myColorTable.Add(info.TextColor);
-                myColorTable.Add(info.BackColor);
+                _myFontTable.Add(info.FontName);
+                _myColorTable.Add(info.TextColor);
+                _myColorTable.Add(info.BackColor);
                 if (info.BorderColor.A != 0)
                 {
-                    myColorTable.Add(info.BorderColor);
+                    _myColorTable.Add(info.BorderColor);
                 }
                 return;
             }
             if (info.Link != null && info.Link.Length > 0)
             {
-                myWriter.WriteStartGroup();
-                myWriter.WriteKeyword("field");
-                myWriter.WriteStartGroup();
-                myWriter.WriteKeyword("fldinst", true);
-                myWriter.WriteStartGroup();
-                myWriter.WriteKeyword("hich");
-                myWriter.WriteText(" HYPERLINK \"" + info.Link + "\"");
-                myWriter.WriteEndGroup();
-                myWriter.WriteEndGroup();
-                myWriter.WriteStartGroup();
-                myWriter.WriteKeyword("fldrslt");
-                myWriter.WriteStartGroup();
+                Writer.WriteStartGroup();
+                Writer.WriteKeyword("field");
+                Writer.WriteStartGroup();
+                Writer.WriteKeyword("fldinst", true);
+                Writer.WriteStartGroup();
+                Writer.WriteKeyword("hich");
+                Writer.WriteText(" HYPERLINK \"" + info.Link + "\"");
+                Writer.WriteEndGroup();
+                Writer.WriteEndGroup();
+                Writer.WriteStartGroup();
+                Writer.WriteKeyword("fldrslt");
+                Writer.WriteStartGroup();
             }
 
             switch (info.Align)
             {
                 case RTFAlignment.Left:
-                    myWriter.WriteKeyword("ql");
+                    Writer.WriteKeyword("ql");
                     break;
                 case RTFAlignment.Center:
-                    myWriter.WriteKeyword("qc");
+                    Writer.WriteKeyword("qc");
                     break;
                 case RTFAlignment.Right:
-                    myWriter.WriteKeyword("qr");
+                    Writer.WriteKeyword("qr");
                     break;
                 case RTFAlignment.Justify:
-                    myWriter.WriteKeyword("qj");
+                    Writer.WriteKeyword("qj");
                     break;
             }
 
-            myWriter.WriteKeyword("plain");
-            int index = 0;
-            index = myFontTable.IndexOf(info.FontName);
+            Writer.WriteKeyword("plain");
+            var index = 0;
+            index = _myFontTable.IndexOf(info.FontName);
             if (index >= 0)
-                myWriter.WriteKeyword("f" + index);
+                Writer.WriteKeyword("f" + index);
             if (info.Bold)
-                myWriter.WriteKeyword("b");
+                Writer.WriteKeyword("b");
             if (info.Italic)
-                myWriter.WriteKeyword("i");
+                Writer.WriteKeyword("i");
             if (info.Underline)
-                myWriter.WriteKeyword("ul");
+                Writer.WriteKeyword("ul");
             if (info.Strikeout)
-                myWriter.WriteKeyword("strike");
-            myWriter.WriteKeyword("fs" + Convert.ToInt32(info.FontSize * 2));
+                Writer.WriteKeyword("strike");
+            Writer.WriteKeyword("fs" + Convert.ToInt32(info.FontSize*2));
 
             // back color
-            index = myColorTable.IndexOf(info.BackColor);
+            index = _myColorTable.IndexOf(info.BackColor);
             if (index >= 0)
             {
-                myWriter.WriteKeyword("chcbpat" + Convert.ToString(index + 1));
+                Writer.WriteKeyword("chcbpat" + Convert.ToString(index + 1));
             }
 
-            index = myColorTable.IndexOf(info.TextColor);
+            index = _myColorTable.IndexOf(info.TextColor);
             if (index >= 0)
             {
-                myWriter.WriteKeyword("cf" + Convert.ToString(index + 1));
+                Writer.WriteKeyword("cf" + Convert.ToString(index + 1));
             }
             if (info.Subscript)
             {
-                myWriter.WriteKeyword("sub");
+                Writer.WriteKeyword("sub");
             }
             if (info.Superscript)
-                myWriter.WriteKeyword("super");
+                Writer.WriteKeyword("super");
             if (info.NoWwrap)
-                myWriter.WriteKeyword("nowwrap");
+                Writer.WriteKeyword("nowwrap");
             if (info.LeftBorder
                 || info.TopBorder
                 || info.RightBorder
@@ -799,142 +786,142 @@ namespace RtfDomParser
                 // border color
                 if (info.BorderColor.A != 0)
                 {
-                    myWriter.WriteKeyword("chbrdr");
-                    myWriter.WriteKeyword("brdrs");
-                    myWriter.WriteKeyword("brdrw10");
-                    index = myColorTable.IndexOf(info.BorderColor);
+                    Writer.WriteKeyword("chbrdr");
+                    Writer.WriteKeyword("brdrs");
+                    Writer.WriteKeyword("brdrw10");
+                    index = _myColorTable.IndexOf(info.BorderColor);
                     if (index >= 0)
                     {
-                        myWriter.WriteKeyword("brdrcf" + Convert.ToString(index + 1));
+                        Writer.WriteKeyword("brdrcf" + Convert.ToString(index + 1));
                     }
                 }
             }
         }
 
-		public void WriteEndString( DocumentFormatInfo info )
-		{
-			if( this.bolCollectionInfo )
-			{
-				return ;
-			}
-			
-			if( info.Subscript )
-				myWriter.WriteKeyword("sub0");
-			if( info.Superscript )
-				myWriter.WriteKeyword("super0");
+        public void WriteEndString(DocumentFormatInfo info)
+        {
+            if (_bolCollectionInfo)
+            {
+                return;
+            }
 
-			if( info.Bold )
-				myWriter.WriteKeyword("b0");
-			if( info.Italic )
-				myWriter.WriteKeyword("i0");
-			if( info.Underline )
-				myWriter.WriteKeyword("ul0");
-			if( info.Strikeout )
-				myWriter.WriteKeyword("strike0");
-			if( info.Link != null && info.Link.Length > 0 )
-			{
-				myWriter.WriteEndGroup();
-				myWriter.WriteEndGroup();
-				myWriter.WriteEndGroup();
-			}
-		}
+            if (info.Subscript)
+                Writer.WriteKeyword("sub0");
+            if (info.Superscript)
+                Writer.WriteKeyword("super0");
 
-		/// <summary>
-		/// write formatted string
-		/// </summary>
+            if (info.Bold)
+                Writer.WriteKeyword("b0");
+            if (info.Italic)
+                Writer.WriteKeyword("i0");
+            if (info.Underline)
+                Writer.WriteKeyword("ul0");
+            if (info.Strikeout)
+                Writer.WriteKeyword("strike0");
+            if (info.Link != null && info.Link.Length > 0)
+            {
+                Writer.WriteEndGroup();
+                Writer.WriteEndGroup();
+                Writer.WriteEndGroup();
+            }
+        }
+
+        /// <summary>
+        /// write formatted string
+        /// </summary>
         /// <param name="strText">text</param>
-		/// <param name="info">format</param>
-		public void WriteString( string strText , DocumentFormatInfo info )
-		{
-			if( this.bolCollectionInfo )
-			{
-				myFontTable.Add( info.FontName );
-				myColorTable.Add( info.TextColor );
-				myColorTable.Add( info.BackColor );
-			}
-			else
-			{
-				this.WriteStartString( info );
+        /// <param name="info">format</param>
+        public void WriteString(string strText, DocumentFormatInfo info)
+        {
+            if (_bolCollectionInfo)
+            {
+                _myFontTable.Add(info.FontName);
+                _myColorTable.Add(info.TextColor);
+                _myColorTable.Add(info.BackColor);
+            }
+            else
+            {
+                WriteStartString(info);
 
-				if( info.Multiline )
-				{
-					if( strText != null )
-					{
-						strText = strText.Replace( "\n" , "");
-                        using (System.IO.StringReader reader = new System.IO.StringReader(strText))
+                if (info.Multiline)
+                {
+                    if (strText != null)
+                    {
+                        strText = strText.Replace("\n", "");
+                        using (var reader = new StringReader(strText))
                         {
-                            string strLine = reader.ReadLine();
-                            int iCount = 0;
+                            var strLine = reader.ReadLine();
+                            var iCount = 0;
                             while (strLine != null)
                             {
                                 if (iCount > 0)
                                 {
-                                    myWriter.WriteKeyword("line");
+                                    Writer.WriteKeyword("line");
                                 }
 
                                 iCount++;
-                                myWriter.WriteText(strLine);
+                                Writer.WriteText(strLine);
                                 strLine = reader.ReadLine();
                             }
                         }
-					}
-				}
-				else
-				{
-					myWriter.WriteText( strText );
-				}
+                    }
+                }
+                else
+                {
+                    Writer.WriteText(strText);
+                }
 
-				this.WriteEndString( info );
-			}
-		}
+                WriteEndString(info);
+            }
+        }
 
-		/// <summary>
-		/// end write string
-		/// </summary>
-		public void WriteEndString()
-		{
-		}
+        /// <summary>
+        /// end write string
+        /// </summary>
+        public void WriteEndString()
+        {
+        }
 
-		/// <summary>
-		/// start write bookmark
-		/// </summary>
-		/// <param name="strName">bookmark name</param>
-		public void WriteStartBookmark( string strName )
-		{
-			if( this.bolCollectionInfo == false )
-			{
-				myWriter.WriteStartGroup();
-				myWriter.WriteKeyword("bkmkstart" , true );
-				myWriter.WriteKeyword("f0");
-				myWriter.WriteText( strName );
-				myWriter.WriteEndGroup();
+        /// <summary>
+        /// start write bookmark
+        /// </summary>
+        /// <param name="strName">bookmark name</param>
+        public void WriteStartBookmark(string strName)
+        {
+            if (_bolCollectionInfo == false)
+            {
+                Writer.WriteStartGroup();
+                Writer.WriteKeyword("bkmkstart", true);
+                Writer.WriteKeyword("f0");
+                Writer.WriteText(strName);
+                Writer.WriteEndGroup();
 
-				myWriter.WriteStartGroup();
-				myWriter.WriteKeyword("bkmkend" , true );
-				myWriter.WriteKeyword("f0");
-				myWriter.WriteText( strName );
-				myWriter.WriteEndGroup();
-			}
-		}
+                Writer.WriteStartGroup();
+                Writer.WriteKeyword("bkmkend", true);
+                Writer.WriteKeyword("f0");
+                Writer.WriteText(strName);
+                Writer.WriteEndGroup();
+            }
+        }
 
-		/// <summary>
-		/// end write bookmark
-		/// </summary>
-		/// <param name="strName">bookmark name</param>
-		public void WriteEndBookmark( string strName )
-		{
-		}
+        /// <summary>
+        /// end write bookmark
+        /// </summary>
+        /// <param name="strName">bookmark name</param>
+        public void WriteEndBookmark(string strName)
+        {
+        }
 
-		/// <summary>
-		/// write a line break
-		/// </summary>
-		public void WriteLineBreak( )
-		{
-			if( this.bolCollectionInfo == false )
-			{
-				myWriter.WriteKeyword("line");
-			}
-		}
+        /// <summary>
+        /// write a line break
+        /// </summary>
+        public void WriteLineBreak()
+        {
+            if (_bolCollectionInfo == false)
+            {
+                Writer.WriteKeyword("line");
+            }
+        }
 
         /*
 		/// <summary>
@@ -972,5 +959,5 @@ namespace RtfDomParser
 			}
 		}
          */
-	}
+    }
 }

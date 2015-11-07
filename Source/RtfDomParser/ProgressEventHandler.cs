@@ -8,7 +8,6 @@
  */
 
 using System;
-using System.Text;
 
 namespace RtfDomParser
 {
@@ -17,70 +16,54 @@ namespace RtfDomParser
     /// </summary>
     /// <param name="sender">sender</param>
     /// <param name="args">event arguments</param>
-    public delegate void ProgressEventHandler( object sender , ProgressEventArgs args );
+    public delegate void ProgressEventHandler(object sender, ProgressEventArgs args);
 
     /// <summary>
     /// porgress event arguments
     /// </summary>
-    public class ProgressEventArgs : EventArgs 
+    public class ProgressEventArgs : EventArgs
     {
-        public ProgressEventArgs(int max, int Value, string message)
+        private readonly int _intMaxValue;
+
+        private readonly int _intValue;
+
+        private readonly string _strMessage;
+
+        public ProgressEventArgs(int max, int value, string message)
         {
-            intMaxValue = max;
-            intValue = Value;
-            strMessage = message;
+            Cancel = false;
+            _intMaxValue = max;
+            _intValue = value;
+            _strMessage = message;
         }
 
-        private int intMaxValue = 0;
         /// <summary>
         /// progress max value
         /// </summary>
         public int MaxValue
         {
-            get 
-            {
-                return intMaxValue; 
-            }
+            get { return _intMaxValue; }
         }
 
-        private int intValue = 0;
         /// <summary>
         /// current value
         /// </summary>
         public int Value
         {
-            get
-            {
-                return intValue; 
-            }
+            get { return _intValue; }
         }
 
-        private string strMessage = null;
         /// <summary>
         /// progress message
         /// </summary>
         public string Message
         {
-            get
-            {
-                return strMessage; 
-            }
+            get { return _strMessage; }
         }
 
-        private bool bolCancel = false;
         /// <summary>
         /// cancel operation
         /// </summary>
-        public bool Cancel
-        {
-            get
-            {
-                return bolCancel; 
-            }
-            set
-            {
-                bolCancel = value; 
-            }
-        }
+        public bool Cancel { get; set; }
     }
 }

@@ -8,74 +8,57 @@
  */
 
 
-
-using System;
+using System.ComponentModel;
 using System.Text;
 
 namespace RtfDomParser
 {
     public class RTFDomText : RTFDomElement
     {
+        private DocumentFormatInfo _myFormat = new DocumentFormatInfo();
+
         /// <summary>
         /// initialize instance
         /// </summary>
         public RTFDomText()
         {
+            Text = null;
             // text element can not contains any child element
-            this.Locked = true;
+            Locked = true;
         }
 
-        private DocumentFormatInfo myFormat = new DocumentFormatInfo();
         /// <summary>
         /// format
         /// </summary>
         public DocumentFormatInfo Format
         {
-            get
-            {
-                return myFormat;
-            }
-            set
-            {
-                myFormat = value;
-            }
+            get { return _myFormat; }
+            set { _myFormat = value; }
         }
 
-        private string strText = null;
         /// <summary>
         /// text
         /// </summary>
-        [System.ComponentModel.DefaultValue( null)]
-        public string Text
-        {
-            get
-            {
-                return strText;
-            }
-            set
-            {
-                strText = value;
-            }
-        }
+        [DefaultValue(null)]
+        public string Text { get; set; }
+
         public override string InnerText
         {
-            get
-            {
-                return strText;
-            }
+            get { return Text; }
         }
+
         public override string ToString()
         {
-            StringBuilder str = new StringBuilder();
+            var str = new StringBuilder();
             str.Append("Text");
-            if (this.Format != null)
+            if (Format != null)
             {
-                if (this.Format.Hidden)
+                if (Format.Hidden)
                 {
                     str.Append("(Hidden)");
                 }
             }
-            str.Append(":" + strText);
+            str.Append(":" + Text);
             return str.ToString();
         }
     }

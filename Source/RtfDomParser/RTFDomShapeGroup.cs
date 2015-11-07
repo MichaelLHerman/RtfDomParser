@@ -8,32 +8,19 @@
  */
 
 
-
-using System;
-using System.Text;
-
 namespace RtfDomParser
 {
     public class RTFDomShapeGroup : RTFDomElement
     {
-        public RTFDomShapeGroup()
-        {
-        }
+        private StringAttributeCollection _myExtAttrbutes = new StringAttributeCollection();
 
-        private StringAttributeCollection myExtAttrbutes = new StringAttributeCollection();
         /// <summary>
         /// extern attributes
         /// </summary>
         public StringAttributeCollection ExtAttrbutes
         {
-            get
-            {
-                return myExtAttrbutes;
-            }
-            set
-            {
-                myExtAttrbutes = value;
-            }
+            get { return _myExtAttrbutes; }
+            set { _myExtAttrbutes = value; }
         }
 
         public override string ToString()

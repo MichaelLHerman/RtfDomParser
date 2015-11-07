@@ -8,37 +8,22 @@
  */
 
 
-
-using System;
-using System.Text;
+using System.ComponentModel;
 
 namespace RtfDomParser
 {
     public class RTFDomTableColumn : RTFDomElement
     {
-        /// <summary>
-        /// initialize instance
-        /// </summary>
         public RTFDomTableColumn()
         {
+            Width = 0;
         }
 
-        private int intWidth = 0;
         /// <summary>
         /// width
         /// </summary>
-        [System.ComponentModel.DefaultValue( 0 )]
-        public int Width
-        {
-            get
-            {
-                return intWidth; 
-            }
-            set
-            {
-                intWidth = value; 
-            }
-        }
+        [DefaultValue(0)]
+        public int Width { get; set; }
 
         public override string ToString()
         {

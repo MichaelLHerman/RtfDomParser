@@ -7,31 +7,23 @@
  * 
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace RtfDomParser
 {
-    public class RTFDomPageBreak:RTFDomElement
+    public class RTFDomPageBreak : RTFDomElement
     {
         public RTFDomPageBreak()
         {
-            this.Locked = true;
+            Locked = true;
         }
 
         public override string InnerText
         {
-            get
-            {
-                return "";
-            }
+            get { return ""; }
         }
+
         public override string ToString()
         {
             return "page";
         }
     }
-
-
 }

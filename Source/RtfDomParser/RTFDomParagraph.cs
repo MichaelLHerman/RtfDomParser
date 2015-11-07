@@ -8,7 +8,6 @@
  */
 
 
-
 using System;
 using System.Text;
 
@@ -17,59 +16,41 @@ namespace RtfDomParser
     /// <summary>
     /// paragraph element
     /// </summary>
-
     public class RTFDomParagraph : RTFDomElement
     {
-        /// <summary>
-        /// initialize instance
-        /// </summary>
-        public RTFDomParagraph()
-        {
-        }
+        private DocumentFormatInfo _myFormat = new DocumentFormatInfo();
 
         internal bool TemplateGenerated = false;
-        /// <summary>
-        /// 是否是临时生成的段落对象
-        /// </summary>
+
         public bool IsTemplateGenerated
         {
-            get
-            {
-                return TemplateGenerated;
-            }
+            get { return TemplateGenerated; }
         }
-        private DocumentFormatInfo myFormat = new DocumentFormatInfo();
+
         /// <summary>
         /// format
         /// </summary>
         public DocumentFormatInfo Format
         {
-            get
-            {
-                return myFormat; 
-            }
-            set
-            {
-                myFormat = value; 
-            }
+            get { return _myFormat; }
+            set { _myFormat = value; }
         }
+
         public override string InnerText
         {
-            get
-            {
-                return base.InnerText + Environment.NewLine ;
-            }
+            get { return base.InnerText + Environment.NewLine; }
         }
+
         public override string ToString()
         {
-            StringBuilder str = new StringBuilder();
+            var str = new StringBuilder();
             str.Append("Paragraph");
-            if (this.Format != null)
+            if (Format != null)
             {
-                str.Append("(" + this.Format.Align + ")");
-                if (this.Format.ListID >= 0)
+                str.Append("(" + Format.Align + ")");
+                if (Format.ListId >= 0)
                 {
-                    str.Append("ListID:" + this.Format.ListID);
+                    str.Append("ListID:" + Format.ListId);
                 }
                 //if (this.Format.NumberedList)
                 //{
@@ -80,7 +61,7 @@ namespace RtfDomParser
                 //    str.Append("(BulletedList)");
                 //}
             }
-            
+
             return str.ToString();
         }
     }

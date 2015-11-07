@@ -17,9 +17,9 @@ using RtfDomParser;
 
 namespace RtfDomParser.Test
 {
-    public partial class frmRTFTest : Form
+    public partial class FrmRTFTest : Form
     {
-        public frmRTFTest()
+        public FrmRTFTest()
         {
             InitializeComponent();
         }

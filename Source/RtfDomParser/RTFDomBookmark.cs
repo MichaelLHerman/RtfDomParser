@@ -8,10 +8,6 @@
  */
 
 
-
-using System;
-using System.Text;
-
 namespace RtfDomParser
 {
     /// <summary>
@@ -20,30 +16,15 @@ namespace RtfDomParser
 
     public class RTFDomBookmark : RTFDomElement
     {
-        public RTFDomBookmark()
-        { 
-        }
-
-        private string strName = null;
         /// <summary>
         /// name
         /// </summary>
         [System.ComponentModel.DefaultValue( null )]
-        public string Name
-        {
-            get
-            {
-                return strName; 
-            }
-            set
-            {
-                strName = value; 
-            }
-        }
+        public string Name { get; set; }
 
         public override string ToString()
         {
-            return "BookMark:" + strName;
+            return "BookMark:" + Name;
         }
     }
 }

@@ -8,58 +8,35 @@
  */
 
 
-using System;
-using System.Text;
+using System.ComponentModel;
+using System.Linq;
 
 namespace RtfDomParser
 {
     public class RTFDomField : RTFDomElement
     {
-        /// <summary>
-        /// initialize instance
-        /// </summary>
-        public RTFDomField()
-        {
-        }
+        private RTFDomFieldMethod _intMethod = RTFDomFieldMethod.None;
 
-        private RTFDomFieldMethod intMethod = RTFDomFieldMethod.None;
         /// <summary>
         /// method
         /// </summary>
-        [System.ComponentModel.DefaultValue(RTFDomFieldMethod.None)]
+        [DefaultValue(RTFDomFieldMethod.None)]
         public RTFDomFieldMethod Method
         {
-            get
-            {
-                return intMethod;
-            }
-            set
-            {
-                intMethod = value;
-            }
+            get { return _intMethod; }
+            set { _intMethod = value; }
         }
 
         //private string strInstructions = null;
         /// <summary>
         /// instructions
         /// </summary>
-        [System.ComponentModel.DefaultValue(null)]
+        [DefaultValue(null)]
         public string Instructions
         {
             get
             {
-                foreach (RTFDomElement element in this.Elements)
-                {
-                    if (element is RTFDomElementContainer)
-                    {
-                        RTFDomElementContainer c = (RTFDomElementContainer)element;
-                        if (c.Name == RTFConsts._fldinst)
-                        {
-                            return c.InnerText;
-                        }
-                    }
-                }
-                return null ;
+                return (from c in Elements.OfType<RTFDomElementContainer>() where c.Name == RTFConsts.Fldinst select c.InnerText).FirstOrDefault();
             }
             //set
             //{
@@ -70,23 +47,12 @@ namespace RtfDomParser
         /// <summary>
         /// result
         /// </summary>
-        [System.ComponentModel.DefaultValue(null)]
+        [DefaultValue(null)]
         public RTFDomElementContainer Result
         {
             get
             {
-                foreach (RTFDomElement element in this.Elements)
-                {
-                    if (element is RTFDomElementContainer)
-                    {
-                        RTFDomElementContainer c = (RTFDomElementContainer)element;
-                        if (c.Name == RTFConsts._fldrslt)
-                        {
-                            return c;
-                        }
-                    }
-                }
-                return null;
+                return Elements.OfType<RTFDomElementContainer>().FirstOrDefault(c => c.Name == RTFConsts.Fldrslt);
             }
             //set
             //{
@@ -98,23 +64,16 @@ namespace RtfDomParser
         {
             get
             {
-                RTFDomElementContainer c = this.Result;
-                if (c != null)
-                {
-                    return c.InnerText;
-                }
-                else
-                {
-                    return null;
-                }
+                var c = Result;
+                return c != null ? c.InnerText : null;
             }
         }
+
         public override string ToString()
         {
-            return "Field";// +strInstructions + " Result:" + this.ResultString;
+            return "Field"; // +strInstructions + " Result:" + this.ResultString;
         }
-
-    }//public class RTFDomField : RTFDomElement
+    } 
 
 
     public enum RTFDomFieldMethod
@@ -123,7 +82,6 @@ namespace RtfDomParser
         Dirty,
         Edit,
         Lock,
-        Priv,
+        Priv
     }
-
 }

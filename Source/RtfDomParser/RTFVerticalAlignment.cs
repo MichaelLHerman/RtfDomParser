@@ -8,8 +8,6 @@
  */
 
 
-using System;
-
 namespace RtfDomParser
 {
     /// <summary>
@@ -21,14 +19,15 @@ namespace RtfDomParser
         /// top alignment
         /// </summary>
         Top,
+
         /// <summary>
         /// middle alignment
         /// </summary>
         Middle,
+
         /// <summary>
         /// bottom alignment
         /// </summary>
         Bottom
     }
-
 }

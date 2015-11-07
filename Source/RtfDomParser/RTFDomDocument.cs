@@ -8,12 +8,10 @@
  */
 
 using System;
-using System.Collections;
 using System.Text;
-using System.ComponentModel ;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace RtfDomParser
 {
@@ -23,139 +21,87 @@ namespace RtfDomParser
     /// <remarks>
     /// This type is the root of RTF Dom tree structure
     /// </remarks>
-    public partial class RTFDomDocument : RTFDomElement
+    public class RTFDomDocument : RTFDomElement
     {
         /// <summary>
         /// initialize instance
         /// </summary>
         public RTFDomDocument()
         {
-            this.OwnerDocument = this;
+            LeftMargin = 1800;
+            PaperHeight = 15840;
+            PaperWidth = 12240;
+            Generator = null;
+            ListOverrideTable = new RTFListOverrideTable();
+            ListTable = new RTFListTable();
+            ColorTable = new RTFColorTable();
+            FontTable = new RTFFontTable();
+            LeadingChars = null;
+            FollowingChars = null;
+            OwnerDocument = this;
         }
-         
-        private string strFollowingChars = null;
+
         /// <summary>
         /// following characters
         /// </summary>
-        [System.ComponentModel.DefaultValue( null)]
-        public string FollowingChars
-        {
-            get
-            {
-                return strFollowingChars; 
-            }
-            set
-            {
-                strFollowingChars = value; 
-            }
-        }
+        [DefaultValue(null)]
+        public string FollowingChars { get; set; }
 
-        private string strLeadingChars = null;
         /// <summary>
         /// leading characters
         /// </summary>
-        [System.ComponentModel.DefaultValue(null)]
-        public string LeadingChars
-        {
-            get
-            {
-                return strLeadingChars; 
-            }
-            set
-            {
-                strLeadingChars = value; 
-            }
-        }
+        [DefaultValue(null)]
+        public string LeadingChars { get; set; }
 
-        private System.Text.Encoding myDefaultEncoding = System.Text.Encoding.UTF8;
+        private Encoding _myDefaultEncoding = Encoding.UTF8;
         /// <summary>
         /// text encoding of current font
         /// </summary>
-        private System.Text.Encoding myFontChartset = null;
+        private Encoding _myFontChartset;
         /// <summary>
         /// text encoding of associate font 
         /// </summary>
-        private System.Text.Encoding myAssociateFontChartset = null;
+        private Encoding _myAssociateFontChartset;
         /// <summary>
         /// text encoding
         /// </summary>
-        internal System.Text.Encoding RuntimeEncoding
+        internal Encoding RuntimeEncoding
         {
             get
             {
-                if (myFontChartset != null)
+                if (_myFontChartset != null)
                 {
-                    return myFontChartset;
+                    return _myFontChartset;
                 }
-                if (myAssociateFontChartset != null)
+                if (_myAssociateFontChartset != null)
                 {
-                    return myAssociateFontChartset;
+                    return _myAssociateFontChartset;
                 }
-                return myDefaultEncoding;
+                return _myDefaultEncoding;
             }
         }
 
         /// <summary>
         /// default font name
         /// </summary>
-        private static string DefaultFontName = "Microsoft Sans Serif";
+        private static string _defaultFontName = "Microsoft Sans Serif";
 
 
-        private RTFFontTable myFontTable = new RTFFontTable();
         /// <summary>
         /// font table
         /// </summary>
-        public RTFFontTable FontTable
-        {
-            get
-            {
-                return myFontTable;
-            }
-            set
-            {
-                myFontTable = value;
-            }
-        }
+        public RTFFontTable FontTable { get; set; }
 
-        private RTFColorTable myColorTable = new RTFColorTable();
         /// <summary>
         /// color table
         /// </summary>
-        public RTFColorTable ColorTable
-        {
-            get
-            {
-                return myColorTable;
-            }
-            set
-            {
-                myColorTable = value;
-            }
-        }
+        public RTFColorTable ColorTable { get; set; }
 
-        private RTFListTable _ListTable = new RTFListTable();
+        public RTFListTable ListTable { get; set; }
 
-        public RTFListTable ListTable
-        {
-            get
-            {
-                return _ListTable; 
-            }
-            set
-            {
-                _ListTable = value; 
-            }
-        }
+        public RTFListOverrideTable ListOverrideTable { get; set; }
 
-        private RTFListOverrideTable _ListOverrideTable = new RTFListOverrideTable();
-        
-        public RTFListOverrideTable ListOverrideTable
-        {
-            get { return _ListOverrideTable; }
-            set { _ListOverrideTable = value; }
-        }
-
-        private RTFDocumentInfo myInfo = new RTFDocumentInfo();
+        private RTFDocumentInfo _myInfo = new RTFDocumentInfo();
         /// <summary>
         /// document information
         /// </summary>
@@ -163,181 +109,137 @@ namespace RtfDomParser
         {
             get
             {
-                return myInfo;
+                return _myInfo;
             }
             set
             {
-                myInfo = value;
+                _myInfo = value;
             }
         }
 
-        private string strGenerator = null;
         /// <summary>
         /// document generator
         /// </summary>
-        [DefaultValue( null )]
-        public string Generator
-        {
-            get
-            {
-                return strGenerator;
-            }
-            set
-            {
-                strGenerator = value;
-            }
-        }
+        [DefaultValue(null)]
+        public string Generator { get; set; }
 
-        private int intPaperWidth = 12240;
         /// <summary>
         /// paper width,unit twips
         /// </summary>
-        [DefaultValue( 12240 )]
-        public int PaperWidth
-        {
-            get
-            {
-                return intPaperWidth; 
-            }
-            set
-            {
-                intPaperWidth = value; 
-            }
-        }
+        [DefaultValue(12240)]
+        public int PaperWidth { get; set; }
 
-        private int intPaperHeight = 15840;
         /// <summary>
         /// paper height,unit twips
         /// </summary>
-        [DefaultValue( 15840 )]
-        public int PaperHeight
-        {
-            get
-            {
-                return intPaperHeight; 
-            }
-            set
-            {
-                intPaperHeight = value; 
-            }
-        }
+        [DefaultValue(15840)]
+        public int PaperHeight { get; set; }
 
-        private int intLeftMargin = 1800;
         /// <summary>
         /// left margin,unit twips
         /// </summary>
-        [DefaultValue( 1800 )]
-        public int LeftMargin
-        {
-            get
-            {
-                return intLeftMargin; 
-            }
-            set
-            {
-                intLeftMargin = value; 
-            }
-        }
+        [DefaultValue(1800)]
+        public int LeftMargin { get; set; }
 
-        private int intTopMargin = 1440;
+        private int _intTopMargin = 1440;
         /// <summary>
         /// top margin,unit twips
         /// </summary>
-        [DefaultValue( 1440 )]
+        [DefaultValue(1440)]
         public int TopMargin
         {
             get
             {
-                return intTopMargin; 
+                return _intTopMargin;
             }
             set
             {
-                intTopMargin = value; 
+                _intTopMargin = value;
             }
         }
 
-        private int intRightMargin = 1800;
+        private int _intRightMargin = 1800;
         /// <summary>
         /// right margin,unit twips
         /// </summary>
-        [System.ComponentModel.DefaultValue(1800)]
+        [DefaultValue(1800)]
         public int RightMargin
         {
             get
             {
-                return intRightMargin;
+                return _intRightMargin;
             }
             set
             {
-                intRightMargin = value;
+                _intRightMargin = value;
             }
         }
 
-        private int intBottomMargin = 1440;
+        private int _intBottomMargin = 1440;
         /// <summary>
         /// bottom margin,unit twips
         /// </summary>
-        [System.ComponentModel.DefaultValue(1440)]
+        [DefaultValue(1440)]
         public int BottomMargin
         {
             get
             {
-                return intBottomMargin;
+                return _intBottomMargin;
             }
             set
             {
-                intBottomMargin = value;
+                _intBottomMargin = value;
             }
         }
 
-        private bool bolLandscape = false;
+        private bool _bolLandscape;
         /// <summary>
         /// landscape
         /// </summary>
-        [System.ComponentModel.DefaultValue(false)]
+        [DefaultValue(false)]
         public bool Landscape
         {
             get
             {
-                return bolLandscape;
+                return _bolLandscape;
             }
             set
             {
-                bolLandscape = value;
+                _bolLandscape = value;
             }
         }
 
-        private int _HeaderDistance = 720;
+        private int _headerDistance = 720;
         /// <summary>
         /// Header's distance from the top of the page( Twips)
         /// </summary>
-        [System.ComponentModel.DefaultValue( 720)]
+        [DefaultValue(720)]
         public int HeaderDistance
         {
             get
             {
-                return _HeaderDistance; 
+                return _headerDistance;
             }
             set
             {
-                _HeaderDistance = value; 
+                _headerDistance = value;
             }
         }
 
-        private int _FooterDistance = 720;
+        private int _footerDistance = 720;
         /// <summary>
         /// Footer's distance from the bottom of the page( twips)
         /// </summary>
-        [System.ComponentModel.DefaultValue( 720 )]
+        [DefaultValue(720)]
         public int FooterDistance
         {
             get
             {
-                return _FooterDistance; 
+                return _footerDistance;
             }
             set
             {
-                _FooterDistance = value; 
+                _footerDistance = value;
             }
         }
         /// <summary>
@@ -347,31 +249,31 @@ namespace RtfDomParser
         {
             get
             {
-                if (bolLandscape)
+                if (_bolLandscape)
                 {
-                    return intPaperHeight - intLeftMargin - intRightMargin;
+                    return PaperHeight - LeftMargin - _intRightMargin;
                 }
                 else
                 {
-                    return intPaperWidth - intLeftMargin - intRightMargin;
+                    return PaperWidth - LeftMargin - _intRightMargin;
                 }
             }
         }
 
-        private bool bolChangeTimesNewRoman = false ;
+        private bool _bolChangeTimesNewRoman;
         /// <summary>
         /// convert "Times new roman" to default font when parse rtf content
         /// </summary>
-        [DefaultValue( true )]
+        [DefaultValue(true)]
         public bool ChangeTimesNewRoman
         {
             get
             {
-                return bolChangeTimesNewRoman;
+                return _bolChangeTimesNewRoman;
             }
             set
             {
-                bolChangeTimesNewRoman = value;
+                _bolChangeTimesNewRoman = value;
             }
         }
         //private Stack myElements = new Stack();
@@ -379,20 +281,20 @@ namespace RtfDomParser
         /// <summary>
         /// progress event
         /// </summary>
-        public event ProgressEventHandler Progress = null;
+        public event ProgressEventHandler Progress;
 
         /// <summary>
         /// raise progress event
         /// </summary>
         /// <param name="max">progress max value</param>
-        /// <param name="Value">progress value</param>
+        /// <param name="value">progress value</param>
         /// <param name="message">progress message</param>
         /// <returns>user cancel</returns>
-        protected bool OnProgress(int max, int Value, string message)
+        protected bool OnProgress(int max, int value, string message)
         {
             if (Progress != null)
             {
-                ProgressEventArgs args = new ProgressEventArgs(max, Value, message);
+                ProgressEventArgs args = new ProgressEventArgs(max, value, message);
                 Progress(this, args);
                 return args.Cancel;
             }
@@ -422,15 +324,15 @@ namespace RtfDomParser
         {
             //_HtmlContentBuilder = new StringBuilder();
             //_RTFHtmlState = true ;
-            _HtmlContent = null;
-            this.Elements.Clear();
-            bolStartContent = false;
+            HtmlContent = null;
+            Elements.Clear();
+            _bolStartContent = false;
             RTFReader reader = new RTFReader(stream);
             DocumentFormatInfo format = new DocumentFormatInfo();
-            _ParagraphFormat = null;
-            Load(reader, format );
+            _paragraphFormat = null;
+            Load(reader, format);
             // combination table rows to table
-            CombinTable(this);
+            CombineTable(this);
             FixElements(this);
             FixRTFHtml();
         }
@@ -440,19 +342,19 @@ namespace RtfDomParser
         /// load a rtf document from a text reader and parse content
         /// </summary>
         /// <param name="reader">text reader</param>
-        public void Load(System.IO.TextReader reader )
+        public void Load(System.IO.TextReader reader)
         {
             //_HtmlContentBuilder = new StringBuilder();
             //_RTFHtmlState = true;
-            _HtmlContent = null;
-            this.Elements.Clear();
-            bolStartContent = false;
+            HtmlContent = null;
+            Elements.Clear();
+            _bolStartContent = false;
             RTFReader r = new RTFReader(reader);
             DocumentFormatInfo format = new DocumentFormatInfo();
-            _ParagraphFormat = null;
-            Load(r, format );
+            _paragraphFormat = null;
+            Load(r, format);
             // combination table rows to table
-            CombinTable(this);
+            CombineTable(this);
             FixElements(this);
             FixRTFHtml();
         }
@@ -466,32 +368,29 @@ namespace RtfDomParser
             System.IO.StringReader reader = new System.IO.StringReader(rtfText);
             //_HtmlContentBuilder = new StringBuilder();
             //_RTFHtmlState = true;
-            _HtmlContent = null;
-            this.Elements.Clear();
-            bolStartContent = false;
+            HtmlContent = null;
+            Elements.Clear();
+            _bolStartContent = false;
             RTFReader rtfReader = new RTFReader(reader);
             DocumentFormatInfo format = new DocumentFormatInfo();
-            _ParagraphFormat = null;
-            Load(rtfReader, format );
-            CombinTable(this);
+            _paragraphFormat = null;
+            Load(rtfReader, format);
+            CombineTable(this);
             FixElements(this);
             FixRTFHtml();
         }
 
         private void FixRTFHtml()
         {
-            //if (this._HtmlContentBuilder != null)
+            //if (_HtmlContentBuilder != null)
             //{
-            //    this._HtmlContent = this._HtmlContentBuilder.ToString();
-            //    this._HtmlContentBuilder = null;
+            //    _HtmlContent = _HtmlContentBuilder.ToString();
+            //    _HtmlContentBuilder = null;
             //}
-            //this._RTFHtmlState = false;
+            //_RTFHtmlState = false;
         }
 
-        /// <summary>
-        /// 将文档中所有的内容都放置在段落中。
-        /// </summary>
-        public void FixForParagraphs( RTFDomElement parentElement )
+        public void FixForParagraphs(RTFDomElement parentElement)
         {
             RTFDomParagraph lastParagraph = null;
             List<RTFDomElement> list = new List<RTFDomElement>();
@@ -505,10 +404,10 @@ namespace RtfDomParser
                     list.Add(element);
                     continue;
                 }
-                if ( element is RTFDomParagraph 
+                if (element is RTFDomParagraph
                     || element is RTFDomTableRow
-                    || element is RTFDomTable 
-                    || element is RTFDomTableCell )
+                    || element is RTFDomTable
+                    || element is RTFDomTableCell)
                 {
                     lastParagraph = null;
                     list.Add(element);
@@ -518,9 +417,9 @@ namespace RtfDomParser
                 {
                     lastParagraph = new RTFDomParagraph();
                     list.Add(lastParagraph);
-                    if( element is RTFDomText )
+                    if (element is RTFDomText)
                     {
-                        lastParagraph.Format = ( ( RTFDomText ) element ).Format.Clone();
+                        lastParagraph.Format = ((RTFDomText)element).Format.Clone();
                     }
                 }
                 lastParagraph.Elements.Add(element);
@@ -605,7 +504,6 @@ namespace RtfDomParser
             }
 
 
-            //// 删除临时生成的锻炼对象，将段落整体往上错动移动一位
             //RTFDomParagraph tempP = null;
             //RTFDomParagraph lastP = null;
             //foreach (RTFDomElement element in parentElement.Elements)
@@ -631,7 +529,6 @@ namespace RtfDomParser
             //}//foreach
             //if (tempP != null && lastP != null)
             //{
-            //    // 若发生锻炼向上错位移动，而且最后一个段落为空，则删除最后一个段落。
             //    if (lastP.Elements.Count == 0)
             //    {
             //        parentElement.Elements.Remove(lastP);
@@ -644,7 +541,7 @@ namespace RtfDomParser
             }
         }
 
-        private RTFDomElement[] GetLastElements( bool checkLockState)
+        private RTFDomElement[] GetLastElements(bool checkLockState)
         {
             List<RTFDomElement> result = new List<RTFDomElement>();
             RTFDomElement element = this;
@@ -685,27 +582,27 @@ namespace RtfDomParser
 
         public RTFDomElement GetLastElement()
         {
-            RTFDomElement[] elements = GetLastElements( true );
+            RTFDomElement[] elements = GetLastElements(true);
             return elements[elements.Length - 1];
         }
 
         private void CompleteParagraph()
         {
             RTFDomElement lastElement = GetLastElement();
-            while ( lastElement != null )
+            while (lastElement != null)
             {
                 if (lastElement is RTFDomParagraph)
                 {
                     RTFDomParagraph p = (RTFDomParagraph)lastElement;
                     p.Locked = true;
-                    if (_ParagraphFormat != null)
+                    if (_paragraphFormat != null)
                     {
-                        p.Format = _ParagraphFormat;
-                        _ParagraphFormat = _ParagraphFormat.Clone();
+                        p.Format = _paragraphFormat;
+                        _paragraphFormat = _paragraphFormat.Clone();
                     }
                     else
                     {
-                        _ParagraphFormat = new DocumentFormatInfo();
+                        _paragraphFormat = new DocumentFormatInfo();
                     }
                     break;
                 }
@@ -715,15 +612,15 @@ namespace RtfDomParser
 
         private void AddContentElement(RTFDomElement newElement)
         {
-            RTFDomElement[] elements = GetLastElements( true );
+            RTFDomElement[] elements = GetLastElements(true);
             RTFDomElement lastElement = null;
             if (elements.Length > 0)
             {
                 lastElement = elements[elements.Length - 1];
             }
-            if ( lastElement is RTFDomDocument 
+            if (lastElement is RTFDomDocument
                 || lastElement is RTFDomHeader
-                || lastElement is RTFDomFooter ) 
+                || lastElement is RTFDomFooter)
             {
                 if (newElement is RTFDomText
                     || newElement is RTFDomImage
@@ -736,9 +633,9 @@ namespace RtfDomParser
                     {
                         p.TemplateGenerated = true;
                     }
-                    if (_ParagraphFormat != null)
+                    if (_paragraphFormat != null)
                     {
-                        p.Format = _ParagraphFormat;
+                        p.Format = _paragraphFormat;
                     }
                     lastElement.AppendChild(p);
                     p.Elements.Add(newElement);
@@ -776,7 +673,7 @@ namespace RtfDomParser
                                     if (e2 is RTFDomTableRow
                                         || e2 is RTFDomTableCell
                                         || e2 is RTFDomField
-                                        || e2 is RTFDomParagraph )
+                                        || e2 is RTFDomParagraph)
                                     {
                                         continue;
                                     }
@@ -789,7 +686,7 @@ namespace RtfDomParser
                     }
                 }
             }
-            
+
             for (int iCount = elements.Length - 1; iCount >= 0; iCount--)
             {
                 if (elements[iCount].Locked == false)
@@ -820,7 +717,7 @@ namespace RtfDomParser
                 else
                 {
                     RTFDomParagraph cellP = new RTFDomParagraph();
-                    cellP.Format = _ParagraphFormat.Clone();
+                    cellP.Format = _paragraphFormat.Clone();
                     cellP.NativeLevel = cell.NativeLevel;
                     cell.AppendChild(cellP);
                     if (newElement != null)
@@ -834,8 +731,8 @@ namespace RtfDomParser
                 if (newElement != null)
                 {
                     if (element is RTFDomParagraph &&
-                        ( newElement is RTFDomParagraph
-                        || newElement is RTFDomTableRow ) )
+                        (newElement is RTFDomParagraph
+                        || newElement is RTFDomTableRow))
                     {
                         // If both is paragraph , append new paragraph to the parent of old paragraph
                         element.Locked = true;
@@ -851,8 +748,8 @@ namespace RtfDomParser
 
 
 
-        private int ListTextFlag = 0;
-        private bool bolStartContent = false;
+        private int _listTextFlag;
+        private bool _bolStartContent;
 
         /// <summary>
         /// convert a hex string to a byte array
@@ -863,9 +760,9 @@ namespace RtfDomParser
         {
             string chars = "0123456789abcdef";
 
-            int index = 0;
-            int Value = 0;
-            int CharCount = 0;
+            int index;
+            int value = 0;
+            int charCount = 0;
             ByteBuffer buffer = new ByteBuffer();
             for (int iCount = 0; iCount < hex.Length; iCount++)
             {
@@ -874,23 +771,19 @@ namespace RtfDomParser
                 index = chars.IndexOf(c);
                 if (index >= 0)
                 {
-                    CharCount++;
-                    Value = Value * 16 + index;
-                    if (CharCount > 0 && (CharCount % 2) == 0)
+                    charCount++;
+                    value = value * 16 + index;
+                    if (charCount > 0 && (charCount % 2) == 0)
                     {
-                        buffer.Add((byte)Value);
-                        Value = 0;
+                        buffer.Add((byte)value);
+                        value = 0;
                     }
                 }
             }
             return buffer.ToArray();
         }
 
-        /// <summary>
-        /// 将表格行元素合并成表格元素
-        /// </summary>
-        /// <param name="parentElement">父元素对象</param>
-        private void CombinTable(RTFDomElement parentElement)
+        private void CombineTable(RTFDomElement parentElement)
         {
             List<RTFDomElement> result = new List<RTFDomElement>();
             List<RTFDomTableRow> rows = new List<RTFDomTableRow>();
@@ -917,7 +810,7 @@ namespace RtfDomParser
                             row.Elements[iCount].Attributes = (RTFAttributeList)cellSettings[iCount];
                         }
                     }
-                    bool isLastRow = row.HasAttribute(RTFConsts._lastrow);
+                    bool isLastRow = row.HasAttribute(RTFConsts.Lastrow);
                     if (isLastRow == false)
                     {
                         int index = parentElement.Elements.IndexOf(element);
@@ -930,7 +823,7 @@ namespace RtfDomParser
                         else
                         {
                             RTFDomElement e2 = parentElement.Elements[index + 1];
-                            if ( !(e2 is RTFDomTableRow))
+                            if (!(e2 is RTFDomTableRow))
                             {
                                 // next element is not row 
                                 isLastRow = true;
@@ -949,21 +842,21 @@ namespace RtfDomParser
                     else
                     {
                         int width = 0;
-                        if (row.HasAttribute(RTFConsts._trwWidth))
+                        if (row.HasAttribute(RTFConsts.TrwWidth))
                         {
-                            width = row.Attributes[RTFConsts._trwWidth];
-                            if (row.HasAttribute(RTFConsts._trwWidthA))
+                            width = row.Attributes[RTFConsts.TrwWidth];
+                            if (row.HasAttribute(RTFConsts.TrwWidthA))
                             {
-                                width = width - row.Attributes[RTFConsts._trwWidthA];
+                                width = width - row.Attributes[RTFConsts.TrwWidthA];
                             }
                         }
                         else
                         {
                             foreach (RTFDomTableCell cell in row.Elements)
                             {
-                                if (cell.HasAttribute(RTFConsts._cellx))
+                                if (cell.HasAttribute(RTFConsts.Cellx))
                                 {
-                                    width = Math.Max(width, cell.Attributes[RTFConsts._cellx]);
+                                    width = Math.Max(width, cell.Attributes[RTFConsts.Cellx]);
                                 }
                             }
                         }
@@ -981,10 +874,10 @@ namespace RtfDomParser
                     }
                     lastRow = row;
                 }
-                else if( element is RTFDomTableCell )
+                else if (element is RTFDomTableCell)
                 {
                     lastRow = null;
-                    CombinTable(element);
+                    CombineTable(element);
                     if (rows.Count > 0)
                     {
                         result.Add(CreateTable(rows));
@@ -995,7 +888,7 @@ namespace RtfDomParser
                 else
                 {
                     lastRow = null;
-                    CombinTable(element);
+                    CombineTable(element);
                     if (rows.Count > 0)
                     {
                         result.Add(CreateTable(rows));
@@ -1038,7 +931,7 @@ namespace RtfDomParser
                 {
                     foreach (RTFDomTableCell cell in row.Elements)
                     {
-                        CombinTable(cell);
+                        CombineTable(cell);
                     }
                 }
                 return table;
@@ -1049,7 +942,7 @@ namespace RtfDomParser
             }
         }
 
-        private int intDefaultRowHeight = 400;
+        private int _intDefaultRowHeight = 400;
         /// <summary>
         /// default row's height, in twips.
         /// </summary>
@@ -1057,14 +950,14 @@ namespace RtfDomParser
         {
             get
             {
-                return intDefaultRowHeight;
+                return _intDefaultRowHeight;
             }
             set
             {
-                intDefaultRowHeight = value;
+                _intDefaultRowHeight = value;
             }
         }
-         
+
         private void UpdateTableCells(RTFDomTable table, bool fixTableCellSize)
         {
             // number of table column
@@ -1081,7 +974,6 @@ namespace RtfDomParser
                 RTFDomTableRow row = (RTFDomTableRow)table.Elements[iCount];
                 if (row.Elements.Count == 0)
                 {
-                    // 删除没有内容的表格行
                     table.Elements.RemoveAt(iCount);
                 }
             }
@@ -1094,19 +986,19 @@ namespace RtfDomParser
                 int lastCellX = 0;
 
                 columns = Math.Max(columns, row.Elements.Count);
-                if (row.HasAttribute(RTFConsts._irow))
+                if (row.HasAttribute(RTFConsts.Irow))
                 {
-                    row.RowIndex = row.Attributes[RTFConsts._irow];
+                    row.RowIndex = row.Attributes[RTFConsts.Irow];
                 }
-                row.IsLastRow = row.HasAttribute(RTFConsts._lastrow);
-                row.Header = row.HasAttribute(RTFConsts._trhdr);
+                row.IsLastRow = row.HasAttribute(RTFConsts.Lastrow);
+                row.Header = row.HasAttribute(RTFConsts.Trhdr);
                 // read row height
-                if (row.HasAttribute(RTFConsts._trrh))
+                if (row.HasAttribute(RTFConsts.Trrh))
                 {
-                    row.Height = row.Attributes[RTFConsts._trrh];
+                    row.Height = row.Attributes[RTFConsts.Trrh];
                     if (row.Height == 0)
                     {
-                        row.Height = this.DefaultRowHeight;
+                        row.Height = DefaultRowHeight;
                     }
                     else if (row.Height < 0)
                     {
@@ -1115,96 +1007,96 @@ namespace RtfDomParser
                 }
                 else
                 {
-                    row.Height = this.DefaultRowHeight;
+                    row.Height = DefaultRowHeight;
                 }
                 // read default padding of cell
-                if (row.HasAttribute(RTFConsts._trpaddl))
+                if (row.HasAttribute(RTFConsts.Trpaddl))
                 {
-                    row.PaddingLeft = row.Attributes[RTFConsts._trpaddl];
+                    row.PaddingLeft = row.Attributes[RTFConsts.Trpaddl];
                 }
                 else
                 {
                     row.PaddingLeft = int.MinValue;
                 }
-                if (row.HasAttribute(RTFConsts._trpaddt))
+                if (row.HasAttribute(RTFConsts.Trpaddt))
                 {
-                    row.PaddingTop = row.Attributes[RTFConsts._trpaddt];
+                    row.PaddingTop = row.Attributes[RTFConsts.Trpaddt];
                 }
                 else
                 {
                     row.PaddingTop = int.MinValue;
                 }
 
-                if (row.HasAttribute(RTFConsts._trpaddr))
+                if (row.HasAttribute(RTFConsts.Trpaddr))
                 {
-                    row.PaddingRight = row.Attributes[RTFConsts._trpaddr];
+                    row.PaddingRight = row.Attributes[RTFConsts.Trpaddr];
                 }
                 else
                 {
                     row.PaddingRight = int.MinValue;
                 }
 
-                if (row.HasAttribute(RTFConsts._trpaddb))
+                if (row.HasAttribute(RTFConsts.Trpaddb))
                 {
-                    row.PaddingBottom = row.Attributes[RTFConsts._trpaddb];
+                    row.PaddingBottom = row.Attributes[RTFConsts.Trpaddb];
                 }
                 else
                 {
                     row.PaddingBottom = int.MinValue;
                 }
 
-                if (row.HasAttribute(RTFConsts._trleft))
+                if (row.HasAttribute(RTFConsts.Trleft))
                 {
-                    tableLeft = row.Attributes[RTFConsts._trleft];
+                    tableLeft = row.Attributes[RTFConsts.Trleft];
                 }
-                if (row.HasAttribute(RTFConsts._trcbpat))
+                if (row.HasAttribute(RTFConsts.Trcbpat))
                 {
-                    row.Format.BackColor = this.ColorTable.GetColor(
-                        row.Attributes[RTFConsts._trcbpat] ,
-                        Color.Transparent );
+                    row.Format.BackColor = ColorTable.GetColor(
+                        row.Attributes[RTFConsts.Trcbpat],
+                        Color.Transparent);
                 }
                 int widthCount = 0;
                 foreach (RTFDomTableCell cell in row.Elements)
                 {
                     // set cell's dispaly format
 
-                    if (cell.HasAttribute(RTFConsts._clvmgf))
+                    if (cell.HasAttribute(RTFConsts.Clvmgf))
                     {
                         // cell vertically merge
                         merge = true;
                     }
-                    if (cell.HasAttribute(RTFConsts._clvmrg))
+                    if (cell.HasAttribute(RTFConsts.Clvmrg))
                     {
                         // cell vertically merge by another cell
                         merge = true;
                     }
-                    if (cell.HasAttribute(RTFConsts._clpadl))
+                    if (cell.HasAttribute(RTFConsts.Clpadl))
                     {
-                        cell.PaddingLeft = cell.Attributes[RTFConsts._clpadl];
+                        cell.PaddingLeft = cell.Attributes[RTFConsts.Clpadl];
                     }
                     else
                     {
                         cell.PaddingLeft = int.MinValue;
                     }
-                    if (cell.HasAttribute(RTFConsts._clpadr))
+                    if (cell.HasAttribute(RTFConsts.Clpadr))
                     {
-                        cell.PaddingRight = cell.Attributes[RTFConsts._clpadr];
+                        cell.PaddingRight = cell.Attributes[RTFConsts.Clpadr];
                     }
                     else
                     {
                         cell.PaddingRight = int.MinValue;
                     }
-                    if (cell.HasAttribute(RTFConsts._clpadt))
+                    if (cell.HasAttribute(RTFConsts.Clpadt))
                     {
-                        cell.PaddingTop = cell.Attributes[RTFConsts._clpadt];
+                        cell.PaddingTop = cell.Attributes[RTFConsts.Clpadt];
                     }
                     else
                     {
                         cell.PaddingTop = int.MinValue;
                     }
-                    if (cell.HasAttribute(RTFConsts._clpadb))
+                    if (cell.HasAttribute(RTFConsts.Clpadb))
                     {
-                        cell.PaddingBottom = cell.Attributes[RTFConsts._clpadb];
+                        cell.PaddingBottom = cell.Attributes[RTFConsts.Clpadb];
                     }
                     else
                     {
@@ -1212,83 +1104,81 @@ namespace RtfDomParser
                     }
 
                     // whether dispaly border line
-                    cell.Format.LeftBorder = cell.HasAttribute(RTFConsts._clbrdrl);
-                    cell.Format.TopBorder = cell.HasAttribute(RTFConsts._clbrdrt);
-                    cell.Format.RightBorder = cell.HasAttribute(RTFConsts._clbrdrr);
-                    cell.Format.BottomBorder = cell.HasAttribute(RTFConsts._clbrdrb);
-                    if (cell.HasAttribute(RTFConsts._brdrcf))
+                    cell.Format.LeftBorder = cell.HasAttribute(RTFConsts.Clbrdrl);
+                    cell.Format.TopBorder = cell.HasAttribute(RTFConsts.Clbrdrt);
+                    cell.Format.RightBorder = cell.HasAttribute(RTFConsts.Clbrdrr);
+                    cell.Format.BottomBorder = cell.HasAttribute(RTFConsts.Clbrdrb);
+                    if (cell.HasAttribute(RTFConsts.Brdrcf))
                     {
-                        cell.Format.BorderColor = this.ColorTable.GetColor(
-                            cell.GetAttributeValue(RTFConsts._brdrcf, 1) ,
-                            Color.Black );
+                        cell.Format.BorderColor = ColorTable.GetColor(
+                            cell.GetAttributeValue(RTFConsts.Brdrcf, 1),
+                            Color.Black);
                     }
                     for (int iCount = cell.Attributes.Count - 1; iCount >= 0; iCount--)
                     {
-                        // 根据 brdrtbl 指令来隐藏某条单元格边框线
                         string name3 = cell.Attributes[iCount].Name;
-                        if ( name3 == RTFConsts._brdrtbl 
-                            || name3 == RTFConsts._brdrnone 
-                            || name3 == RTFConsts._brdrnil )
+                        if (name3 == RTFConsts.Brdrtbl
+                            || name3 == RTFConsts.Brdrnone
+                            || name3 == RTFConsts.Brdrnil)
                         {
-                            // 某个边框不显示
                             for (int iCount2 = iCount - 1; iCount2 >= 0; iCount2--)
                             {
                                 string name2 = cell.Attributes[iCount2].Name;
-                                if (name2 == RTFConsts._clbrdrl)
+                                if (name2 == RTFConsts.Clbrdrl)
                                 {
                                     cell.Format.LeftBorder = false;
                                     break;
                                 }
-                                else if (name2 == RTFConsts._clbrdrt)
+                                else if (name2 == RTFConsts.Clbrdrt)
                                 {
                                     cell.Format.TopBorder = false;
                                     break;
                                 }
-                                else if (name2 == RTFConsts._clbrdrr)
+                                else if (name2 == RTFConsts.Clbrdrr)
                                 {
                                     cell.Format.RightBorder = false;
                                     break;
                                 }
-                                else if (name2 == RTFConsts._clbrdrb)
+                                else if (name2 == RTFConsts.Clbrdrb)
                                 {
                                     cell.Format.BottomBorder = false;
                                     break;
                                 }
-                            }//for
+                            }
                         }
                     }
-                    // vertial alignment
-                    if (cell.HasAttribute(RTFConsts._clvertalt))
+
+                    if (cell.HasAttribute(RTFConsts.Clvertalt))
                     {
                         cell.VerticalAlignment = RTFVerticalAlignment.Top;
                     }
-                    else if (cell.HasAttribute(RTFConsts._clvertalc))
+                    else if (cell.HasAttribute(RTFConsts.Clvertalc))
                     {
                         cell.VerticalAlignment = RTFVerticalAlignment.Middle;
                     }
-                    else if (cell.HasAttribute(RTFConsts._clvertalb))
+                    else if (cell.HasAttribute(RTFConsts.Clvertalb))
                     {
                         cell.VerticalAlignment = RTFVerticalAlignment.Bottom;
                     }
                     // background color
-                    if (cell.HasAttribute(RTFConsts._clcbpat))
+                    if (cell.HasAttribute(RTFConsts.Clcbpat))
                     {
-                        cell.Format.BackColor = this.ColorTable.GetColor(cell.Attributes[RTFConsts._clcbpat] , Color.Transparent );
+                        cell.Format.BackColor = ColorTable.GetColor(cell.Attributes[RTFConsts.Clcbpat], Color.Transparent);
                     }
                     else
                     {
                         cell.Format.BackColor = Color.Transparent;
                     }
-                    if (cell.HasAttribute(RTFConsts._clcfpat))
+                    if (cell.HasAttribute(RTFConsts.Clcfpat))
                     {
-                        cell.Format.BorderColor = this.ColorTable.GetColor(cell.Attributes[RTFConsts._clcfpat]  , Color.Black );
+                        cell.Format.BorderColor = ColorTable.GetColor(cell.Attributes[RTFConsts.Clcfpat], Color.Black);
                     }
 
                     // cell's width
                     int cellWidth = 2763;// cell's default with is 2763 Twips(570 Document)
-                    if (cell.HasAttribute(RTFConsts._cellx))
+                    if (cell.HasAttribute(RTFConsts.Cellx))
                     {
-                        cellWidth = cell.Attributes[RTFConsts._cellx] - lastCellX;
+                        cellWidth = cell.Attributes[RTFConsts.Cellx] - lastCellX;
                         if (cellWidth < 100)
                         {
                             cellWidth = 100;
@@ -1300,9 +1190,9 @@ namespace RtfDomParser
                     // is the same , this can decrease number of table columns
                     for (int iCount = 0; iCount < rights.Count; iCount++)
                     {
-                        if (Math.Abs(right - (int)rights[iCount]) < 45)
+                        if (Math.Abs(right - rights[iCount]) < 45)
                         {
-                            right = (int)rights[iCount];
+                            right = rights[iCount];
                             cellWidth = right - lastCellX;
                             break;
                         }
@@ -1310,7 +1200,7 @@ namespace RtfDomParser
 
                     cell.Left = lastCellX;
                     cell.Width = cellWidth;
-                    if (cell.HasAttribute(RTFConsts._cellx) == false)
+                    if (cell.HasAttribute(RTFConsts.Cellx) == false)
                     {
 
                     }
@@ -1324,9 +1214,9 @@ namespace RtfDomParser
                         rights.Add(right);
                     }
                     lastCellX = lastCellX + cellWidth;
-                }//foreach
+                }
                 row.Width = widthCount;
-            }//foreach
+            }
             if (rights.Count == 0)
             {
                 // can not detect cell's width , so consider set cell's width
@@ -1336,7 +1226,7 @@ namespace RtfDomParser
                 {
                     cols = Math.Max(cols, row.Elements.Count);
                 }
-                int w = (int)(this.ClientWidth / cols);
+                int w = (ClientWidth / cols);
                 for (int iCount = 0; iCount < cols; iCount++)
                 {
                     rights.Add(iCount * w + w);
@@ -1350,7 +1240,7 @@ namespace RtfDomParser
             for (int iCount = 1; iCount < rights.Count; iCount++)
             {
                 RTFDomTableColumn col = new RTFDomTableColumn();
-                col.Width = (int)rights[iCount] - (int)rights[iCount - 1];
+                col.Width = rights[iCount] - rights[iCount - 1];
                 table.Columns.Add(col);
             }
 
@@ -1408,7 +1298,7 @@ namespace RtfDomParser
                             int index2 = rights.IndexOf(cell.Left + cell.Width);
                             int intColSpan = index2 - index;
                             // detect vertical merge
-                            bool verticalMerge = cell.HasAttribute(RTFConsts._clvmrg);
+                            bool verticalMerge = cell.HasAttribute(RTFConsts.Clvmrg);
                             if (verticalMerge == false)
                             {
                                 // If this cell does not merged by another cell abover , 
@@ -1428,7 +1318,7 @@ namespace RtfDomParser
                                 if (verticalMerge)
                                 {
                                     // This cell has been merged.
-                                    newCell.Attributes[RTFConsts._clvmrg] = 1;
+                                    newCell.Attributes[RTFConsts.Clvmrg] = 1;
                                     newCell.OverrideCell = cell;
                                 }
                             }//for
@@ -1456,7 +1346,7 @@ namespace RtfDomParser
                 {
                     foreach (RTFDomTableCell cell in row.Elements)
                     {
-                        if (cell.HasAttribute(RTFConsts._clvmgf) == false)
+                        if (cell.HasAttribute(RTFConsts.Clvmgf) == false)
                         {
                             //if this cell does not mark vertial merge , then next cell
                             continue;
@@ -1469,7 +1359,7 @@ namespace RtfDomParser
                         {
                             RTFDomTableRow row2 = (RTFDomTableRow)table.Elements[rowIndex];
                             RTFDomTableCell cell2 = (RTFDomTableCell)row2.Elements[colIndex];
-                            if (cell2.HasAttribute(RTFConsts._clvmrg))
+                            if (cell2.HasAttribute(RTFConsts.Clvmrg))
                             {
                                 if (cell2.OverrideCell != null)
                                 {
@@ -1531,38 +1421,38 @@ namespace RtfDomParser
         private void CopyStyleAttribute(RTFDomTableCell cell, RTFAttributeList table)
         {
             RTFAttributeList attrs = table.Clone();
-            attrs.Remove(RTFConsts._clvmgf);
-            attrs.Remove(RTFConsts._clvmrg);
+            attrs.Remove(RTFConsts.Clvmgf);
+            attrs.Remove(RTFConsts.Clvmrg);
             cell.Attributes = attrs;
         }
 
         public override string ToString()
         {
-            return "RTFDocument:" + this.myInfo.Title;
+            return "RTFDocument:" + _myInfo.Title;
         }
 
         private bool ApplyText(
-            RTFTextContainer myText, 
+            RTFTextContainer myText,
             RTFReader reader,
-            DocumentFormatInfo format )
+            DocumentFormatInfo format)
         {
             if (myText.HasContent)
             {
                 string strText = myText.Text;
                 myText.Clear();
-                //if (this._RTFHtmlState == false)
+                //if (_RTFHtmlState == false)
                 //{
                 //    _HtmlContentBuilder.Append(strText);
                 //    return false ;
                 //}
                 // if current element is image element , then finish handle image element
-                RTFDomImage img = GetLastElement<RTFDomImage>() ;
-                if( img != null && img.Locked == false )
+                RTFDomImage img = GetLastElement<RTFDomImage>();
+                if (img != null && img.Locked == false)
                 {
                     img.Data = HexToBytes(strText);
                     img.Format = format.Clone();
-                    img.Width = (int)(img.DesiredWidth * img.ScaleX / 100);
-                    img.Height = (int)(img.DesiredHeight * img.ScaleY / 100);
+                    img.Width = (img.DesiredWidth * img.ScaleX / 100);
+                    img.Height = (img.DesiredHeight * img.ScaleY / 100);
                     img.Locked = true;
                     if (reader.TokenType != RTFTokenType.GroupEnd)
                     {
@@ -1570,7 +1460,7 @@ namespace RtfDomParser
                     }
                     return true;
                 }
-                else if (format.ReadText && bolStartContent)
+                else if (format.ReadText && _bolStartContent)
                 {
                     RTFDomText txt = new RTFDomText();
                     txt.NativeLevel = myText.Level;
@@ -1585,15 +1475,15 @@ namespace RtfDomParser
         }
 
 
-        private int intTokenCount = 0;
-        private DocumentFormatInfo _ParagraphFormat = null;
-        private void Load(RTFReader reader , DocumentFormatInfo parentFormat)
+        private int _intTokenCount;
+        private DocumentFormatInfo _paragraphFormat;
+        private void Load(RTFReader reader, DocumentFormatInfo parentFormat)
         {
-            bool ForbitPard = false;
-            DocumentFormatInfo format = null;
-            if (_ParagraphFormat == null)
+            bool forbitPard = false;
+            DocumentFormatInfo format;
+            if (_paragraphFormat == null)
             {
-                _ParagraphFormat = new DocumentFormatInfo();
+                _paragraphFormat = new DocumentFormatInfo();
             }
             if (parentFormat == null)
             {
@@ -1604,18 +1494,18 @@ namespace RtfDomParser
                 format = parentFormat.Clone();
                 format.NativeLevel = parentFormat.NativeLevel + 1;
             }
-            RTFTextContainer myText = new RTFTextContainer( this );
+            RTFTextContainer myText = new RTFTextContainer(this);
             int levelBack = reader.Level;
             while (reader.ReadToken() != null)
             {
-                if (reader.TokenCount - intTokenCount > 100)
+                if (reader.TokenCount - _intTokenCount > 100)
                 {
-                    intTokenCount = reader.TokenCount;
+                    _intTokenCount = reader.TokenCount;
                     OnProgress(reader.ContentLength, reader.ContentPosition, null);
                 }
-                if (bolStartContent)
+                if (_bolStartContent)
                 {
-                    if (myText.Accept(reader.CurrentToken , reader ))
+                    if (myText.Accept(reader.CurrentToken, reader))
                     {
                         myText.Level = reader.Level;
                         continue;
@@ -1631,13 +1521,13 @@ namespace RtfDomParser
 
                 if (reader.TokenType == RTFTokenType.GroupEnd)
                 {
-                    RTFDomElement[] elements = GetLastElements( true );
-                    for (int iCount = 0 ; iCount < elements.Length ; iCount ++ )
+                    RTFDomElement[] elements = GetLastElements(true);
+                    for (int iCount = 0; iCount < elements.Length; iCount++)
                     {
                         RTFDomElement element = elements[iCount];
                         if (element.NativeLevel >= 0 && element.NativeLevel > reader.Level)
                         {
-                            for (int iCount2 = iCount ; iCount2 < elements.Length; iCount2++)
+                            for (int iCount2 = iCount; iCount2 < elements.Length; iCount2++)
                             {
                                 elements[iCount2].Locked = true;
                             }
@@ -1656,7 +1546,7 @@ namespace RtfDomParser
                 if (reader.TokenType == RTFTokenType.GroupStart)
                 {
                     //level++;
-                    Load(reader, format );
+                    Load(reader, format);
                     if (reader.Level < levelBack)
                     {
                         break;
@@ -1664,33 +1554,32 @@ namespace RtfDomParser
                     //continue;
                 }
 
-                if (reader.TokenType == RTFTokenType.Control 
-                    || reader.TokenType == RTFTokenType.Keyword 
+                if (reader.TokenType == RTFTokenType.Control
+                    || reader.TokenType == RTFTokenType.Keyword
                     || reader.TokenType == RTFTokenType.ExtKeyword)
                 {
-                     
+
 
                     switch (reader.Keyword)
                     {
                         case "fromhtml":
-                            // 以HTML方式读取文档内容
                             ReadHtmlContent(reader);
                             return;
-                        case RTFConsts._listtable:
+                        case RTFConsts.Listtable:
                             ReadListTable(reader);
                             return;
-                        case RTFConsts._listoverride:
+                        case RTFConsts.Listoverride:
                             // unknow keyword
                             ReadToEndGround(reader);
                             break;
-                        case RTFConsts._ansi :
+                        case RTFConsts.Ansi:
                             break;
-                        case RTFConsts._ansicpg :
+                        case RTFConsts.Ansicpg:
                             // read default encoding
                             //todo: look up in encoding dictionary
                             //myDefaultEncoding = Encoding.GetEncoding(reader.Parameter);
                             break;
-                        case RTFConsts._fonttbl :
+                        case RTFConsts.Fonttbl:
                             // read font table
                             ReadFontTable(reader);
                             break;
@@ -1699,207 +1588,207 @@ namespace RtfDomParser
                             break;
                         case "filetbl":
                             // unsupport file list
-                            ReadToEndGround( reader );
-                            break ;// finish current level
-                            //break;
-                        case RTFConsts._colortbl :
+                            ReadToEndGround(reader);
+                            break;// finish current level
+                        //break;
+                        case RTFConsts.Colortbl:
                             // read color table
                             ReadColorTable(reader);
                             return;// finish current level
-                            //break;
+                        //break;
                         case "stylesheet":
                             // unsupport style sheet list
                             ReadToEndGround(reader);
                             break;
-                        case RTFConsts._generator :
+                        case RTFConsts.Generator:
                             // read document generator
-                            this.Generator = ReadInnerText(reader, true );
+                            Generator = ReadInnerText(reader, true);
                             break;
-                        case RTFConsts._info :
+                        case RTFConsts.Info:
                             // read document information
                             ReadDocumentInfo(reader);
-                            return ;
-                        case RTFConsts._headery:
+                            return;
+                        case RTFConsts.Headery:
                             {
                                 if (reader.HasParam)
                                 {
-                                    this.HeaderDistance = reader.Parameter;
+                                    HeaderDistance = reader.Parameter;
                                 }
                             }
                             break;
-                        case RTFConsts._footery :
+                        case RTFConsts.Footery:
                             {
                                 if (reader.HasParam)
                                 {
-                                    this.FooterDistance = reader.Parameter;
+                                    FooterDistance = reader.Parameter;
                                 }
                             }
                             break;
-                        case RTFConsts._header:
+                        case RTFConsts.Header:
                             {
                                 // analyse header
                                 RTFDomHeader header = new RTFDomHeader();
-                                header.Style = HeaderFooterStyle.AllPages ;
-                                this.AppendChild(header);
+                                header.Style = HeaderFooterStyle.AllPages;
+                                AppendChild(header);
                                 Load(reader, parentFormat);
                                 header.Locked = true;
-                                _ParagraphFormat = new DocumentFormatInfo();
+                                _paragraphFormat = new DocumentFormatInfo();
                                 break;
                             }
-                        case RTFConsts._headerl:
+                        case RTFConsts.Headerl:
                             {
                                 // analyse header
                                 RTFDomHeader header = new RTFDomHeader();
-                                header.Style = HeaderFooterStyle.LeftPages ;
-                                this.AppendChild(header);
+                                header.Style = HeaderFooterStyle.LeftPages;
+                                AppendChild(header);
                                 Load(reader, parentFormat);
                                 header.Locked = true;
-                                _ParagraphFormat = new DocumentFormatInfo();
+                                _paragraphFormat = new DocumentFormatInfo();
                                 break;
                             }
-                        case RTFConsts._headerr:
+                        case RTFConsts.Headerr:
                             {
                                 // analyse header
                                 RTFDomHeader header = new RTFDomHeader();
                                 header.Style = HeaderFooterStyle.RightPages;
-                                this.AppendChild(header);
+                                AppendChild(header);
                                 Load(reader, parentFormat);
                                 header.Locked = true;
-                                _ParagraphFormat = new DocumentFormatInfo();
+                                _paragraphFormat = new DocumentFormatInfo();
                                 break;
                             }
-                        case RTFConsts._headerf:
+                        case RTFConsts.Headerf:
                             {
                                 // analyse header
                                 RTFDomHeader header = new RTFDomHeader();
                                 header.Style = HeaderFooterStyle.FirstPage;
-                                this.AppendChild(header);
+                                AppendChild(header);
                                 Load(reader, parentFormat);
                                 header.Locked = true;
-                                _ParagraphFormat = new DocumentFormatInfo();
+                                _paragraphFormat = new DocumentFormatInfo();
                                 break;
                             }
-                        case RTFConsts._footer:
+                        case RTFConsts.Footer:
                             {
                                 // analyse footer
                                 RTFDomFooter footer = new RTFDomFooter();
                                 footer.Style = HeaderFooterStyle.FirstPage;
-                                this.AppendChild(footer);
+                                AppendChild(footer);
                                 Load(reader, parentFormat);
                                 footer.Locked = true;
-                                _ParagraphFormat = new DocumentFormatInfo();
+                                _paragraphFormat = new DocumentFormatInfo();
                                 break;
                             }
-                        case RTFConsts._footerl:
+                        case RTFConsts.Footerl:
                             {
                                 // analyse footer
                                 RTFDomFooter footer = new RTFDomFooter();
-                                footer.Style = HeaderFooterStyle.LeftPages ;
-                                this.AppendChild(footer);
+                                footer.Style = HeaderFooterStyle.LeftPages;
+                                AppendChild(footer);
                                 Load(reader, parentFormat);
                                 footer.Locked = true;
-                                _ParagraphFormat = new DocumentFormatInfo();
+                                _paragraphFormat = new DocumentFormatInfo();
                                 break;
                             }
-                        case RTFConsts._footerr:
+                        case RTFConsts.Footerr:
                             {
                                 // analyse footer
                                 RTFDomFooter footer = new RTFDomFooter();
-                                footer.Style = HeaderFooterStyle.RightPages ;
-                                this.AppendChild(footer);
+                                footer.Style = HeaderFooterStyle.RightPages;
+                                AppendChild(footer);
                                 Load(reader, parentFormat);
                                 footer.Locked = true;
-                                _ParagraphFormat = new DocumentFormatInfo();
+                                _paragraphFormat = new DocumentFormatInfo();
                                 break;
                             }
-                        case RTFConsts._footerf:
+                        case RTFConsts.Footerf:
                             {
                                 // analyse footer
                                 RTFDomFooter footer = new RTFDomFooter();
-                                footer.Style = HeaderFooterStyle.FirstPage ;
-                                this.AppendChild(footer);
+                                footer.Style = HeaderFooterStyle.FirstPage;
+                                AppendChild(footer);
                                 Load(reader, parentFormat);
                                 footer.Locked = true;
-                                _ParagraphFormat = new DocumentFormatInfo();
+                                _paragraphFormat = new DocumentFormatInfo();
                                 break;
                             }
-                        case RTFConsts._xmlns:
+                        case RTFConsts.Xmlns:
                             {
                                 // unsupport xml namespace
                                 ReadToEndGround(reader);
                                 break;
                             }
-                        case  RTFConsts._nonesttables:
+                        case RTFConsts.Nonesttables:
                             {
                                 // I support nest table , then ignore this keyword
                                 ReadToEndGround(reader);
                                 break;
                             }
-                        case  RTFConsts._xmlopen:
+                        case RTFConsts.Xmlopen:
                             {
                                 // unsupport xmlopen keyword
                                 break;
                             }
-                        case RTFConsts._revtbl:
+                        case RTFConsts.Revtbl:
                             {
                                 //ReadToEndGround(reader);
                                 break;
                             }
-                        
-                       
+
+
                         //**************** read document information ***********************
-                        case RTFConsts._paperw:
+                        case RTFConsts.Paperw:
                             {
                                 // read paper width
-                                intPaperWidth = reader.Parameter;
+                                PaperWidth = reader.Parameter;
                                 break;
                             }
-                        case RTFConsts._paperh:
+                        case RTFConsts.Paperh:
                             {
                                 // read paper height
-                                intPaperHeight = reader.Parameter;
+                                PaperHeight = reader.Parameter;
                                 break;
                             }
-                        case RTFConsts._margl:
+                        case RTFConsts.Margl:
                             {
                                 // read left margin
-                                intLeftMargin = reader.Parameter;
+                                LeftMargin = reader.Parameter;
                                 break;
                             }
-                        case RTFConsts._margr:
+                        case RTFConsts.Margr:
                             {
                                 // read right margin
-                                intRightMargin = reader.Parameter;
+                                _intRightMargin = reader.Parameter;
                                 break;
                             }
-                        case RTFConsts._margb:
+                        case RTFConsts.Margb:
                             {
                                 // read bottom margin
-                                intBottomMargin = reader.Parameter;
+                                _intBottomMargin = reader.Parameter;
                                 break;
                             }
-                        case RTFConsts._margt:
+                        case RTFConsts.Margt:
                             {
                                 // read top margin 
-                                intTopMargin = reader.Parameter;
+                                _intTopMargin = reader.Parameter;
                                 break;
                             }
-                        case RTFConsts._landscape:
+                        case RTFConsts.Landscape:
                             {
                                 // set landscape
-                                bolLandscape = true;
+                                _bolLandscape = true;
                                 break;
                             }
-                        case RTFConsts._fchars :
-                            this.FollowingChars = ReadInnerText(reader, true);
+                        case RTFConsts.Fchars:
+                            FollowingChars = ReadInnerText(reader, true);
                             break;
-                        case RTFConsts._lchars :
-                            this.LeadingChars = ReadInnerText(reader, true);
+                        case RTFConsts.Lchars:
+                            LeadingChars = ReadInnerText(reader, true);
                             break;
                         case "pnseclvl":
                             // ignore this keyword
                             ReadToEndGround(reader);
-                            break; ;
+                            break;
                         ////**************** read html content ***************************
                         //case "htmlrtf":
                         //    {
@@ -1946,118 +1835,114 @@ namespace RtfDomParser
                         //    }
                         //    break;
                         //**************** read paragraph format ***********************
-                        case RTFConsts._pard:
+                        case RTFConsts.Pard:
                             {
-                                bolStartContent = true;
-                                if (ForbitPard)
+                                _bolStartContent = true;
+                                if (forbitPard)
                                     continue;
                                 // clear paragraph format
-                                _ParagraphFormat.ResetParagraph();
+                                _paragraphFormat.ResetParagraph();
                                 //format.ResetParagraph();
                                 break;
                             }
-                        case RTFConsts._par:
+                        case RTFConsts.Par:
                             {
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 // new paragraph
                                 if (GetLastElement<RTFDomParagraph>() == null)
                                 {
                                     RTFDomParagraph p = new RTFDomParagraph();
-                                    p.Format = _ParagraphFormat ;
-                                    _ParagraphFormat = _ParagraphFormat.Clone();
+                                    p.Format = _paragraphFormat;
+                                    _paragraphFormat = _paragraphFormat.Clone();
                                     AddContentElement(p);
                                     p.Locked = true;
                                 }
                                 else
                                 {
-                                    // 结束当前段落
-                                    this.CompleteParagraph();
-                                    // 创建新的段落
+                                    CompleteParagraph();
                                     RTFDomParagraph p = new RTFDomParagraph();
-                                    p.Format = _ParagraphFormat;
+                                    p.Format = _paragraphFormat;
                                     AddContentElement(p);
                                 }
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 break;
                             }
-                        case RTFConsts._page:
+                        case RTFConsts.Page:
                             {
-                                // 强制分页
-                                bolStartContent = true;
-                                this.CompleteParagraph();
-                                this.AddContentElement(new RTFDomPageBreak());
+                                _bolStartContent = true;
+                                CompleteParagraph();
+                                AddContentElement(new RTFDomPageBreak());
                                 break;
                             }
-                        case RTFConsts._pagebb:
+                        case RTFConsts.Pagebb:
                             {
-                                // 在段落前强制分页
-                                bolStartContent = true;
-                                _ParagraphFormat.PageBreak = true;
+                                _bolStartContent = true;
+                                _paragraphFormat.PageBreak = true;
                                 break;
                             }
-                        case RTFConsts._ql:
+                        case RTFConsts.Ql:
                             {
                                 // left alignment
-                                bolStartContent = true;
-                                _ParagraphFormat.Align = RTFAlignment.Left;
+                                _bolStartContent = true;
+                                _paragraphFormat.Align = RTFAlignment.Left;
                                 break;
                             }
-                        case RTFConsts._qc:
+                        case RTFConsts.Qc:
                             {
                                 // center alignment
-                                bolStartContent = true;
-                                _ParagraphFormat.Align = RTFAlignment.Center;
+                                _bolStartContent = true;
+                                _paragraphFormat.Align = RTFAlignment.Center;
                                 break;
                             }
-                        case RTFConsts._qr:
+                        case RTFConsts.Qr:
                             {
                                 // right alignment
-                                bolStartContent = true;
-                                _ParagraphFormat.Align = RTFAlignment.Right;
+                                _bolStartContent = true;
+                                _paragraphFormat.Align = RTFAlignment.Right;
                                 break;
                             }
-                        case RTFConsts._qj:
+                        case RTFConsts.Qj:
                             {
                                 // jusitify alignment
-                                bolStartContent = true;
-                                _ParagraphFormat.Align = RTFAlignment.Justify;
+                                _bolStartContent = true;
+                                _paragraphFormat.Align = RTFAlignment.Justify;
                                 break;
                             }
-                        case RTFConsts._sl:
+                        case RTFConsts.Sl:
                             {
                                 // line spacing
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (reader.Parameter >= 0)
                                 {
-                                    _ParagraphFormat.LineSpacing = reader.Parameter;
+                                    _paragraphFormat.LineSpacing = reader.Parameter;
                                 }
                             }
                             break;
-                        case RTFConsts._slmult:
+                        case RTFConsts.Slmult:
                             {
-                                bolStartContent = true;
-                                _ParagraphFormat.MultipleLineSpacing = (reader.Parameter == 1);
+                                _bolStartContent = true;
+                                _paragraphFormat.MultipleLineSpacing = (reader.Parameter == 1);
                             }
                             break;
-                        case RTFConsts._sb:
+                        case RTFConsts.Sb:
                             {
                                 // spacing before paragraph
-                                bolStartContent = true;
-                                _ParagraphFormat.SpacingBefore = reader.Parameter;
+                                _bolStartContent = true;
+                                _paragraphFormat.SpacingBefore = reader.Parameter;
                             }
                             break;
-                        case RTFConsts._sa:
+                        case RTFConsts.Sa:
                             {
                                 // spacing after paragraph
-                                bolStartContent = true;
-                                _ParagraphFormat.SpacingAfter = reader.Parameter;
+                                _bolStartContent = true;
+                                _paragraphFormat.SpacingAfter = reader.Parameter;
                             }
                             break;
-                        case RTFConsts._fi:
+                        case RTFConsts.Fi:
                             {
                                 // indent first line
-                                bolStartContent = true;
-                                _ParagraphFormat.ParagraphFirstLineIndent = reader.Parameter;
+                                _bolStartContent = true;
+                                _paragraphFormat.ParagraphFirstLineIndent = reader.Parameter;
                                 //if (reader.Parameter >= 400)
                                 //{
                                 //    _ParagraphFormat.ParagraphFirstLineIndent = reader.Parameter; //doc.StandTabWidth;
@@ -2069,33 +1954,33 @@ namespace RtfDomParser
                                 ////UpdateParagraph( CurrentParagraphEOF , format );
                                 break;
                             }
-                        case RTFConsts._brdrw:
+                        case RTFConsts.Brdrw:
                             {
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (reader.HasParam)
                                 {
-                                    _ParagraphFormat.BorderWidth = reader.Parameter;
+                                    _paragraphFormat.BorderWidth = reader.Parameter;
                                 }
                                 break;
                             }
-                        case RTFConsts._pn :
+                        case RTFConsts.Pn:
                             {
-                                bolStartContent = true;
-                                _ParagraphFormat.ListID = -1;
+                                _bolStartContent = true;
+                                _paragraphFormat.ListId = -1;
                                 break;
                             }
 
-                        case RTFConsts._pntext:
+                        case RTFConsts.Pntext:
                             break;
-                        case RTFConsts._pntxtb:
+                        case RTFConsts.Pntxtb:
                             break;
-                        case RTFConsts._pntxta:
+                        case RTFConsts.Pntxta:
                             break;
 
-                        case RTFConsts._pnlvlbody:
+                        case RTFConsts.Pnlvlbody:
                             {
                                 // numbered list style
-                                bolStartContent = true; 
+                                _bolStartContent = true;
                                 //_ParagraphFormat.NumberedList = true;
                                 //_ParagraphFormat.BulletedList = false;
                                 //if (_ParagraphFormat.Parent != null)
@@ -2105,10 +1990,10 @@ namespace RtfDomParser
                                 //}
                                 break;
                             }
-                        case RTFConsts._pnlvlblt:
+                        case RTFConsts.Pnlvlblt:
                             {
                                 // bulleted list style
-                                bolStartContent = true; 
+                                _bolStartContent = true;
                                 //_ParagraphFormat.NumberedList = false;
                                 //_ParagraphFormat.BulletedList = true;
                                 //if (_ParagraphFormat.Parent != null)
@@ -2118,28 +2003,28 @@ namespace RtfDomParser
                                 //}
                                 break;
                             }
-                        case RTFConsts._listtext:
+                        case RTFConsts.Listtext:
                             {
-                                bolStartContent = true; 
+                                _bolStartContent = true;
                                 string txt = ReadInnerText(reader, true);
                                 if (txt != null)
                                 {
                                     txt = txt.Trim();
                                     if (txt.StartsWith("l"))
                                     {
-                                        ListTextFlag = 1;
+                                        _listTextFlag = 1;
                                     }
                                     else
                                     {
-                                        ListTextFlag = 2;
+                                        _listTextFlag = 2;
                                     }
                                 }
                                 break;
                             }
-                        case RTFConsts._ls:
+                        case RTFConsts.Ls:
                             {
-                                bolStartContent = true;
-                                _ParagraphFormat.ListID = reader.Parameter;
+                                _bolStartContent = true;
+                                _paragraphFormat.ListId = reader.Parameter;
 
                                 //if (ListTextFlag == 1)
                                 //{
@@ -2151,25 +2036,25 @@ namespace RtfDomParser
                                 //    _ParagraphFormat.NumberedList = true;
                                 //    _ParagraphFormat.BulletedList = false;
                                 //}
-                                ListTextFlag = 0;
+                                _listTextFlag = 0;
                                 break;
                             }
-                        case RTFConsts._li:
+                        case RTFConsts.Li:
                             {
-                                bolStartContent = true; 
+                                _bolStartContent = true;
                                 if (reader.HasParam)
                                 {
-                                    _ParagraphFormat.LeftIndent = reader.Parameter;
+                                    _paragraphFormat.LeftIndent = reader.Parameter;
                                 }
                                 break;
                             }
-                        case RTFConsts._line:
+                        case RTFConsts.Line:
                             {
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 // break line
-                                //if (this._RTFHtmlState == false)
+                                //if (_RTFHtmlState == false)
                                 //{
-                                //    this._HtmlContentBuilder.Append(Environment.NewLine);
+                                //    _HtmlContentBuilder.Append(Environment.NewLine);
                                 //}
                                 //else
                                 {
@@ -2183,99 +2068,99 @@ namespace RtfDomParser
                                 break;
                             }
                         // ****************** read text format ******************************
-                        case RTFConsts._insrsid :
+                        case RTFConsts.Insrsid:
                             break;
-                        case RTFConsts._plain:
+                        case RTFConsts.Plain:
                             {
                                 // clear text format
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 format.ResetText();
                                 break;
                             }
-                        case RTFConsts._f:
+                        case RTFConsts.F:
                             {
                                 // font name
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (format.ReadText)
                                 {
-                                    string FontName = this.FontTable.GetFontName(reader.Parameter);
-                                    if (FontName != null)
-                                        FontName = FontName.Trim();
-                                    if (FontName == null || FontName.Length == 0)
-                                        FontName = DefaultFontName;
+                                    string fontName = FontTable.GetFontName(reader.Parameter);
+                                    if (fontName != null)
+                                        fontName = fontName.Trim();
+                                    if (fontName == null || fontName.Length == 0)
+                                        fontName = _defaultFontName;
 
-                                    if (this.ChangeTimesNewRoman)
+                                    if (ChangeTimesNewRoman)
                                     {
-                                        if (FontName == "Times New Roman")
+                                        if (fontName == "Times New Roman")
                                         {
-                                            FontName = DefaultFontName;
+                                            fontName = _defaultFontName;
                                         }
                                     }
-                                    format.FontName = FontName;
+                                    format.FontName = fontName;
                                 }
-                                myFontChartset = this.FontTable[reader.Parameter].Encoding;
+                                _myFontChartset = FontTable[reader.Parameter].Encoding;
                                 break;
                             }
-                        case RTFConsts._af:
+                        case RTFConsts.Af:
                             {
-                                myAssociateFontChartset = this.FontTable[reader.Parameter].Encoding;
+                                _myAssociateFontChartset = FontTable[reader.Parameter].Encoding;
                                 break;
                             }
-                        case RTFConsts._fs:
+                        case RTFConsts.Fs:
                             {
                                 // font size
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (format.ReadText)
                                 {
-                                    if ( reader.HasParam)
+                                    if (reader.HasParam)
                                     {
                                         format.FontSize = reader.Parameter / 2.0f;
                                     }
                                 }
                                 break;
                             }
-                        case RTFConsts._cf:
+                        case RTFConsts.Cf:
                             {
                                 // font color
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (format.ReadText)
                                 {
                                     if (reader.HasParam)
                                     {
-                                        format.TextColor = this.ColorTable.GetColor( reader.Parameter, Color.Black);
+                                        format.TextColor = ColorTable.GetColor(reader.Parameter, Color.Black);
                                     }
                                 }
                                 break;
                             }
-                       
-                        case RTFConsts._cb:
-                        case RTFConsts._chcbpat:
+
+                        case RTFConsts.Cb:
+                        case RTFConsts.Chcbpat:
                             {
                                 // background color
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (format.ReadText)
                                 {
-                                    if ( reader.HasParam )
+                                    if (reader.HasParam)
                                     {
-                                        format.BackColor = this.ColorTable.GetColor(reader.Parameter, Color.Empty);
+                                        format.BackColor = ColorTable.GetColor(reader.Parameter, Color.Empty);
                                     }
                                 }
                                 break;
                             }
-                        case RTFConsts._b:
+                        case RTFConsts.B:
                             {
                                 // bold
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (format.ReadText)
                                 {
                                     format.Bold = (reader.HasParam == false || reader.Parameter != 0);
                                 }
                                 break;
                             }
-                        case RTFConsts._v :
+                        case RTFConsts.V:
                             {
                                 // hidden text
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (format.ReadText)
                                 {
                                     if (reader.HasParam && reader.Parameter == 0)
@@ -2289,116 +2174,116 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._highlight:
+                        case RTFConsts.Highlight:
                             {
                                 // highlight content
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (format.ReadText)
                                 {
                                     if (reader.HasParam)
                                     {
-                                        format.BackColor = this.ColorTable.GetColor(
-                                            reader.Parameter ,
-                                            Color.Empty );
+                                        format.BackColor = ColorTable.GetColor(
+                                            reader.Parameter,
+                                            Color.Empty);
                                     }
                                 }
                                 break;
                             }
-                        case RTFConsts._i:
+                        case RTFConsts.I:
                             {
                                 // italic
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (format.ReadText)
                                 {
                                     format.Italic = (reader.HasParam == false || reader.Parameter != 0);
                                 }
                                 break;
                             }
-                        case RTFConsts._ul:
+                        case RTFConsts.Ul:
                             {
                                 // under line
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (format.ReadText)
                                 {
                                     format.Underline = (reader.HasParam == false || reader.Parameter != 0);
                                 }
                                 break;
                             }
-                        case RTFConsts._strike:
+                        case RTFConsts.Strike:
                             {
                                 // strikeout
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (format.ReadText)
                                 {
                                     format.Strikeout = (reader.HasParam == false || reader.Parameter != 0);
                                 }
                                 break;
                             }
-                        case RTFConsts._sub:
+                        case RTFConsts.Sub:
                             {
                                 // subscript
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (format.ReadText)
                                 {
                                     format.Subscript = (reader.HasParam == false || reader.Parameter != 0);
                                 }
                                 break;
                             }
-                        case RTFConsts._super:
+                        case RTFConsts.Super:
                             {
                                 // superscript
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (format.ReadText)
                                 {
                                     format.Superscript = (reader.HasParam == false || reader.Parameter != 0);
                                 }
                                 break;
                             }
-                        case RTFConsts._nosupersub:
+                        case RTFConsts.Nosupersub:
                             {
                                 // nosupersub
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 format.Subscript = false;
                                 format.Superscript = false;
                                 break;
                             }
-                        case RTFConsts._brdrb:
+                        case RTFConsts.Brdrb:
                             {
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 //format.ParagraphBorder.Bottom = true;
-                                _ParagraphFormat.BottomBorder = true;
+                                _paragraphFormat.BottomBorder = true;
                                 break;
                             }
-                        case RTFConsts._brdrl:
+                        case RTFConsts.Brdrl:
                             {
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 //format.ParagraphBorder.Left = true ;
-                                _ParagraphFormat.LeftBorder = true;
+                                _paragraphFormat.LeftBorder = true;
                                 break;
                             }
-                        case RTFConsts._brdrr:
+                        case RTFConsts.Brdrr:
                             {
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 //format.ParagraphBorder.Right = true ;
-                                _ParagraphFormat.RightBorder = true;
+                                _paragraphFormat.RightBorder = true;
                                 break;
                             }
-                        case RTFConsts._brdrt:
+                        case RTFConsts.Brdrt:
                             {
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 //format.ParagraphBorder.Top = true;
-                                _ParagraphFormat.BottomBorder = true;
+                                _paragraphFormat.BottomBorder = true;
                                 break;
                             }
-                        case RTFConsts._brdrcf:
+                        case RTFConsts.Brdrcf:
                             {
-                                bolStartContent = true;
-                                RTFDomElement element = this.GetLastElement<RTFDomTableRow>(false );
+                                _bolStartContent = true;
+                                RTFDomElement element = GetLastElement<RTFDomTableRow>(false);
                                 if (element is RTFDomTableRow)
                                 {
                                     // reading a table row
                                     RTFDomTableRow row = (RTFDomTableRow)element;
-                                    RTFAttributeList style = null;
+                                    RTFAttributeList style;
                                     if (row.CellSettings.Count > 0)
                                     {
                                         style = (RTFAttributeList)row.CellSettings[row.CellSettings.Count - 1];
@@ -2409,64 +2294,64 @@ namespace RtfDomParser
                                     //    style = new RTFAttributeList();
                                     //    row.CellSettings.Add(style);
                                     //}
-                                    
+
                                 }
                                 else
                                 {
-                                    _ParagraphFormat.BorderColor = this.ColorTable.GetColor(reader.Parameter , Color.Black);
+                                    _paragraphFormat.BorderColor = ColorTable.GetColor(reader.Parameter, Color.Black);
                                     format.BorderColor = format.BorderColor;
                                 }
                                 break;
                             }
-                        case RTFConsts._brdrs:
+                        case RTFConsts.Brdrs:
                             {
-                                bolStartContent = true;
-                                _ParagraphFormat.BorderThickness = false;
+                                _bolStartContent = true;
+                                _paragraphFormat.BorderThickness = false;
                                 format.BorderThickness = false;
                                 break;
                             }
-                        case RTFConsts._brdrth:
+                        case RTFConsts.Brdrth:
                             {
-                                bolStartContent = true;
-                                _ParagraphFormat.BorderThickness = true;
+                                _bolStartContent = true;
+                                _paragraphFormat.BorderThickness = true;
                                 format.BorderThickness = true;
                                 break;
                             }
-                        case RTFConsts._brdrdot:
+                        case RTFConsts.Brdrdot:
                             {
-                                bolStartContent = true;
-                                _ParagraphFormat.BorderStyle= DashStyle.Dot;
+                                _bolStartContent = true;
+                                _paragraphFormat.BorderStyle = DashStyle.Dot;
                                 format.BorderStyle = DashStyle.Dot;
                                 break;
                             }
-                        case RTFConsts._brdrdash:
+                        case RTFConsts.Brdrdash:
                             {
-                                bolStartContent = true;
-                                _ParagraphFormat.BorderStyle = DashStyle.Dash;
+                                _bolStartContent = true;
+                                _paragraphFormat.BorderStyle = DashStyle.Dash;
                                 format.BorderStyle = DashStyle.Dash;
                                 break;
                             }
-                        case RTFConsts._brdrdashd:
+                        case RTFConsts.Brdrdashd:
                             {
-                                bolStartContent = true;
-                                _ParagraphFormat.BorderStyle = DashStyle.DashDot;
+                                _bolStartContent = true;
+                                _paragraphFormat.BorderStyle = DashStyle.DashDot;
                                 format.BorderStyle = DashStyle.DashDot;
                                 break;
                             }
-                        case RTFConsts._brdrdashdd:
+                        case RTFConsts.Brdrdashdd:
                             {
-                                bolStartContent = true;
-                                _ParagraphFormat.BorderStyle = DashStyle.DashDotDot;
+                                _bolStartContent = true;
+                                _paragraphFormat.BorderStyle = DashStyle.DashDotDot;
                                 format.BorderStyle = DashStyle.DashDotDot;
                                 break;
                             }
-                        case RTFConsts._brdrnil:
+                        case RTFConsts.Brdrnil:
                             {
-                                bolStartContent = true;
-                                _ParagraphFormat.LeftBorder = false;
-                                _ParagraphFormat.TopBorder = false;
-                                _ParagraphFormat.RightBorder = false;
-                                _ParagraphFormat.BottomBorder = false;
+                                _bolStartContent = true;
+                                _paragraphFormat.LeftBorder = false;
+                                _paragraphFormat.TopBorder = false;
+                                _paragraphFormat.RightBorder = false;
+                                _paragraphFormat.BottomBorder = false;
 
                                 format.LeftBorder = false;
                                 format.TopBorder = false;
@@ -2474,29 +2359,29 @@ namespace RtfDomParser
                                 format.BottomBorder = false;
                                 break;
                             }
-                        case RTFConsts._brsp:
+                        case RTFConsts.Brsp:
                             {
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 if (reader.HasParam)
                                 {
-                                    _ParagraphFormat.BorderSpacing = reader.Parameter;
+                                    _paragraphFormat.BorderSpacing = reader.Parameter;
                                 }
                                 break;
                             }
-                        case RTFConsts._chbrdr:
+                        case RTFConsts.Chbrdr:
                             {
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 format.LeftBorder = true;
                                 format.TopBorder = true;
                                 format.RightBorder = true;
                                 format.BottomBorder = true;
                                 break;
                             }
-                        case RTFConsts._bkmkstart:
+                        case RTFConsts.Bkmkstart:
                             {
                                 // book mark
-                                bolStartContent = true;
-                                if (format.ReadText && bolStartContent)
+                                _bolStartContent = true;
+                                if (format.ReadText && _bolStartContent)
                                 {
                                     RTFDomBookmark bk = new RTFDomBookmark();
                                     bk.Name = ReadInnerText(reader, true);
@@ -2505,21 +2390,21 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._bkmkend:
+                        case RTFConsts.Bkmkend:
                             {
-                                ForbitPard = true;
+                                forbitPard = true;
                                 format.ReadText = false;
                                 break;
                             }
-                        case RTFConsts._field:
+                        case RTFConsts.Field:
                             {
                                 // field
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 ReadDomField(reader, format);
                                 return; // finish current level
                                 //break;
                             }
-                        
+
                         //case RTFConsts._objdata:
                         //case RTFConsts._objclass:
                         //    {
@@ -2529,10 +2414,10 @@ namespace RtfDomParser
 
                         #region read object *********************************
 
-                        case RTFConsts._object:
+                        case RTFConsts.Object:
                             {
                                 // object
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 ReadDomObject(reader, format);
                                 return;// finish current level
                             }
@@ -2541,24 +2426,24 @@ namespace RtfDomParser
 
                         #region read image **********************************
 
-                        case RTFConsts._shppict :
+                        case RTFConsts.Shppict:
                             // continue the following token
                             break;
-                        case RTFConsts._nonshppict :
+                        case RTFConsts.Nonshppict:
                             // unsupport keyword
                             ReadToEndGround(reader);
                             break;
-                        case RTFConsts._pict:
+                        case RTFConsts.Pict:
                             {
                                 // read image data
                                 //ReadDomImage(reader, format);
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 RTFDomImage img = new RTFDomImage();
                                 img.NativeLevel = reader.Level;
                                 AddContentElement(img);
                             }
                             break;
-                        case RTFConsts._picscalex:
+                        case RTFConsts.Picscalex:
                             {
                                 RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
@@ -2567,7 +2452,7 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._picscaley:
+                        case RTFConsts.Picscaley:
                             {
                                 RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
@@ -2576,7 +2461,7 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._picwgoal:
+                        case RTFConsts.Picwgoal:
                             {
                                 RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
@@ -2585,7 +2470,7 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._pichgoal:
+                        case RTFConsts.Pichgoal:
                             {
                                 RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
@@ -2594,16 +2479,16 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._blipuid:
+                        case RTFConsts.Blipuid:
                             {
                                 RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
                                 {
-                                    img.ID = ReadInnerText(reader, true);
+                                    img.Id = ReadInnerText(reader, true);
                                 }
                                 break;
                             }
-                        case RTFConsts._emfblip :
+                        case RTFConsts.Emfblip:
                             {
                                 RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
@@ -2612,7 +2497,7 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._pngblip :
+                        case RTFConsts.Pngblip:
                             {
                                 RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
@@ -2621,7 +2506,7 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._jpegblip :
+                        case RTFConsts.Jpegblip:
                             {
                                 RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
@@ -2630,7 +2515,7 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._macpict :
+                        case RTFConsts.Macpict:
                             {
                                 RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
@@ -2639,7 +2524,7 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._pmmetafile:
+                        case RTFConsts.Pmmetafile:
                             {
                                 RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
@@ -2648,7 +2533,7 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._wmetafile :
+                        case RTFConsts.Wmetafile:
                             {
                                 RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
@@ -2657,7 +2542,7 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._dibitmap :
+                        case RTFConsts.Dibitmap:
                             {
                                 RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
@@ -2666,7 +2551,7 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._wbitmap :
+                        case RTFConsts.Wbitmap:
                             {
                                 RTFDomImage img = GetLastElement<RTFDomImage>();
                                 if (img != null)
@@ -2678,7 +2563,7 @@ namespace RtfDomParser
                         #endregion
 
                         #region read shape ************************************************
-                        case RTFConsts._sp:
+                        case RTFConsts.Sp:
                             {
                                 // begin read shape property
                                 int level = 0;
@@ -2698,11 +2583,11 @@ namespace RtfDomParser
                                             break;
                                         }
                                     }
-                                    else if (reader.Keyword == RTFConsts._sn)
+                                    else if (reader.Keyword == RTFConsts.Sn)
                                     {
                                         vName = ReadInnerText(reader, true);
                                     }
-                                    else if (reader.Keyword == RTFConsts._sv)
+                                    else if (reader.Keyword == RTFConsts.Sv)
                                     {
                                         vValue = ReadInnerText(reader, true);
                                     }
@@ -2722,26 +2607,26 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._shptxt:
+                        case RTFConsts.Shptxt:
                             {
                                 // handle following token
                                 break;
                             }
-                        case RTFConsts._shprslt:
+                        case RTFConsts.Shprslt:
                             {
                                 // ignore this level
-                                ReadToEndGround( reader );
-                                break  ;
+                                ReadToEndGround(reader);
+                                break;
                             }
-                        case RTFConsts._shp:
+                        case RTFConsts.Shp:
                             {
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 RTFDomShape shape = new RTFDomShape();
                                 shape.NativeLevel = reader.Level;
                                 AddContentElement(shape);
                                 break;
                             }
-                        case RTFConsts._shpleft:
+                        case RTFConsts.Shpleft:
                             {
                                 RTFDomShape shape = GetLastElement<RTFDomShape>();
                                 if (shape != null)
@@ -2750,7 +2635,7 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._shptop:
+                        case RTFConsts.Shptop:
                             {
                                 RTFDomShape shape = GetLastElement<RTFDomShape>();
                                 if (shape != null)
@@ -2759,7 +2644,7 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._shpright:
+                        case RTFConsts.Shpright:
                             {
                                 RTFDomShape shape = GetLastElement<RTFDomShape>();
                                 if (shape != null)
@@ -2768,7 +2653,7 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._shpbottom:
+                        case RTFConsts.Shpbottom:
                             {
                                 RTFDomShape shape = GetLastElement<RTFDomShape>();
                                 if (shape != null)
@@ -2777,16 +2662,16 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._shplid:
+                        case RTFConsts.Shplid:
                             {
                                 RTFDomShape shape = GetLastElement<RTFDomShape>();
                                 if (shape != null)
                                 {
-                                    shape.ShapeID = reader.Parameter;
+                                    shape.ShapeId = reader.Parameter;
                                 }
                                 break;
                             }
-                        case RTFConsts._shpz:
+                        case RTFConsts.Shpz:
                             {
                                 RTFDomShape shape = GetLastElement<RTFDomShape>();
                                 if (shape != null)
@@ -2795,26 +2680,26 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._shpgrp:
+                        case RTFConsts.Shpgrp:
                             {
                                 RTFDomShapeGroup group = new RTFDomShapeGroup();
                                 group.NativeLevel = reader.Level;
                                 AddContentElement(group);
                                 break;
                             }
-                        case RTFConsts._shpinst:
+                        case RTFConsts.Shpinst:
                             {
                                 break;
                             }
                         #endregion
 
                         #region read table ************************************************
-                        case RTFConsts._intbl:
-                        case RTFConsts._trowd:
-                        case RTFConsts._itap:
+                        case RTFConsts.Intbl:
+                        case RTFConsts.Trowd:
+                        case RTFConsts.Itap:
                             {
                                 // these keyword said than current paragraph is table row
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 RTFDomElement[] es = GetLastElements(true);
                                 RTFDomElement lastUnlockElement = null;
                                 RTFDomElement lastTableElement = null;
@@ -2834,7 +2719,7 @@ namespace RtfDomParser
                                         }
                                     }
                                 }
-                                if ( reader.Keyword == RTFConsts._intbl)
+                                if (reader.Keyword == RTFConsts.Intbl)
                                 {
                                     if (lastTableElement == null)
                                     {
@@ -2845,10 +2730,10 @@ namespace RtfDomParser
                                         lastUnlockElement.AppendChild(row);
                                     }
                                 }
-                                else if ( reader.Keyword == RTFConsts._trowd)
+                                else if (reader.Keyword == RTFConsts.Trowd)
                                 {
                                     // clear row format
-                                    RTFDomTableRow row = null;
+                                    RTFDomTableRow row;
                                     if (lastTableElement == null)
                                     {
                                         row = new RTFDomTableRow();
@@ -2865,17 +2750,16 @@ namespace RtfDomParser
                                     }
                                     row.Attributes.Clear();
                                     row.CellSettings.Clear();
-                                    _ParagraphFormat.ResetParagraph();
+                                    _paragraphFormat.ResetParagraph();
                                 }
-                                else if (reader.Keyword == RTFConsts._itap)
+                                else if (reader.Keyword == RTFConsts.Itap)
                                 {
                                     // set nested level
-                                    RTFDomTableRow row = null;
+                                    RTFDomTableRow row;
 
                                     if (reader.Parameter == 0)
                                     {
                                         // is the 0 level , belong to document , not to a table
-                                        // ？？？？？？ \itap0功能不明，看来还是以 \cell指令为准
                                         //foreach (RTFDomElement element in es)
                                         //{
                                         //    if (element is RTFDomTableRow || element is RTFDomTableCell)
@@ -2903,17 +2787,17 @@ namespace RtfDomParser
                                             //row.Attributes.Clear();
                                             //row.CellSettings = new ArrayList();
                                         }
-                                        if ( reader.Parameter == row.Level)
+                                        if (reader.Parameter == row.Level)
                                         {
                                         }
-                                        else if ( reader.Parameter > row.Level)
+                                        else if (reader.Parameter > row.Level)
                                         {
                                             // nested row
                                             RTFDomTableRow newRow = new RTFDomTableRow();
                                             newRow.Level = reader.Parameter;
                                             RTFDomTableCell parentCell = GetLastElement<RTFDomTableCell>(false);
                                             if (parentCell == null)
-                                                this.AddContentElement(newRow);
+                                                AddContentElement(newRow);
                                             else
                                                 parentCell.AppendChild(newRow);
                                         }
@@ -2925,15 +2809,15 @@ namespace RtfDomParser
                                 }//else if
                                 break;
                             }
-                        case RTFConsts._nesttableprops:
+                        case RTFConsts.Nesttableprops:
                             {
                                 // ignore
                                 break;
                             }
-                        case RTFConsts._row:
+                        case RTFConsts.Row:
                             {
                                 // finish read row
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 RTFDomElement[] es = GetLastElements(true);
                                 for (int iCount = es.Length - 1; iCount >= 0; iCount--)
                                 {
@@ -2945,10 +2829,10 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._nestrow:
+                        case RTFConsts.Nestrow:
                             {
                                 // finish nested row
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 RTFDomElement[] es = GetLastElements(true);
                                 for (int iCount = es.Length - 1; iCount >= 0; iCount--)
                                 {
@@ -2960,72 +2844,72 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._trrh:
-                        case RTFConsts._trautofit :
-                        case RTFConsts._irowband :
-                        case RTFConsts._trhdr:
-                        case RTFConsts._trkeep:
-                        case RTFConsts._trkeepfollow :
-                        case RTFConsts._trleft:
-                        case RTFConsts._trqc :
-                        case RTFConsts._trql :
-                        case RTFConsts._trqr :
-                        case RTFConsts._trcbpat:
-                        case RTFConsts._trcfpat:
-                        case RTFConsts._trpat:
-                        case RTFConsts._trshdng:
-                        case RTFConsts._trwWidth:
-                        case RTFConsts._trwWidthA:
-                        case RTFConsts._irow:
-                        case RTFConsts._trpaddb:
-                        case RTFConsts._trpaddl:
-                        case RTFConsts._trpaddr:
-                        case RTFConsts._trpaddt:
-                        case RTFConsts._trpaddfb :
-                        case RTFConsts._trpaddfl :
-                        case RTFConsts._trpaddfr :
-                        case RTFConsts._trpaddft :
-                        case RTFConsts._lastrow:
+                        case RTFConsts.Trrh:
+                        case RTFConsts.Trautofit:
+                        case RTFConsts.Irowband:
+                        case RTFConsts.Trhdr:
+                        case RTFConsts.Trkeep:
+                        case RTFConsts.Trkeepfollow:
+                        case RTFConsts.Trleft:
+                        case RTFConsts.Trqc:
+                        case RTFConsts.Trql:
+                        case RTFConsts.Trqr:
+                        case RTFConsts.Trcbpat:
+                        case RTFConsts.Trcfpat:
+                        case RTFConsts.Trpat:
+                        case RTFConsts.Trshdng:
+                        case RTFConsts.TrwWidth:
+                        case RTFConsts.TrwWidthA:
+                        case RTFConsts.Irow:
+                        case RTFConsts.Trpaddb:
+                        case RTFConsts.Trpaddl:
+                        case RTFConsts.Trpaddr:
+                        case RTFConsts.Trpaddt:
+                        case RTFConsts.Trpaddfb:
+                        case RTFConsts.Trpaddfl:
+                        case RTFConsts.Trpaddfr:
+                        case RTFConsts.Trpaddft:
+                        case RTFConsts.Lastrow:
                             {
                                 // meet row control word , not parse at first , just save it 
-                                bolStartContent = true;
-                                RTFDomTableRow row = (RTFDomTableRow)GetLastElement<RTFDomTableRow>(false);
+                                _bolStartContent = true;
+                                RTFDomTableRow row = GetLastElement<RTFDomTableRow>(false);
                                 if (row != null)
                                 {
-                                    row.Attributes.Add( reader.Keyword , reader.Parameter );
+                                    row.Attributes.Add(reader.Keyword, reader.Parameter);
                                 }
                                 break;
                             }
-                        case RTFConsts._clvmgf:
-                        case RTFConsts._clvmrg:
-                        case RTFConsts._cellx:
-                        case RTFConsts._clvertalt:
-                        case RTFConsts._clvertalc:
-                        case RTFConsts._clvertalb:
-                        case RTFConsts._clNoWrap:
-                        case RTFConsts._clcbpat:
-                        case RTFConsts._clcfpat:
-                        case RTFConsts._clpadl:
-                        case RTFConsts._clpadt:
-                        case RTFConsts._clpadr:
-                        case RTFConsts._clpadb:
-                        case RTFConsts._clbrdrl:
-                        case RTFConsts._clbrdrt:
-                        case RTFConsts._clbrdrr:
-                        case RTFConsts._clbrdrb:
-                        case RTFConsts._brdrtbl :
-                        case RTFConsts._brdrnone :
+                        case RTFConsts.Clvmgf:
+                        case RTFConsts.Clvmrg:
+                        case RTFConsts.Cellx:
+                        case RTFConsts.Clvertalt:
+                        case RTFConsts.Clvertalc:
+                        case RTFConsts.Clvertalb:
+                        case RTFConsts.ClNoWrap:
+                        case RTFConsts.Clcbpat:
+                        case RTFConsts.Clcfpat:
+                        case RTFConsts.Clpadl:
+                        case RTFConsts.Clpadt:
+                        case RTFConsts.Clpadr:
+                        case RTFConsts.Clpadb:
+                        case RTFConsts.Clbrdrl:
+                        case RTFConsts.Clbrdrt:
+                        case RTFConsts.Clbrdrr:
+                        case RTFConsts.Clbrdrb:
+                        case RTFConsts.Brdrtbl:
+                        case RTFConsts.Brdrnone:
                             {
                                 // meet cell control word , no parse at first , just save it
-                                bolStartContent = true;
-                                RTFDomTableRow row = (RTFDomTableRow)GetLastElement<RTFDomTableRow>(false);
+                                _bolStartContent = true;
+                                RTFDomTableRow row = GetLastElement<RTFDomTableRow>(false);
                                 //if (row != null && row.Locked == false )
                                 {
                                     RTFAttributeList style = null;
                                     if (row.CellSettings.Count > 0)
                                     {
                                         style = (RTFAttributeList)row.CellSettings[row.CellSettings.Count - 1];
-                                        if (style.Contains(RTFConsts._cellx))
+                                        if (style.Contains(RTFConsts.Cellx))
                                         {
                                             // if find repeat control word , then can consider this control word
                                             // belong to the next cell . userly cellx is the last control word of 
@@ -3040,19 +2924,19 @@ namespace RtfDomParser
                                         row.CellSettings.Add(style);
                                     }
                                     style.Add(reader.Keyword, reader.Parameter);
-                                    
+
                                 }
                                 break;
                             }
-                        case RTFConsts._cell:
+                        case RTFConsts.Cell:
                             {
                                 // finish cell content
-                                bolStartContent = true;
-                                this.AddContentElement(null);
-                                this.CompleteParagraph();
-                                _ParagraphFormat.Reset();
+                                _bolStartContent = true;
+                                AddContentElement(null);
+                                CompleteParagraph();
+                                _paragraphFormat.Reset();
                                 format.Reset();
-                                RTFDomElement[] es = GetLastElements(true );
+                                RTFDomElement[] es = GetLastElements(true);
                                 for (int iCount = es.Length - 1; iCount >= 0; iCount--)
                                 {
                                     if (es[iCount].Locked == false)
@@ -3067,13 +2951,13 @@ namespace RtfDomParser
                                 }
                                 break;
                             }
-                        case RTFConsts._nestcell:
+                        case RTFConsts.Nestcell:
                             {
                                 // finish nested cell content
-                                bolStartContent = true;
+                                _bolStartContent = true;
                                 AddContentElement(null);
-                                this.CompleteParagraph();
-                                RTFDomElement[] es = GetLastElements( false );
+                                CompleteParagraph();
+                                RTFDomElement[] es = GetLastElements(false);
                                 for (int iCount = es.Length - 1; iCount >= 0; iCount--)
                                 {
                                     es[iCount].Locked = true;
@@ -3086,41 +2970,41 @@ namespace RtfDomParser
                                 break;
                             }
                         #endregion
-                        default :
+                        default:
                             // unsupport keyword
                             if (reader.TokenType == RTFTokenType.ExtKeyword
-                                && reader.FirstTokenInGroup )
+                                && reader.FirstTokenInGroup)
                             {
                                 // if meet unsupport extern keyword , and this token is the first token in 
                                 // current group , then ingore whole group.
                                 ReadToEndGround(reader);
-                                break ;
+                                break;
                             }
                             break;
                     }//switch
                 }
-                
+
             }//while
             if (myText.HasContent)
             {
                 ApplyText(myText, reader, format);
             }
         }
-         
+
 
         /// <summary>
         /// read data , until at the front of the end token belong the current level.
         /// </summary>
         /// <param name="reader"></param>
-        private void ReadToEndGround( RTFReader reader )
+        private void ReadToEndGround(RTFReader reader)
         {
-            reader.ReadToEndGround( );
+            reader.ReadToEndGround();
         }
 
 
         private void ReadListOverrideTable(RTFReader reader)
         {
-            _ListOverrideTable = new RTFListOverrideTable();
+            ListOverrideTable = new RTFListOverrideTable();
             while (reader.ReadToken() != null)
             {
                 if (reader.TokenType == RTFTokenType.GroupEnd)
@@ -3129,8 +3013,6 @@ namespace RtfDomParser
                 }
                 else if (reader.TokenType == RTFTokenType.GroupStart)
                 {
-                    // 读取一条记录
-                    int level = reader.Level;
                     RTFListOverride record = null;
                     while (reader.ReadToken() != null)
                     {
@@ -3141,7 +3023,7 @@ namespace RtfDomParser
                         if (reader.CurrentToken.Key == "listoverride")
                         {
                             record = new RTFListOverride();
-                            _ListOverrideTable.Add(record);
+                            ListOverrideTable.Add(record);
                             continue;
                         }
                         if (record == null)
@@ -3151,13 +3033,13 @@ namespace RtfDomParser
                         switch (reader.CurrentToken.Key)
                         {
                             case "listid":
-                                record.ListID = reader.CurrentToken.Param;
+                                record.ListId = reader.CurrentToken.Param;
                                 break;
                             case "listoverridecount":
                                 record.ListOverriedCount = reader.CurrentToken.Param;
                                 break;
                             case "ls":
-                                record.ID = reader.CurrentToken.Param;
+                                record.Id = reader.CurrentToken.Param;
                                 break;
                         }
                     }
@@ -3165,19 +3047,12 @@ namespace RtfDomParser
             }//while
         }
 
-        #region HTML RTF 
-
-        
-        private string _HtmlContent = null;
+        #region HTML RTF
 
         /// <summary>
         /// HTML content in RTF
         /// </summary>
-        public string HtmlContent
-        {
-            get { return _HtmlContent; }
-            set { _HtmlContent = value; }
-        }
+        public string HtmlContent { get; set; }
 
         private void ReadHtmlContent(RTFReader reader)
         {
@@ -3198,7 +3073,7 @@ namespace RtfDomParser
                 }
                 else if (reader.Keyword == "htmltag")
                 {
-                    if (reader.InnerReader.Peek() == (int)' ')
+                    if (reader.InnerReader.Peek() == ' ')
                     {
                         reader.InnerReader.Read();
                     }
@@ -3262,14 +3137,14 @@ namespace RtfDomParser
                     }
                 }
             }//while
-            this.HtmlContent = htmlStr.ToString();
+            HtmlContent = htmlStr.ToString();
         }
 
         #endregion
 
         private void ReadListTable(RTFReader reader)
         {
-            _ListTable = new RTFListTable();
+            ListTable = new RTFListTable();
             while (reader.ReadToken() != null)
             {
                 if (reader.TokenType == RTFTokenType.GroupEnd)
@@ -3280,12 +3155,12 @@ namespace RtfDomParser
                 {
                     bool firstRead = true;
                     RTFList currentList = null;
-                    int level = reader.Level ;
+                    int level = reader.Level;
                     while (reader.ReadToken() != null)
                     {
                         if (reader.TokenType == RTFTokenType.GroupEnd)
                         {
-                            if( reader.Level < level )
+                            if (reader.Level < level)
                             {
                                 break;
                             }
@@ -3301,22 +3176,21 @@ namespace RtfDomParser
                         {
                             if (reader.CurrentToken.Key != "list")
                             {
-                                // 不是以list开头，忽略掉
                                 ReadToEndGround(reader);
                                 reader.ReadToken();
                                 break;
                             }
                             currentList = new RTFList();
-                            _ListTable.Add(currentList);
+                            ListTable.Add(currentList);
                             firstRead = false;
                         }
                         switch (reader.CurrentToken.Key)
                         {
                             case "listtemplateid":
-                                currentList.ListTemplateID = reader.CurrentToken.Param;
+                                currentList.ListTemplateId = reader.CurrentToken.Param;
                                 break;
                             case "listid":
-                                currentList.ListID = reader.CurrentToken.Param;
+                                currentList.ListId = reader.CurrentToken.Param;
                                 break;
                             case "listhybrid":
                                 currentList.ListHybrid = true;
@@ -3334,7 +3208,7 @@ namespace RtfDomParser
                                 }
                                 break;
                             case "levelnfcn":
-                                 if (currentList.LevelNfc == LevelNumberType.None)
+                                if (currentList.LevelNfc == LevelNumberType.None)
                                 {
                                     currentList.LevelNfc = (LevelNumberType)reader.CurrentToken.Param;
                                 }
@@ -3348,33 +3222,32 @@ namespace RtfDomParser
                                     if (string.IsNullOrEmpty(currentList.LevelText))
                                     {
                                         string text = ReadInnerText(reader, true);
-                                        if( text != null && text.Length > 2 )
+                                        if (text != null && text.Length > 2)
                                         {
-                                            int len = (int)text[0];
+                                            int len = text[0];
                                             len = Math.Min(len, text.Length - 1);
                                             text = text.Substring(1, len);
                                         }
-                                        currentList.LevelText = text ;
+                                        currentList.LevelText = text;
                                     }
                                 }
                                 break;
                             case "f":
-                                currentList.FontName = this.FontTable.GetFontName(reader.CurrentToken.Param);
+                                currentList.FontName = FontTable.GetFontName(reader.CurrentToken.Param);
                                 break;
                         }
                     }//while
                 }
             }//while
         }
-         
+
 
         /// <summary>
         /// read font table
         /// </summary>
-        /// <param name="group"></param>
         private void ReadFontTable(RTFReader reader)
         {
-            myFontTable.Clear();
+            FontTable.Clear();
             while (reader.ReadToken() != null)
             {
                 if (reader.TokenType == RTFTokenType.GroupEnd)
@@ -3409,7 +3282,7 @@ namespace RtfDomParser
                             name = "Microsoft Sans Serif";
                             nilFlag = true;
                         }
-                        else if (reader.Keyword == RTFConsts._fcharset)
+                        else if (reader.Keyword == RTFConsts.Fcharset)
                         {
                             charset = reader.Parameter;
                         }
@@ -3419,10 +3292,10 @@ namespace RtfDomParser
                             {
                                 name = ReadInnerText(
                                     reader,
-                                    reader.CurrentToken, 
-                                    false, 
-                                    false , 
-                                    false );
+                                    reader.CurrentToken,
+                                    false,
+                                    false,
+                                    false);
                                 if (name != null)
                                 {
                                     name = name.Trim();
@@ -3450,7 +3323,7 @@ namespace RtfDomParser
                         RTFFont font = new RTFFont(index, name);
                         font.Charset = charset;
                         font.NilFlag = nilFlag;
-                        myFontTable.Add(font);
+                        FontTable.Add(font);
                     }
                 }//else
             }//while
@@ -3459,11 +3332,10 @@ namespace RtfDomParser
         /// <summary>
         /// read color table
         /// </summary>
-        /// <param name="group"></param>
         private void ReadColorTable(RTFReader reader)
         {
-            myColorTable.Clear();
-            myColorTable.CheckValueExistWhenAdd = false;
+            ColorTable.Clear();
+            ColorTable.CheckValueExistWhenAdd = false;
             int r = -1;
             int g = -1;
             int b = -1;
@@ -3488,7 +3360,7 @@ namespace RtfDomParser
                         if (r >= 0 && g >= 0 && b >= 0)
                         {
                             Color c = Color.FromArgb(255, r, g, b);
-                            myColorTable.Add(c);
+                            ColorTable.Add(c);
                             r = -1;
                             g = -1;
                             b = -1;
@@ -3500,17 +3372,16 @@ namespace RtfDomParser
             {
                 // read the last color
                 Color c = Color.FromArgb(255, r, g, b);
-                myColorTable.Add(c);
+                ColorTable.Add(c);
             }
         }
 
         /// <summary>
         /// read document information
         /// </summary>
-        /// <param name="group"></param>
         private void ReadDocumentInfo(RTFReader reader)
         {
-            myInfo.Clear();
+            _myInfo.Clear();
             int level = 0;
             while (reader.ReadToken() != null)
             {
@@ -3531,19 +3402,19 @@ namespace RtfDomParser
                     switch (reader.Keyword)
                     {
                         case "creatim":
-                            myInfo.Creatim = ReadDateTime(reader);
+                            _myInfo.Creatim = ReadDateTime(reader);
                             level--;
                             break;
                         case "revtim":
-                            myInfo.Revtim = ReadDateTime(reader);
+                            _myInfo.Revtim = ReadDateTime(reader);
                             level--;
                             break;
                         case "printim":
-                            myInfo.Printim = ReadDateTime(reader);
+                            _myInfo.Printim = ReadDateTime(reader);
                             level--;
                             break;
                         case "buptim":
-                            myInfo.Buptim = ReadDateTime(reader);
+                            _myInfo.Buptim = ReadDateTime(reader);
                             level--;
                             break;
                         default:
@@ -3551,11 +3422,11 @@ namespace RtfDomParser
                             {
                                 if (reader.HasParam)
                                 {
-                                    myInfo.SetInfo(reader.Keyword, reader.Parameter.ToString());
+                                    _myInfo.SetInfo(reader.Keyword, reader.Parameter.ToString());
                                 }
                                 else
                                 {
-                                    myInfo.SetInfo(reader.Keyword, ReadInnerText(reader, true));
+                                    _myInfo.SetInfo(reader.Keyword, ReadInnerText(reader, true));
                                 }
                             }
                             break;
@@ -3605,6 +3476,11 @@ namespace RtfDomParser
                         break;
                 }//switch
             }//while
+
+            if (mo == 0 || dy == 0)
+            {
+                return DateTime.MinValue;
+            }
             return new DateTime(yr, mo, dy, hr, min, sec);
         }
 
@@ -3613,7 +3489,7 @@ namespace RtfDomParser
         //    bolStartContent = true;
         //    RTFDomImage img = new RTFDomImage();
         //    img.NativeLevel = reader.Level;
-        //    this.AddContentElement(img);
+        //    AddContentElement(img);
         //    RTFTextContainer txt = new RTFTextContainer( this );
         //    while (reader.ReadToken() != null)
         //    {
@@ -3638,7 +3514,7 @@ namespace RtfDomParser
         //        {
         //            case RTFConsts._nonshppict :
         //                // ignore group
-        //                this.ReadToEndGround(reader);
+        //                ReadToEndGround(reader);
         //                break;
         //            case RTFConsts._picscalex:
         //                img.ScaleX = reader.Parameter;
@@ -3691,7 +3567,7 @@ namespace RtfDomParser
         //    img.Locked = true;
         //    return img;
         //}
-            
+
         /// <summary>
         /// Read a rtf emb object
         /// </summary>
@@ -3725,58 +3601,57 @@ namespace RtfDomParser
                 }
                 switch (reader.Keyword)
                 {
-                    case RTFConsts._objautlink:
+                    case RTFConsts.Objautlink:
                         obj.Type = RTFObjectType.AutLink;
                         break;
-                    case RTFConsts._objclass:
+                    case RTFConsts.Objclass:
                         obj.ClassName = ReadInnerText(reader, true);
                         break;
-                    case RTFConsts._objdata:
+                    case RTFConsts.Objdata:
                         string data = ReadInnerText(reader, true);
                         obj.Content = HexToBytes(data);
                         break;
-                    case RTFConsts._objemb:
-                        obj.Type = RTFObjectType.EMB;
+                    case RTFConsts.Objemb:
+                        obj.Type = RTFObjectType.Emb;
                         break;
-                    case RTFConsts._objh:
+                    case RTFConsts.Objh:
                         obj.Height = reader.Parameter;
                         break;
-                    case RTFConsts._objhtml:
+                    case RTFConsts.Objhtml:
                         obj.Type = RTFObjectType.Html;
                         break;
-                    case RTFConsts._objicemb:
+                    case RTFConsts.Objicemb:
                         obj.Type = RTFObjectType.Icemb;
                         break;
-                    case RTFConsts._objlink:
+                    case RTFConsts.Objlink:
                         obj.Type = RTFObjectType.Link;
                         break;
-                    case RTFConsts._objname:
+                    case RTFConsts.Objname:
                         obj.Name = ReadInnerText(reader, true);
                         break;
-                    case RTFConsts._objocx:
+                    case RTFConsts.Objocx:
                         obj.Type = RTFObjectType.Ocx;
                         break;
-                    case RTFConsts._objpub:
+                    case RTFConsts.Objpub:
                         obj.Type = RTFObjectType.Pub;
                         break;
-                    case RTFConsts._objsub:
+                    case RTFConsts.Objsub:
                         obj.Type = RTFObjectType.Sub;
                         break;
-                    case RTFConsts._objtime:
+                    case RTFConsts.Objtime:
                         break;
-                    case RTFConsts._objw:
+                    case RTFConsts.Objw:
                         obj.Width = reader.Parameter;
                         break;
-                    case RTFConsts._objscalex:
+                    case RTFConsts.Objscalex:
                         obj.ScaleX = reader.Parameter;
                         break;
-                    case RTFConsts._objscaley:
+                    case RTFConsts.Objscaley:
                         obj.ScaleY = reader.Parameter;
                         break;
-                    case RTFConsts._result :
-                        // 读取对象运算结果数据
+                    case RTFConsts.Result:
                         RTFDomElementContainer result = new RTFDomElementContainer();
-                        result.Name = RTFConsts._result;
+                        result.Name = RTFConsts.Result;
                         obj.AppendChild(result);
                         Load(reader, format);
                         result.Locked = true;
@@ -3795,7 +3670,7 @@ namespace RtfDomParser
         /// <returns></returns>
         private RTFDomField ReadDomField(
             RTFReader reader,
-            DocumentFormatInfo format  )
+            DocumentFormatInfo format)
         {
             RTFDomField field = new RTFDomField();
             field.NativeLevel = reader.Level;
@@ -3813,56 +3688,56 @@ namespace RtfDomParser
                 }
                 else if (reader.TokenType == RTFTokenType.GroupEnd)
                 {
-                    
+
                 }
                 else
                 {
                     switch (reader.Keyword)
                     {
-                        case RTFConsts._flddirty:
+                        case RTFConsts.Flddirty:
                             {
                                 field.Method = RTFDomFieldMethod.Dirty;
                                 break;
                             }
-                        case RTFConsts._fldedit:
+                        case RTFConsts.Fldedit:
                             {
                                 field.Method = RTFDomFieldMethod.Edit;
                                 break;
                             }
-                        case RTFConsts._fldlock:
+                        case RTFConsts.Fldlock:
                             {
                                 field.Method = RTFDomFieldMethod.Lock;
                                 break;
                             }
-                        case RTFConsts._fldpriv:
+                        case RTFConsts.Fldpriv:
                             {
                                 field.Method = RTFDomFieldMethod.Priv;
                                 break;
                             }
-                        case RTFConsts._fldrslt:
+                        case RTFConsts.Fldrslt:
                             {
                                 RTFDomElementContainer result = new RTFDomElementContainer();
-                                result.Name = RTFConsts._fldrslt;
+                                result.Name = RTFConsts.Fldrslt;
                                 field.AppendChild(result);
-                                Load(reader, format );
+                                Load(reader, format);
                                 result.Locked = true;
                                 //field.Result = ReadInnerText(reader, true);
                                 break;
                             }
-                        case RTFConsts._fldinst:
+                        case RTFConsts.Fldinst:
                             {
                                 RTFDomElementContainer inst = new RTFDomElementContainer();
-                                inst.Name = RTFConsts._fldinst;
+                                inst.Name = RTFConsts.Fldinst;
                                 field.AppendChild(inst);
-                                Load(reader, format );
+                                Load(reader, format);
                                 inst.Locked = true;
                                 string txt = inst.InnerText;
                                 if (txt != null)
                                 {
-                                    int index = txt.IndexOf(RTFConsts._HYPERLINK);
+                                    int index = txt.IndexOf(RTFConsts.Hyperlink);
                                     if (index >= 0)
                                     {
-                                        string link = null;
+                                        string link;
                                         int index1 = txt.IndexOf('\"', index);
                                         if (index1 > 0 && txt.Length > index1 + 2)
                                         {
@@ -3878,15 +3753,15 @@ namespace RtfDomParser
                                                 }
                                                 break;
                                             }
-                                        }//if
-                                    }//if
+                                        }
+                                    }
                                 }
 
                                 break;
                             }
-                    }//switch
+                    }
                 }
-            }//while
+            }
             field.Locked = true;
             return field;
 
@@ -3898,27 +3773,30 @@ namespace RtfDomParser
             return ReadInnerText(
                 reader,
                 null,
-                deeply, 
-                false , 
-                false );
+                deeply,
+                false,
+                false);
         }
 
         /// <summary>
         /// read the following plain text in the current level
         /// </summary>
         /// <param name="reader">RTF reader</param>
+        /// <param name="firstToken"></param>
         /// <param name="deeply">whether read the text in the sub level</param>
+        /// <param name="breakMeetControlWord"></param>
+        /// <param name="htmlMode"></param>
         /// <returns>text</returns>
         private string ReadInnerText(
             RTFReader reader,
             RTFToken firstToken,
-            bool deeply, 
+            bool deeply,
             bool breakMeetControlWord,
-            bool htmlMode )
+            bool htmlMode)
         {
             int level = 0;
             RTFTextContainer container = new RTFTextContainer(this);
-            container.Accept(firstToken , reader );
+            container.Accept(firstToken, reader);
             while (true)
             {
                 RTFTokenType type = reader.PeekTokenType();
@@ -3940,7 +3818,7 @@ namespace RtfDomParser
 
                 if (deeply || level == 0)
                 {
-                    if ( htmlMode )
+                    if (htmlMode)
                     {
                         if (reader.Keyword == "par")
                         {
@@ -3948,66 +3826,58 @@ namespace RtfDomParser
                             continue;
                         }
                     }
-                    if (container.Accept(reader.CurrentToken , reader ))
+                    if (!container.Accept(reader.CurrentToken, reader) && breakMeetControlWord)
                     {
-                        continue;
-                    }
-                    else
-                    {
-                        if (breakMeetControlWord)
-                        {
-                            break;
-                        }
+                        break;
                     }
                 }
-
             }//while
             return container.Text;
         }
 
         public override string ToDomString()
         {
-            System.Text.StringBuilder builder = new StringBuilder();
-            builder.Append(this.ToString());
-            builder.Append( Environment.NewLine + "   Info");
-            foreach (string item in myInfo.StringItems)
+            StringBuilder builder = new StringBuilder();
+            builder.Append(ToString());
+            builder.Append(Environment.NewLine + "   Info");
+            foreach (string item in _myInfo.StringItems)
             {
                 builder.Append(Environment.NewLine + "      " + item);
             }
-            builder.Append( Environment.NewLine + "   ColorTable(" + myColorTable.Count + ")");
-            for (int iCount = 0; iCount < myColorTable.Count; iCount ++ )
+            builder.Append(Environment.NewLine + "   ColorTable(" + ColorTable.Count + ")");
+            for (int iCount = 0; iCount < ColorTable.Count; iCount++)
             {
-                Color c = myColorTable[iCount];
-                builder.Append(Environment.NewLine + "      " + iCount + ":" + c.R + " " + c.G + " " + c.B );
+                Color c = ColorTable[iCount];
+                builder.Append(Environment.NewLine + "      " + iCount + ":" + c.R + " " + c.G + " " + c.B);
             }
-            builder.Append(Environment.NewLine + "   FontTable(" + myFontTable.Count + ")");
-            foreach (RTFFont font in myFontTable)
+            builder.Append(Environment.NewLine + "   FontTable(" + FontTable.Count + ")");
+            foreach (RTFFont font in FontTable)
             {
-                builder.Append(Environment.NewLine + "      " + font.ToString());
+                builder.Append(Environment.NewLine + "      " + font);
             }
-            if (_ListTable.Count > 0)
+            if (ListTable.Count > 0)
             {
-                builder.Append(Environment.NewLine + "   ListTable(" + _ListTable.Count + ")");
-                foreach (RTFList list in this._ListTable)
+                builder.Append(Environment.NewLine + "   ListTable(" + ListTable.Count + ")");
+                foreach (RTFList list in ListTable)
                 {
-                    builder.Append(Environment.NewLine + "      " + list.ToString());
+                    builder.Append(Environment.NewLine + "      " + list);
                 }
             }
-            if (this.ListOverrideTable.Count > 0)
+            if (ListOverrideTable.Count > 0)
             {
-                builder.Append(Environment.NewLine + "   ListOverrideTable(" + this.ListOverrideTable.Count + ")");
-                foreach (RTFListOverride list in this.ListOverrideTable)
+                builder.Append(Environment.NewLine + "   ListOverrideTable(" + ListOverrideTable.Count + ")");
+                foreach (RTFListOverride list in ListOverrideTable)
                 {
-                    builder.Append(Environment.NewLine + "      " + list.ToString());
+                    builder.Append(Environment.NewLine + "      " + list);
                 }
             }
             builder.Append(Environment.NewLine + "   -----------------------");
-            if (string.IsNullOrEmpty(this.HtmlContent) == false)
+            if (string.IsNullOrEmpty(HtmlContent) == false)
             {
-                builder.Append(Environment.NewLine + "   HTMLContent:" + this.HtmlContent);
+                builder.Append(Environment.NewLine + "   HTMLContent:" + HtmlContent);
                 builder.Append(Environment.NewLine + "   -----------------------");
             }
-            ToDomString(this.Elements, builder, 1);
+            ToDomString(Elements, builder, 1);
             return builder.ToString();
         }
     }

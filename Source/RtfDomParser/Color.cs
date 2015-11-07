@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RtfDomParser
+﻿namespace RtfDomParser
 {
     public struct Color
     {
-        public static readonly Color Empty;
+        public static readonly Color Empty = new Color();
 
         public Color(byte a, byte r, byte g, byte b)
             : this()
@@ -42,6 +36,7 @@ namespace RtfDomParser
         {
             return left.A != right.A || left.R != right.R || left.G != right.G || left.B == right.B;
         }
+
         //
         // Summary:
         //     Tests whether two specified System.Drawing.Color structures are equivalent.
@@ -61,23 +56,27 @@ namespace RtfDomParser
         }
 
 
-
         //
         // Summary:
         //     Gets a system-defined color that has an ARGB value of #FF000000.
         //
         // Returns:
         //     A System.Drawing.Color representing a system-defined color.
-        public static Color Black { get { return new Color(255, 0, 0, 0); } }
-        public static Color Transparent { get { return new Color(0, 0, 0, 0); } }
+        public static Color Black
+        {
+            get { return new Color(255, 0, 0, 0); }
+        }
 
-        private bool _isInitialized;
+        public static Color Transparent
+        {
+            get { return new Color(0, 0, 0, 0); }
+        }
+
+        private readonly bool _isInitialized;
+
         public bool IsEmpty
         {
-            get
-            {
-                return !_isInitialized;
-            }
+            get { return !_isInitialized; }
         }
 
         // Summary:
@@ -93,8 +92,9 @@ namespace RtfDomParser
         //     structure; otherwise, false.
         public override bool Equals(object obj)
         {
-            return obj is Color && (Color)obj == this;
+            return obj is Color && (Color) obj == this;
         }
+
         //
         // Summary:
         //     Creates a System.Drawing.Color structure from a 32-bit ARGB value.
@@ -107,15 +107,15 @@ namespace RtfDomParser
         //     The System.Drawing.Color structure that this method creates.
         public static Color FromArgb(int argb)
         {
-            return new Color((byte)(argb >> 24),
-                (byte)(argb >> 16),
-                (byte)(argb >> 8),
-                (byte)argb);
+            return new Color((byte) (argb >> 24),
+                (byte) (argb >> 16),
+                (byte) (argb >> 8),
+                (byte) argb);
         }
 
         public static Color FromArgb(int alpha, Color baseColor)
         {
-            return new Color((byte)alpha, baseColor.R, baseColor.G, baseColor.B);
+            return new Color((byte) alpha, baseColor.R, baseColor.G, baseColor.B);
         }
 
         //
@@ -146,8 +146,9 @@ namespace RtfDomParser
         //     red, green, or blue is less than 0 or greater than 255.
         public static Color FromArgb(int red, int green, int blue)
         {
-            return new Color(255, (byte)red, (byte)green, (byte)blue);
+            return new Color(255, (byte) red, (byte) green, (byte) blue);
         }
+
         //
         // Summary:
         //     Creates a System.Drawing.Color structure from the four ARGB component (alpha,
@@ -176,8 +177,9 @@ namespace RtfDomParser
         //     alpha, red, green, or blue is less than 0 or greater than 255.
         public static Color FromArgb(int alpha, int red, int green, int blue)
         {
-            return new Color((byte)alpha, (byte)red, (byte)green, (byte)blue);
+            return new Color((byte) alpha, (byte) red, (byte) green, (byte) blue);
         }
+
         //
         // Summary:
         //     Returns a hash code for this System.Drawing.Color structure.
@@ -188,6 +190,7 @@ namespace RtfDomParser
         {
             return A << 24 ^ R << 16 ^ G << 8 ^ R;
         }
+
         //
         // Summary:
         //     Gets the 32-bit ARGB value of this System.Drawing.Color structure.
@@ -198,6 +201,5 @@ namespace RtfDomParser
         {
             return A << 24 ^ R << 16 ^ G << 8 ^ R;
         }
-
     }
 }

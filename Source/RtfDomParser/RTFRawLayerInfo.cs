@@ -1,42 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RtfDomParser
+﻿namespace RtfDomParser
 {
     public class RTFRawLayerInfo
     {
-        private int _UCValue = 0;
+        private int _ucValue;
 
-        public int UCValue
+        public RTFRawLayerInfo()
         {
-            get { return _UCValue; }
+            UcValueCount = 0;
+        }
+
+        public int UcValue
+        {
+            get { return _ucValue; }
             set
             {
-                _UCValue = value;
-                _UCValueCount = 0;
+                _ucValue = value;
+                UcValueCount = 0;
             }
         }
 
-        private int _UCValueCount = 0;
+        public int UcValueCount { get; set; }
 
-        public int UCValueCount
+        public bool CheckUcValueCount()
         {
-            get { return _UCValueCount; }
-            set { _UCValueCount = value; }
+            UcValueCount--;
+            return UcValueCount < 0;
         }
-        /// <summary>
-        /// 检查UC累计值
-        /// </summary>
-        /// <returns>检查通过，能添加单字节字符</returns>
-        public bool CheckUCValueCount()
-        {
-            _UCValueCount--;
-            return _UCValueCount < 0;
-        }
+
         public RTFRawLayerInfo Clone()
         {
-            return (RTFRawLayerInfo)this.MemberwiseClone();
+            return (RTFRawLayerInfo) MemberwiseClone();
         }
     }
 }

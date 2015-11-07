@@ -8,10 +8,6 @@
  */
 
 
-
-using System;
-using System.Text;
-
 namespace RtfDomParser
 {
     /// <summary>
@@ -23,14 +19,17 @@ namespace RtfDomParser
         /// left
         /// </summary>
         Left,
+
         /// <summary>
         /// center
         /// </summary>
         Center,
+
         /// <summary>
         /// right
         /// </summary>
         Right,
+
         /// <summary>
         /// justify
         /// </summary>

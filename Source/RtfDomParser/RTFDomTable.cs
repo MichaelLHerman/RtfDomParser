@@ -8,40 +8,26 @@
  */
 
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace RtfDomParser
 {
     public class RTFDomTable : RTFDomElement
     {
-        /// <summary>
-        /// initialize instance
-        /// </summary>
-        public RTFDomTable()
-        {
-        }
+        private List<RTFDomElement> _myColumns = new List<RTFDomElement>();
 
-        private List<RTFDomElement> myColumns = new List<RTFDomElement>();
         /// <summary>
         /// column list
         /// </summary>
         public List<RTFDomElement> Columns
         {
-            get
-            {
-                return myColumns; 
-            }
-            set
-            {
-                myColumns = value; 
-            }
+            get { return _myColumns; }
+            set { _myColumns = value; }
         }
 
         public override string ToString()
         {
-            return "Table(Rows:" + this.Elements.Count + " Columns:" + myColumns.Count + ")";
+            return "Table(Rows:" + Elements.Count + " Columns:" + _myColumns.Count + ")";
         }
     }
 }

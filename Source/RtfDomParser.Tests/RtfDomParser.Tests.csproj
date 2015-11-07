@@ -51,6 +51,10 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <EmbeddedResource Include="TestData\ansi.rtf" />
+    <EmbeddedResource Include="TestData\cjk.rtf" />
+    <EmbeddedResource Include="TestData\sample.rtf" />
+    <EmbeddedResource Include="TestData\zh-cn.rtf" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RtfDomParser\RtfDomParser.csproj">

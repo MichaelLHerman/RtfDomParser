@@ -7,9 +7,8 @@
  * 
  */
 
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.ComponentModel;
 
 namespace RtfDomParser
 {
@@ -18,64 +17,38 @@ namespace RtfDomParser
     /// </summary>
     public class StringAttribute
     {
-        /// <summary>
-        /// initialize instance
-        /// </summary>
         public StringAttribute()
         {
+            Value = null;
+            Name = null;
         }
 
-        private string strName = null;
         /// <summary>
         /// name
         /// </summary>
-        [System.ComponentModel.DefaultValue( null )]
-        public string Name
-        {
-            get
-            {
-                return strName; 
-            }
-            set 
-            {
-                strName = value; 
-            }
-        }
+        [DefaultValue(null)]
+        public string Name { get; set; }
 
-        private string strValue = null;
         /// <summary>
         /// value
         /// </summary>
-        [System.ComponentModel.DefaultValue( null)]
-        public string Value
-        {
-            get
-            {
-                return strValue; 
-            }
-            set
-            {
-                strValue = value; 
-            }
-        }
+        [DefaultValue(null)]
+        public string Value { get; set; }
+
         public override string ToString()
         {
-            return strName + "=" + strValue;
+            return Name + "=" + Value;
         }
     }
 
 
     public class StringAttributeCollection : List<StringAttribute>
     {
-        public StringAttributeCollection()
-        {
-        }
-
         public string this[string name]
         {
             get
             {
-                foreach (StringAttribute attr in this)
+                foreach (var attr in this)
                 {
                     if (attr.Name == name)
                     {
@@ -86,12 +59,12 @@ namespace RtfDomParser
             }
             set
             {
-                foreach (StringAttribute item in this)
+                foreach (var item in this)
                 {
                     if (item.Name == name)
                     {
                         if (value == null)
-                            this.Remove(item);
+                            Remove(item);
                         else
                             item.Value = value;
                         return;
@@ -99,13 +72,12 @@ namespace RtfDomParser
                 }
                 if (value != null)
                 {
-                    StringAttribute newItem = new StringAttribute();
+                    var newItem = new StringAttribute();
                     newItem.Name = name;
                     newItem.Value = value;
-                    this.Add(newItem);
+                    Add(newItem);
                 }
             }
         }
-
     }
 }

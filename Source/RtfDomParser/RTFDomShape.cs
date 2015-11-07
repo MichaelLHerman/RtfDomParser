@@ -8,147 +8,66 @@
  */
 
 
-
-using System;
-using System.Text;
-using System.ComponentModel ;
+using System.ComponentModel;
 
 namespace RtfDomParser
 {
     /// <summary>
     /// shape element
     /// </summary>
-
     public class RTFDomShape : RTFDomElement
     {
-        /// <summary>
-        /// initialize instance
-        /// </summary>
+        private StringAttributeCollection _myExtAttrbutes = new StringAttributeCollection();
+
         public RTFDomShape()
         {
         }
 
-        private int intLeft = 0;
         /// <summary>
         /// left position
         /// </summary>
-        [DefaultValue( 0 )]
-        public int Left
-        {
-            get
-            {
-                return intLeft;
-            }
-            set
-            {
-                intLeft = value;
-            }
-        }
+        [DefaultValue(0)]
+        public int Left { get; set; }
 
-        private int intTop = 0;
         /// <summary>
         /// top position
         /// </summary>
-        [DefaultValue( 0 )]
-        public int Top
-        {
-            get
-            {
-                return intTop;
-            }
-            set
-            {
-                intTop = value;
-            }
-        }
-
-        private int intWidth = 0;
-        /// <summary>
-        /// width
-        /// </summary
         [DefaultValue(0)]
-        public int Width
-        {
-            get
-            {
-                return intWidth;
-            }
-            set
-            {
-                intWidth = value;
-            }
-        }
+        public int Top { get; set; }
 
-        private int intHeight = 0;
+        [DefaultValue(0)]
+        public int Width { get; set; }
+
         /// <summary>
         /// height
         /// </summary>
         [DefaultValue(0)]
-        public int Height
-        {
-            get
-            {
-                return intHeight;
-            }
-            set
-            {
-                intHeight = value;
-            }
-        }
+        public int Height { get; set; }
 
-        private int intZIndex = 0;
         /// <summary>
         /// Z index
         /// </summary>
         [DefaultValue(0)]
-        public int ZIndex
-        {
-            get
-            {
-                return intZIndex;
-            }
-            set
-            {
-                intZIndex = value;
-            }
-        }
+        public int ZIndex { get; set; }
 
-        private int intShapeID = 0;
         /// <summary>
         /// shape id
         /// </summary>
         [DefaultValue(0)]
-        public int ShapeID
-        {
-            get
-            {
-                return intShapeID;
-            }
-            set
-            {
-                intShapeID = value;
-            }
-        }
+        public int ShapeId { get; set; }
 
-        private StringAttributeCollection myExtAttrbutes = new StringAttributeCollection();
         /// <summary>
         /// ext attribute
         /// </summary>
         public StringAttributeCollection ExtAttrbutes
         {
-            get
-            {
-                return myExtAttrbutes; 
-            }
-            set
-            {
-                myExtAttrbutes = value; 
-            }
+            get { return _myExtAttrbutes; }
+            set { _myExtAttrbutes = value; }
         }
 
         public override string ToString()
         {
-            return "Shape:Left:" + intLeft + " Top:" + intTop + " Width:" + intWidth + " Height:" + intHeight;
+            return "Shape:Left:" + Left + " Top:" + Top + " Width:" + Width + " Height:" + Height;
         }
     }
 }

@@ -10,91 +10,135 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
+using System.Text;
 
 namespace RtfDomParser
 {
-	/// <summary>
+    /// <summary>
     /// RTF raw document,this source code evolution from other software.
-	/// </summary>
-	public class RTFRawDocument : RTFNodeGroup
-	{ 
+    /// </summary>
+    public class RTFRawDocument : RTFNodeGroup
+    {
+        /// <summary>
+        /// text encoding for current associate font
+        /// </summary>
+        private Encoding _myAssociateFontChartset;
 
-		
-		/// <summary>
-		/// initialize instance
-		/// </summary>
-		public RTFRawDocument()
-		{
-			myOwnerDocument = this ;
-			myParent = null ;
-            myColorTable.CheckValueExistWhenAdd = false;
-		}
+        private Encoding _myEncoding;
 
-		/// <summary>
-		/// this owner document is myself
-		/// </summary>
-		public override RTFRawDocument OwnerDocument
-		{
-			get
-			{
-				return this ;
-			}
-			set
-			{
-				
-			}
-		}
-		/// <summary>
-		/// no parent node
-		/// </summary>
-		public override RTFNodeGroup Parent
-		{
-			get
-			{
-				return null;
-			}
-			set
-			{
-				
-			}
-		}
+        /// <summary>
+        /// text encoding for current font
+        /// </summary>
+        private Encoding _myFontChartset;
 
-		/// <summary>
-		/// color table
-		/// </summary>
-		protected RTFColorTable myColorTable = new RTFColorTable();
-		/// <summary>
-		/// color table
-		/// </summary>
-		public RTFColorTable ColorTable
-		{
-			get{ return myColorTable ;}
-		}
+        /// <summary>
+        /// color table
+        /// </summary>
+        protected RTFColorTable MyColorTable = new RTFColorTable();
 
-		/// <summary>
-		/// font table
-		/// </summary>
-		protected RTFFontTable myFontTable = new RTFFontTable();
-		/// <summary>
-		/// font table
-		/// </summary>
-		public RTFFontTable FontTable
-		{
-			get{ return myFontTable ;}
-		}
+        /// <summary>
+        /// font table
+        /// </summary>
+        protected RTFFontTable MyFontTable = new RTFFontTable();
 
-		/// <summary>
-		/// document information
-		/// </summary>
-		protected RTFDocumentInfo myInfo = new RTFDocumentInfo();
-		/// <summary>
-		/// document information
-		/// </summary>
-		public RTFDocumentInfo Info
-		{
-			get{ return myInfo ;}
-		}
+        /// <summary>
+        /// document information
+        /// </summary>
+        protected RTFDocumentInfo MyInfo = new RTFDocumentInfo();
+
+
+        /// <summary>
+        /// initialize instance
+        /// </summary>
+        public RTFRawDocument()
+        {
+            MyOwnerDocument = this;
+            MyParent = null;
+            MyColorTable.CheckValueExistWhenAdd = false;
+        }
+
+        /// <summary>
+        /// this owner document is myself
+        /// </summary>
+        public override RTFRawDocument OwnerDocument
+        {
+            get { return this; }
+            set { }
+        }
+
+        /// <summary>
+        /// no parent node
+        /// </summary>
+        public override RTFNodeGroup Parent
+        {
+            get { return null; }
+            set { }
+        }
+
+        /// <summary>
+        /// color table
+        /// </summary>
+        public RTFColorTable ColorTable
+        {
+            get { return MyColorTable; }
+        }
+
+        /// <summary>
+        /// font table
+        /// </summary>
+        public RTFFontTable FontTable
+        {
+            get { return MyFontTable; }
+        }
+
+        /// <summary>
+        /// document information
+        /// </summary>
+        public RTFDocumentInfo Info
+        {
+            get { return MyInfo; }
+        }
+
+        /// <summary>
+        /// text encoding
+        /// </summary>
+        public Encoding Encoding
+        {
+            get
+            {
+                if (_myEncoding == null)
+                {
+                    var node = MyNodes[RTFConsts.Ansicpg];
+                    if (node != null && node.HasParameter)
+                    {
+                        //todo look up code in encoding dictionary
+                        //myEncoding = System.Text.Encoding.GetEncoding( node.Parameter );
+                    }
+                }
+                if (_myEncoding == null)
+                    _myEncoding = Encoding.UTF8;
+                return _myEncoding;
+            }
+        }
+
+        /// <summary>
+        /// current text encoding
+        /// </summary>
+        internal Encoding RuntimeEncoding
+        {
+            get
+            {
+                if (_myFontChartset != null)
+                {
+                    return _myFontChartset;
+                }
+                if (_myAssociateFontChartset != null)
+                {
+                    return _myAssociateFontChartset;
+                }
+                return Encoding;
+            }
+        }
 
         /// <summary>
         /// read font table
@@ -102,21 +146,21 @@ namespace RtfDomParser
         /// <param name="group"></param>
         private void ReadFontTable(RTFNodeGroup group)
         {
-            myFontTable.Clear();
-            foreach (RTFNode node in group.Nodes)
+            MyFontTable.Clear();
+            foreach (var node in group.Nodes)
             {
                 if (node is RTFNodeGroup)
                 {
-                    int index = -1;
+                    var index = -1;
                     string name = null;
-                    int charset = 0;
-                    foreach (RTFNode item in node.Nodes)
+                    var charset = 0;
+                    foreach (var item in node.Nodes)
                     {
                         if (item.Keyword == "f" && item.HasParameter)
                         {
                             index = item.Parameter;
                         }
-                        else if (item.Keyword == RTFConsts._fcharset)
+                        else if (item.Keyword == RTFConsts.Fcharset)
                         {
                             charset = item.Parameter;
                         }
@@ -135,9 +179,9 @@ namespace RtfDomParser
                             name = name.Substring(0, name.Length - 1);
                         name = name.Trim();
                         //System.Console.WriteLine( "Index:" + index + "  Name:" + name );
-                        RTFFont font = new RTFFont(index, name);
+                        var font = new RTFFont(index, name);
                         font.Charset = charset;
-                        myFontTable.Add(font);
+                        MyFontTable.Add(font);
                     }
                 }
             }
@@ -147,13 +191,13 @@ namespace RtfDomParser
         /// read color table
         /// </summary>
         /// <param name="group"></param>
-        private void ReadColorTable( RTFNodeGroup group )
+        private void ReadColorTable(RTFNodeGroup group)
         {
-            myColorTable.Clear();
-            int r = -1;
-            int g = -1;
-            int b = -1;
-            foreach (RTFNode node in group.Nodes)
+            MyColorTable.Clear();
+            var r = -1;
+            var g = -1;
+            var b = -1;
+            foreach (var node in group.Nodes)
             {
                 if (node.Keyword == "red")
                 {
@@ -171,8 +215,8 @@ namespace RtfDomParser
                 {
                     if (r >= 0 && g >= 0 && b >= 0)
                     {
-                        Color c = Color.FromArgb(255, r, g, b);
-                        myColorTable.Add(c);
+                        var c = Color.FromArgb(255, r, g, b);
+                        MyColorTable.Add(c);
                         r = -1;
                         g = -1;
                         b = -1;
@@ -182,8 +226,8 @@ namespace RtfDomParser
             if (r >= 0 && g >= 0 && b >= 0)
             {
                 // read the last color
-                Color c = Color.FromArgb(255, r, g, b);
-                myColorTable.Add(c);
+                var c = Color.FromArgb(255, r, g, b);
+                MyColorTable.Add(c);
             }
         }
 
@@ -193,272 +237,221 @@ namespace RtfDomParser
         /// <param name="group"></param>
         private void ReadDocumentInfo(RTFNodeGroup group)
         {
-            myInfo.Clear();
-            RTFNodeList list = group.GetAllNodes(false);
-            foreach (RTFNode node in group.Nodes)
+            MyInfo.Clear();
+            var list = group.GetAllNodes(false);
+            foreach (var node in group.Nodes)
             {
-                if ((node is RTFNodeGroup) == false)
+                if (node is RTFNodeGroup == false)
                 {
                     continue;
                 }
                 if (node.Keyword == "creatim")
                 {
-                    myInfo.Creatim = ReadDateTime(node);
+                    MyInfo.Creatim = ReadDateTime(node);
                 }
                 else if (node.Keyword == "revtim")
                 {
-                    myInfo.Revtim = ReadDateTime(node);
+                    MyInfo.Revtim = ReadDateTime(node);
                 }
                 else if (node.Keyword == "printim")
                 {
-                    myInfo.Printim = ReadDateTime(node);
+                    MyInfo.Printim = ReadDateTime(node);
                 }
                 else if (node.Keyword == "buptim")
                 {
-                    myInfo.Buptim = ReadDateTime(node);
+                    MyInfo.Buptim = ReadDateTime(node);
                 }
                 else
                 {
                     if (node.HasParameter)
-                        myInfo.SetInfo(node.Keyword, node.Parameter.ToString());
+                        MyInfo.SetInfo(node.Keyword, node.Parameter.ToString());
                     else
                     {
-                        myInfo.SetInfo(node.Keyword, node.Nodes.Text);
+                        MyInfo.SetInfo(node.Keyword, node.Nodes.Text);
                     }
                 }
             }
         }
-         
-		private DateTime ReadDateTime( RTFNode g )
-		{
-			int yr = g.Nodes.GetParameter( "yr" , 1900 );
-			int mo = g.Nodes.GetParameter( "mo" , 1 );
-			int dy = g.Nodes.GetParameter( "dy" , 1 );
-			int hr = g.Nodes.GetParameter( "hr" , 0 );
-			int min = g.Nodes.GetParameter( "min" , 0 );
-			int sec = g.Nodes.GetParameter( "sec" , 0 );
-			return new DateTime( yr , mo , dy , hr , min ,sec );
-		}
- 
-		/// <summary>
-		/// load rtf text
-		/// </summary>
-		/// <param name="strText">text in rtf format</param>
-		public void LoadRTFText( string strText )
-		{
-			myEncoding = null ;
-			using( RTFReader reader = new RTFReader())
-			{
-				if( reader.LoadRTFText( strText ))
-				{
-					Load( reader );
-					reader.Close();
-				}
-				reader.Close();
-			}
-		}
 
-		/// <summary>
-		/// load rtf file
-		/// </summary>
-		/// <param name="strFileName">file name</param>
-		public async Task Load(Stream stream )
-		{
-			myEncoding = null ;
-			using( RTFReader reader = new RTFReader() )
-			{
-                await reader.LoadStream(stream);
-				
-				Load( reader );
-				reader.Close();
-				
-			}
-		}
-
-		private System.Text.Encoding myEncoding = null;
-		/// <summary>
-		/// text encoding
-		/// </summary>
-		public System.Text.Encoding Encoding
-		{
-			get
-			{
-				if( myEncoding == null )
-				{
-					RTFNode node = myNodes[ RTFConsts._ansicpg ];
-					if( node != null && node.HasParameter )
-					{
-                        //todo look up code in encoding dictionary
-						//myEncoding = System.Text.Encoding.GetEncoding( node.Parameter );
-					}
-				}
-				if( myEncoding == null )
-                    myEncoding = System.Text.Encoding.UTF8;
-				return myEncoding ;
-			}
-		}
-
-        /// <summary>
-        /// text encoding for current font
-        /// </summary>
-        private System.Text.Encoding myFontChartset = null;
-        /// <summary>
-        /// text encoding for current associate font
-        /// </summary>
-        private System.Text.Encoding myAssociateFontChartset = null;
-        /// <summary>
-        /// current text encoding
-        /// </summary>
-        internal System.Text.Encoding RuntimeEncoding
+        private DateTime ReadDateTime(RTFNode g)
         {
-            get
+            var yr = g.Nodes.GetParameter("yr", 1900);
+            var mo = g.Nodes.GetParameter("mo", 1);
+            var dy = g.Nodes.GetParameter("dy", 1);
+            var hr = g.Nodes.GetParameter("hr", 0);
+            var min = g.Nodes.GetParameter("min", 0);
+            var sec = g.Nodes.GetParameter("sec", 0);
+            return new DateTime(yr, mo, dy, hr, min, sec);
+        }
+
+        /// <summary>
+        /// load rtf text
+        /// </summary>
+        /// <param name="strText">text in rtf format</param>
+        public void LoadRTFText(string strText)
+        {
+            _myEncoding = null;
+            using (var reader = new RTFReader())
             {
-                if (myFontChartset != null)
+                if (reader.LoadRTFText(strText))
                 {
-                    return myFontChartset;
+                    Load(reader);
+                    reader.Close();
                 }
-                if (myAssociateFontChartset != null)
-                {
-                    return myAssociateFontChartset;
-                }
-                return this.Encoding;
+                reader.Close();
             }
         }
 
-		public void Load( System.IO.TextReader reader )
-		{
-			RTFReader myReader = new RTFReader();
-			myReader.LoadReader( reader );
-			Load( myReader );
-		}
-		/// <summary>
-		/// load rtf
-		/// </summary>
-		/// <param name="reader">RTF text reader</param>
-		public void Load( RTFReader reader )
-		{
-			myNodes.Clear();
-			Stack<RTFNodeGroup> groups = new Stack<RTFNodeGroup>();
-			RTFNodeGroup NewGroup = null ;
-			RTFNode NewNode = null;
-			while( reader.ReadToken() != null )
-			{
-				if( reader.TokenType == RTFTokenType.GroupStart )
-				{
-					// begin group
-					if( NewGroup == null)
-					{
-						NewGroup = this ;
-					}
-					else
-					{
-						NewGroup = new RTFNodeGroup();
-						NewGroup.OwnerDocument = this ;
-					}
-					if( NewGroup != this )
-					{
-						RTFNodeGroup g = ( RTFNodeGroup ) groups.Peek();
-						g.AppendChild( NewGroup );
-					}
-					groups.Push( NewGroup );
-				}
-				else if( reader.TokenType == RTFTokenType.GroupEnd )
-				{
-					// end group
-					NewGroup = ( RTFNodeGroup ) groups.Pop();
-					NewGroup.MergeText();
-                    if (NewGroup.FirstNode is RTFNode)
+        /// <summary>
+        /// load rtf file
+        /// </summary>
+        public void Load(Stream stream)
+        {
+            _myEncoding = null;
+            using (var reader = new RTFReader())
+            {
+                reader.LoadStream(stream);
+
+                Load(reader);
+                reader.Close();
+            }
+        }
+
+        public void Load(TextReader reader)
+        {
+            var myReader = new RTFReader();
+            myReader.LoadReader(reader);
+            Load(myReader);
+        }
+
+        /// <summary>
+        /// load rtf
+        /// </summary>
+        /// <param name="reader">RTF text reader</param>
+        public void Load(RTFReader reader)
+        {
+            MyNodes.Clear();
+            var groups = new Stack<RTFNodeGroup>();
+            RTFNodeGroup newGroup = null;
+            RTFNode newNode = null;
+            while (reader.ReadToken() != null)
+            {
+                if (reader.TokenType == RTFTokenType.GroupStart)
+                {
+                    // begin group
+                    if (newGroup == null)
                     {
-                        switch (NewGroup.Keyword)
+                        newGroup = this;
+                    }
+                    else
+                    {
+                        newGroup = new RTFNodeGroup();
+                        newGroup.OwnerDocument = this;
+                    }
+                    if (newGroup != this)
+                    {
+                        var g = groups.Peek();
+                        g.AppendChild(newGroup);
+                    }
+                    groups.Push(newGroup);
+                }
+                else if (reader.TokenType == RTFTokenType.GroupEnd)
+                {
+                    // end group
+                    newGroup = groups.Pop();
+                    newGroup.MergeText();
+                    if (newGroup.FirstNode is RTFNode)
+                    {
+                        switch (newGroup.Keyword)
                         {
-                            case RTFConsts._fonttbl:
+                            case RTFConsts.Fonttbl:
                                 // read font table
-                                ReadFontTable(NewGroup);
+                                ReadFontTable(newGroup);
                                 break;
-                            case RTFConsts._colortbl:
+                            case RTFConsts.Colortbl:
                                 // read color table
-                                ReadColorTable(NewGroup);
+                                ReadColorTable(newGroup);
                                 break;
-                            case RTFConsts._info :
+                            case RTFConsts.Info:
                                 // read document information
-                                ReadDocumentInfo(NewGroup);
+                                ReadDocumentInfo(newGroup);
                                 break;
                         }
                     }
                     if (groups.Count > 0)
                     {
-                        NewGroup = (RTFNodeGroup)groups.Peek();
+                        newGroup = groups.Peek();
                     }
                     else
                     {
                         break;
                     }
-					//NewGroup.MergeText();
-				}
-				else
-				{
-					// read content
-					 
-					NewNode = new RTFNode( reader.CurrentToken );
-					NewNode.OwnerDocument = this ;
-					NewGroup.AppendChild( NewNode );
-                    if (NewNode.Keyword == RTFConsts._f )
+                    //NewGroup.MergeText();
+                }
+                else
+                {
+                    // read content
+
+                    newNode = new RTFNode(reader.CurrentToken);
+                    newNode.OwnerDocument = this;
+                    newGroup.AppendChild(newNode);
+                    if (newNode.Keyword == RTFConsts.F)
                     {
-                        RTFFont font = this.FontTable[NewNode.Parameter];
+                        var font = FontTable[newNode.Parameter];
                         if (font != null)
                         {
-                            myFontChartset = font.Encoding;
+                            _myFontChartset = font.Encoding;
                         }
                         else
                         {
-                            myFontChartset = null;
+                            _myFontChartset = null;
                         }
                         //myFontChartset = RTFFont.GetRTFEncoding( NewNode.Parameter );
                     }
-                    else if (NewNode.Keyword == RTFConsts._af)
+                    else if (newNode.Keyword == RTFConsts.Af)
                     {
-                        RTFFont font = this.FontTable[NewNode.Parameter];
+                        var font = FontTable[newNode.Parameter];
                         if (font != null)
                         {
-                            myAssociateFontChartset = font.Encoding;
+                            _myAssociateFontChartset = font.Encoding;
                         }
                         else
                         {
-                            myAssociateFontChartset = null;
+                            _myAssociateFontChartset = null;
                         }
                     }
-				}
-			}// while( reader.ReadToken() != null )
-			while( groups.Count > 0 )
-			{
-				NewGroup = ( RTFNodeGroup ) groups.Pop();
-				NewGroup.MergeText();
-			}
-			//this.UpdateInformation();
-		}
+                }
+            } // while( reader.ReadToken() != null )
+            while (groups.Count > 0)
+            {
+                newGroup = groups.Pop();
+                newGroup.MergeText();
+            }
+            //this.UpdateInformation();
+        }
 
-		/// <summary>
-		/// write rtf
-		/// </summary>
-		/// <param name="writer">RTF writer</param>
-		public override void Write(RTFWriter writer)
-		{
-			writer.Encoding = this.Encoding ;
-			base.Write (writer);
-		}
+        /// <summary>
+        /// write rtf
+        /// </summary>
+        /// <param name="writer">RTF writer</param>
+        public override void Write(RTFWriter writer)
+        {
+            writer.Encoding = Encoding;
+            base.Write(writer);
+        }
 
 
-		/// <summary>
-		/// Save rtf to a stream
-		/// </summary>
-		/// <param name="stream">stream</param>
-		public void Save( System.IO.Stream stream )
-		{
-			using( RTFWriter writer = new RTFWriter( new System.IO.StreamWriter( stream , this.Encoding )))
-			{
-				this.Write( writer );
-				writer.Close();
-			}
-		}
-	}
+        /// <summary>
+        /// Save rtf to a stream
+        /// </summary>
+        /// <param name="stream">stream</param>
+        public void Save(Stream stream)
+        {
+            using (var writer = new RTFWriter(new StreamWriter(stream, Encoding)))
+            {
+                Write(writer);
+                writer.Close();
+            }
+        }
+    }
 }

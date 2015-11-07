@@ -7,82 +7,66 @@
  * 
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel;
 
 namespace RtfDomParser
 {
     public class RTFBorderStyle
     {
-        private bool _Left = false;
-        [DefaultValue( false )]
-        public bool Left
+        private Color _color = Color.Black;
+
+        private DashStyle _style = DashStyle.Solid;
+
+        public RTFBorderStyle()
         {
-            get { return _Left; }
-            set { _Left = value; }
+            Thickness = false;
+            Bottom = false;
+            Right = false;
+            Top = false;
+            Left = false;
         }
 
-        private bool _Top = false;
         [DefaultValue(false)]
-        public bool Top
-        {
-            get { return _Top; }
-            set { _Top = value; }
-        }
+        public bool Left { get; set; }
 
-        private bool _Right = false;
         [DefaultValue(false)]
-        public bool Right
-        {
-            get { return _Right; }
-            set { _Right = value; }
-        }
+        public bool Top { get; set; }
 
-        private bool _Bottom = false;
         [DefaultValue(false)]
-        public bool Bottom
-        {
-            get { return _Bottom; }
-            set { _Bottom = value; }
-        }
+        public bool Right { get; set; }
 
-        private DashStyle _Style = DashStyle.Solid;
+        [DefaultValue(false)]
+        public bool Bottom { get; set; }
+
         [DefaultValue(DashStyle.Solid)]
         public DashStyle Style
         {
-            get { return _Style; }
-            set { _Style = value; }
+            get { return _style; }
+            set { _style = value; }
         }
 
-        private Color _Color = Color.Black;
-        [DefaultValue(typeof( Color ) , "Black")]
+        [DefaultValue(typeof (Color), "Black")]
         public Color Color
         {
-            get { return _Color; }
-            set { _Color = value; }
+            get { return _color; }
+            set { _color = value; }
         }
 
-        private bool _Thickness = false;
-
-        public bool Thickness
-        {
-            get { return _Thickness; }
-            set { _Thickness = value; }
-        }
+        public bool Thickness { get; set; }
 
 
         public RTFBorderStyle Clone()
         {
-            RTFBorderStyle b = new RTFBorderStyle();
-            b._Bottom = this._Bottom;
-            b._Color = this._Color;
-            b._Left = this._Left;
-            b._Right = this._Right;
-            b._Style = this._Style;
-            b._Top = this._Top;
-            b._Thickness = this._Thickness;
+            var b = new RTFBorderStyle
+            {
+                Bottom = Bottom,
+                _color = _color,
+                Left = Left,
+                Right = Right,
+                _style = _style,
+                Top = Top,
+                Thickness = Thickness
+            };
             return b;
         }
 
@@ -96,20 +80,7 @@ namespace RtfDomParser
             {
                 return false;
             }
-            if (b._Bottom != this._Bottom
-                || b._Color != this._Color
-                || b._Left != this._Left
-                || b._Right != this._Right
-                || b._Style != this._Style
-                || b._Top != this._Top
-                || b._Thickness != this._Thickness )
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return b.Bottom == Bottom && b._color == _color && b.Left == Left && b.Right == Right && b._style == _style && b.Top == Top && b.Thickness == Thickness;
         }
     }
 }

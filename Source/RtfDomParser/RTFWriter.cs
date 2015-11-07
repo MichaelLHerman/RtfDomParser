@@ -1,4 +1,4 @@
-/*
+ï»¿/*
  * 
  *   DCSoft RTF DOM v1.0
  *   Author : Yuan yong fu.
@@ -8,18 +8,56 @@
  */
 
 
-
 using System;
 using System.IO;
+using System.Text;
 
 namespace RtfDomParser
 {
-	/// <summary>
+    /// <summary>
     /// RTF text writer ,  this source code evolution from other software.
-	/// </summary>
-	public class RTFWriter : System.IDisposable
-	{
-	
+    /// </summary>
+    public class RTFWriter : IDisposable
+    {
+        /// <summary>
+        /// hex characters
+        /// </summary>
+        private const string Hexs = "0123456789abcdef";
+
+        private int _codePageNumber = 1252;
+
+        /// <summary>
+        /// current group level
+        /// </summary>
+        private int _intGroupLevel;
+
+        /// <summary>
+        /// current line head
+        /// </summary>
+        private int _intLineHead;
+
+        /// <summary>
+        /// current position
+        /// </summary>
+        private int _intPosition;
+
+        /// <summary>
+        /// for chinese , can use System.Text.Encoding.GetEncoding( 936 );
+        /// </summary>
+        private Encoding _myEncoding = Encoding.UTF8;
+
+        /// <summary>
+        /// inner text writer
+        /// </summary>
+        private TextWriter _myWriter;
+
+        private string _strIndentString = "   ";
+
+//		public void WriteRaw( string raw )
+//		{
+//			InnerWrite( raw );
+//		}
+
         /*
 		#region test ******************************************************
          
@@ -32,7 +70,7 @@ namespace RtfDomParser
 			RTFWriter w = new RTFWriter( "c:\\a.rtf" ) ;
 			TestBuildRTF( w );
 			w.Close();
-			System.Windows.Forms.MessageBox.Show("OK , you can open file c:\\a.rtf ÁË.");
+			System.Windows.Forms.MessageBox.Show("OK , you can open file c:\\a.rtf ï¿½ï¿½.");
 		}
 
 		/// <summary>
@@ -108,160 +146,136 @@ namespace RtfDomParser
 
          */
 
-		/// <summary>
-		/// Initialize instance
-		/// </summary>
-		/// <param name="w">text writer</param>
-		public RTFWriter( System.IO.TextWriter w )
-		{
-			myWriter = w ;
-		}
-
-		/// <summary>
-		/// Initialize instance
-		/// </summary>
-		/// <param name="strFileName">file name</param>
-		public RTFWriter( Stream strFileName )
-		{
-			myWriter = new System.IO.StreamWriter(
-				strFileName ,
-				System.Text.Encoding.GetEncoding("us-ascii") );
-		}
+        /// <summary>
+        /// Initialize instance
+        /// </summary>
+        /// <param name="w">text writer</param>
+        public RTFWriter(TextWriter w)
+        {
+            Indent = false;
+            _myWriter = w;
+        }
 
         /// <summary>
-        /// for chinese , can use System.Text.Encoding.GetEncoding( 936 );
+        /// Initialize instance
         /// </summary>
-        private System.Text.Encoding myEncoding = System.Text.Encoding.UTF8;
-		/// <summary>
-		/// text encoding
-		/// </summary>
-		public System.Text.Encoding Encoding
-		{
-			get{ return myEncoding ;}
-			set{ myEncoding = value;}
-		}
+        /// <param name="strFileName">file name</param>
+        public RTFWriter(Stream strFileName)
+        {
+            Indent = false;
+            _myWriter = new StreamWriter(
+                strFileName,
+                Encoding.GetEncoding("us-ascii"));
+        }
 
-        private int codePageNumber = 1252;
-        public int CodePageNumber { get { return codePageNumber; } set { codePageNumber = value; } }
+        /// <summary>
+        /// text encoding
+        /// </summary>
+        public Encoding Encoding
+        {
+            get { return _myEncoding; }
+            set { _myEncoding = value; }
+        }
 
-		/// <summary>
-		/// inner text writer
-		/// </summary>
-		private System.IO.TextWriter myWriter = null;
+        public int CodePageNumber
+        {
+            get { return _codePageNumber; }
+            set { _codePageNumber = value; }
+        }
 
-		private bool bolIndent = false;
-		/// <summary>
-		/// whether output rtf code with indent style
-		/// </summary>
-		/// <remarks>
+        /// <summary>
+        /// whether output rtf code with indent style
+        /// </summary>
+        /// <remarks>
         /// In rtf formation , recommend do not use indent . this option just to debugger , 
         /// in software development , use this option can genereate indented rtf code friendly to read,
         /// but after debug , recommend clear this option and set this attribute = false.
         /// </remarks>
-		public bool Indent
-		{
-			get
-            {
-                return bolIndent ;
-            }
-			set
-            {
-                bolIndent = value;
-            }
-		}
+        public bool Indent { get; set; }
 
-		private string strIndentString = "   ";
-		/// <summary>
-		/// string used to indent
-		/// </summary>
-		public string IndentString
-		{
-			get
-            {
-                return strIndentString ;
-            }
-			set
-            {
-                strIndentString = value;
-            }
-		}
-
-		/// <summary>
-		/// current group level
-		/// </summary>
-		private int intGroupLevel = 0 ;
         /// <summary>
-        /// µ±Ç°×éºÏµÈ¼¶
+        /// string used to indent
         /// </summary>
-        public int GroupLevel
+        public string IndentString
         {
-            get
-            {
-                return intGroupLevel;
-            }
+            get { return _strIndentString; }
+            set { _strIndentString = value; }
         }
 
-		/// <summary>
-		/// close 
-		/// </summary>
-		public void Close()
-		{
-			if(this.intGroupLevel > 0 )
-				throw new System.Exception("Some group does not finish");
-			if( myWriter != null )
-			{
-				myWriter.Dispose();
-				myWriter = null;
-			}
-		}
+        public int GroupLevel
+        {
+            get { return _intGroupLevel; }
+        }
+
+        /// <summary>
+        /// dispose instance
+        /// </summary>
+        public void Dispose()
+        {
+            Close();
+        }
+
+        /// <summary>
+        /// close 
+        /// </summary>
+        public void Close()
+        {
+            if (_intGroupLevel > 0)
+                throw new Exception("Some group does not finish");
+            if (_myWriter != null)
+            {
+                _myWriter.Dispose();
+                _myWriter = null;
+            }
+        }
 
         public void Flush()
         {
-            if (myWriter != null)
+            if (_myWriter != null)
             {
-                myWriter.Flush();
+                _myWriter.Flush();
             }
         }
 
-		/// <summary>
-		/// write completed group wich one keyword
-		/// </summary>
-		/// <param name="KeyWord">keyword</param>
-		public void WriteGroup( string KeyWord )
-		{
-			this.WriteStartGroup();
-			this.WriteKeyword( KeyWord );
-			this.WriteEndGroup();
-		}
+        /// <summary>
+        /// write completed group wich one keyword
+        /// </summary>
+        /// <param name="keyWord">keyword</param>
+        public void WriteGroup(string keyWord)
+        {
+            WriteStartGroup();
+            WriteKeyword(keyWord);
+            WriteEndGroup();
+        }
 
-		/// <summary>
-		/// begin write group
-		/// </summary>
-		public void WriteStartGroup( )
-		{
-            if (bolIndent)
+        /// <summary>
+        /// begin write group
+        /// </summary>
+        public void WriteStartGroup()
+        {
+            if (Indent)
             {
                 InnerWriteNewLine();
-                myWriter.Write("{");
+                _myWriter.Write("{");
             }
             else
             {
-                myWriter.Write("{");
+                _myWriter.Write("{");
             }
-			intGroupLevel ++ ;
-		}
+            _intGroupLevel ++;
+        }
 
-		/// <summary>
-		/// end write group
-		/// </summary>
+        /// <summary>
+        /// end write group
+        /// </summary>
         public void WriteEndGroup()
         {
-            intGroupLevel--;
-            if (intGroupLevel < 0)
+            _intGroupLevel--;
+            if (_intGroupLevel < 0)
             {
-                throw new System.Exception("group level error");
+                throw new Exception("group level error");
             }
-            if (bolIndent)
+            if (Indent)
             {
                 InnerWriteNewLine();
                 InnerWrite("}");
@@ -272,86 +286,75 @@ namespace RtfDomParser
             }
         }
 
-		/// <summary>
-		/// write raw text
-		/// </summary>
-		/// <param name="txt">text</param>
-		public void WriteRaw( string txt )
-		{
-			if( txt != null && txt.Length > 0 )
-			{
-				InnerWrite( txt );
-			}
-		}
-		/// <summary>
-		/// write keyword
-		/// </summary>
-		/// <param name="Keyword">keyword</param>
-		public void WriteKeyword( string Keyword )
-		{
-			WriteKeyword( Keyword , false );
-		}
-		/// <summary>
-		/// write keyword
-		/// </summary>
-		/// <param name="Keyword">keyword</param>
-		/// <param name="Ext">whether extern key word</param>
-		public void WriteKeyword( string Keyword , bool Ext)
-		{
-			if( Keyword == null || Keyword.Length == 0)
-				throw new System.ArgumentNullException("Öµ²»µÃÎª¿Õ");
-			if( bolIndent == false && ( Keyword == "par" || Keyword == "pard" ) )
-			{
+        /// <summary>
+        /// write raw text
+        /// </summary>
+        /// <param name="txt">text</param>
+        public void WriteRaw(string txt)
+        {
+            if (txt != null && txt.Length > 0)
+            {
+                InnerWrite(txt);
+            }
+        }
+
+        /// <summary>
+        /// write keyword
+        /// </summary>
+        /// <param name="keyword">keyword</param>
+        public void WriteKeyword(string keyword)
+        {
+            WriteKeyword(keyword, false);
+        }
+
+        /// <summary>
+        /// write keyword
+        /// </summary>
+        /// <param name="keyword">keyword</param>
+        /// <param name="ext">whether extern key word</param>
+        public void WriteKeyword(string keyword, bool ext)
+        {
+            if (keyword == null || keyword.Length == 0)
+                throw new ArgumentNullException("Öµï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½");
+            if (Indent == false && (keyword == "par" || keyword == "pard"))
+            {
                 // at the front of par or pard can write new line , will not effect rtf render.
-				InnerWrite( System.Environment.NewLine );
-			}
-			if( this.bolIndent )
-			{
-				if( Keyword == "par" || Keyword == "pard" )
-				{
-					this.InnerWriteNewLine();
-				}
-			}
-			if( Ext )
-				InnerWrite("\\*\\");
-			else
-				InnerWrite("\\");
-			InnerWrite( Keyword );
-		}
+                InnerWrite(Environment.NewLine);
+            }
+            if (Indent)
+            {
+                if (keyword == "par" || keyword == "pard")
+                {
+                    InnerWriteNewLine();
+                }
+            }
+            if (ext)
+                InnerWrite("\\*\\");
+            else
+                InnerWrite("\\");
+            InnerWrite(keyword);
+        }
 
-//		public void WriteRaw( string raw )
-//		{
-//			InnerWrite( raw );
-//		}
+        public void WriteText(string text)
+        {
+            if (text == null || text.Length == 0)
+                return;
 
-		/// <summary>
-		/// text encoding
-		/// </summary>
-		private System.Text.Encoding Unicode = System.Text.Encoding.Unicode ;
-		/// <summary>
-		/// write plain text
-		/// </summary>
-		/// <param name="Text">ÎÄ±¾Öµ</param>
-		public void WriteText( string Text )
-		{
-			if( Text == null || Text.Length == 0 )
-				return ;
-
-			WriteText( Text , true );
-		}
+            WriteText(text, true);
+        }
 
         public void WriteUnicodeText(string text)
         {
             if (string.IsNullOrEmpty(text) == false)
             {
                 WriteKeyword("uc1");
-                foreach (char c in text)
+                foreach (var c in text)
                 {
                     if (c > 127)
                     {
-                        int v = (int)c;
-                        short v2 = (short)v;
-                        WriteKeyword("u" + v2.ToString());
+                        int v = c;
+                        var v2 = (short) v;
+                        WriteKeyword("u" + v2);
                         WriteRaw(" ?");
                     }
                     else
@@ -362,24 +365,24 @@ namespace RtfDomParser
             }
         }
 
-		/// <summary>
-		/// write plain text, can choose write a white space automatic
-		/// </summary>
-		/// <param name="Text">text</param>
-		/// <param name="AutoAddWhitespace">wirte a white space automatic</param>
-		public void WriteText( string Text , bool AutoAddWhitespace )
-		{
-			if( Text == null || Text.Length == 0 )
-				return ;
-			
-			if( AutoAddWhitespace )
-			{
-				InnerWrite( ' ' );
-			}
+        /// <summary>
+        /// write plain text, can choose write a white space automatic
+        /// </summary>
+        /// <param name="text">text</param>
+        /// <param name="autoAddWhitespace">wirte a white space automatic</param>
+        public void WriteText(string text, bool autoAddWhitespace)
+        {
+            if (text == null || text.Length == 0)
+                return;
 
-			for( int iCount = 0 ; iCount < Text.Length ; iCount ++ )
-			{
-				char c = Text[ iCount ] ;
+            if (autoAddWhitespace)
+            {
+                InnerWrite(' ');
+            }
+
+            for (var iCount = 0; iCount < text.Length; iCount ++)
+            {
+                var c = text[iCount];
                 InnerWriteChar(c);
 
                 //if( c == '\t')
@@ -403,14 +406,14 @@ namespace RtfDomParser
                 //        WriteByte( bs[ iCount2 ] );
                 //    }
                 //}
-			}//for( int iCount = 0 ; iCount < Text.Length ; iCount ++ )
-		}
+            } //for( int iCount = 0 ; iCount < Text.Length ; iCount ++ )
+        }
 
         private void InnerWriteChar(char c)
         {
             if (c == '\t')
             {
-                this.WriteKeyword("tab");
+                WriteKeyword("tab");
                 InnerWrite(' ');
             }
             if (c > 32 && c < 127)
@@ -424,8 +427,8 @@ namespace RtfDomParser
             }
             else
             {
-                byte[] bs = myEncoding.GetBytes(c.ToString());
-                for (int iCount2 = 0; iCount2 < bs.Length; iCount2++)
+                var bs = _myEncoding.GetBytes(c.ToString());
+                for (var iCount2 = 0; iCount2 < bs.Length; iCount2++)
                 {
                     InnerWrite("\\\'");
                     WriteByte(bs[iCount2]);
@@ -433,117 +436,96 @@ namespace RtfDomParser
             }
         }
 
-		/// <summary>
-		/// current position
-		/// </summary>
-		private int intPosition = 0 ;
-		/// <summary>
-		/// current line head
-		/// </summary>
-		private int intLineHead = 0 ;
+        /// <summary>
+        /// write binary data
+        /// </summary>
+        /// <param name="bs">binary data</param>
+        public void WriteBytes(byte[] bs)
+        {
+            if (bs == null || bs.Length == 0)
+                return;
+            WriteRaw(" ");
+            for (var iCount = 0; iCount < bs.Length; iCount ++)
+            {
+                if (iCount%32 == 0)
+                {
+                    WriteRaw(Environment.NewLine);
+                    WriteIndent();
+                }
+                else if (iCount%8 == 0)
+                {
+                    WriteRaw(" ");
+                }
+                var b = bs[iCount];
+                var h = (b & 0xf0) >> 4;
+                var l = b & 0xf;
+                _myWriter.Write(Hexs[h]);
+                _myWriter.Write(Hexs[l]);
+                _intPosition += 2;
+            }
+        }
 
-		/// <summary>
-		/// hex characters
-		/// </summary>
-		private const string Hexs = "0123456789abcdef";
+        /// <summary>
+        /// write a byte data
+        /// </summary>
+        /// <param name="b">byte data</param>
+        public void WriteByte(byte b)
+        {
+            var h = (b & 0xf0) >> 4;
+            var l = b & 0xf;
+            _myWriter.Write(Hexs[h]);
+            _myWriter.Write(Hexs[l]);
+            _intPosition += 2;
+            //FixIndent();
+        }
 
-		/// <summary>
-		/// write binary data
-		/// </summary>
-		/// <param name="bs">binary data</param>
-		public void WriteBytes( byte[] bs )
-		{
-			if( bs == null || bs.Length == 0 )
-				return ;
-			WriteRaw( " " );
-			for( int iCount = 0 ; iCount < bs.Length ; iCount ++ )
-			{
-				if( ( iCount % 32 ) == 0 )
-				{
-					this.WriteRaw( System.Environment.NewLine );
-					this.WriteIndent();
-				}
-				else if( ( iCount % 8 ) == 0 )
-				{
-					this.WriteRaw(" ");
-				}
-				byte b = bs[ iCount ] ;
-				int h = ( b & 0xf0 ) >> 4  ;
-				int l = b & 0xf ;
-				myWriter.Write( Hexs[ h ] );
-				myWriter.Write( Hexs[ l ] );
-				intPosition += 2 ;
-			}
-		}
+        #region internal function ******************************************************
 
-		/// <summary>
-		/// write a byte data
-		/// </summary>
-		/// <param name="b">byte data</param>
-		public void WriteByte( byte b )
-		{
-			int h = ( b & 0xf0 ) >> 4 ;
-			int l = b & 0xf ;
-			myWriter.Write( Hexs[ h ] );
-			myWriter.Write( Hexs[ l ] );
-			intPosition += 2 ;
-			//FixIndent();
-		}
+        private void InnerWrite(char c)
+        {
+            _intPosition ++;
+            _myWriter.Write(c);
+        }
 
-		#region internal function ******************************************************
+        private void InnerWrite(string txt)
+        {
+            _intPosition += txt.Length;
+            _myWriter.Write(txt);
+        }
 
-		private void InnerWrite( char c )
-		{
-			intPosition ++ ;
-			myWriter.Write( c );
-		}
-		private void InnerWrite( string txt )
-		{
-			intPosition += txt.Length ;
-			myWriter.Write( txt );
-		}
+        private void FixIndent()
+        {
+            if (Indent)
+            {
+                if (_intPosition - _intLineHead > 100)
+                    InnerWriteNewLine();
+            }
+        }
 
-		private void FixIndent()
-		{
-			if( this.bolIndent )
-			{
-				if( intPosition - intLineHead > 100 )
-					InnerWriteNewLine();
-			}
-		}
+        private void InnerWriteNewLine()
+        {
+            if (Indent)
+            {
+                if (_intPosition > 0)
+                {
+                    InnerWrite(Environment.NewLine);
+                    _intLineHead = _intPosition;
+                    WriteIndent();
+                }
+            }
+        }
 
-		private void InnerWriteNewLine()
-		{
-			if( this.bolIndent )
-			{
-				if( intPosition > 0 )
-				{
-					InnerWrite( System.Environment.NewLine );
-					intLineHead = intPosition ;
-					WriteIndent();
-				}
-			}
-		}
+        private void WriteIndent()
+        {
+            if (Indent)
+            {
+                for (var iCount = 0; iCount < _intGroupLevel; iCount ++)
+                {
+                    InnerWrite(_strIndentString);
+                }
+            }
+        }
 
-		private void WriteIndent( )
-		{
-			if( bolIndent )
-			{
-				for( int iCount = 0 ; iCount < intGroupLevel ; iCount ++ )
-				{
-					InnerWrite( this.strIndentString );
-				}
-			}
-		}
-
-		#endregion 
-
-		/// <summary>
-		/// dispose instance
-		/// </summary>
-		public void Dispose()
-		{
-			this.Close();
-		}
-	}
+        #endregion
+    }
 }

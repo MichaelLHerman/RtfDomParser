@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace RtfDomParser
 {
     public class RTFListOverrideTable : List<RTFListOverride>
     {
-        public RTFListOverrideTable()
+        public RTFListOverride GetById(int id)
         {
-        }
-
-        public RTFListOverride GetByID(int id)
-        {
-            foreach (RTFListOverride item in this)
+            foreach (var item in this)
             {
-                if (item.ID == id)
+                if (item.Id == id)
                 {
                     return item;
                 }
@@ -25,33 +19,27 @@ namespace RtfDomParser
 
     public class RTFListOverride
     {
-        private int _ListID = 0;
+        private int _id = 1;
 
-        public int ListID
+        public RTFListOverride()
         {
-            get { return _ListID; }
-            set { _ListID = value; }
+            ListOverriedCount = 0;
+            ListId = 0;
         }
 
-        private int _ListOverriedCount = 0;
+        public int ListId { get; set; }
 
-        public int ListOverriedCount
+        public int ListOverriedCount { get; set; }
+
+        public int Id
         {
-            get { return _ListOverriedCount; }
-            set { _ListOverriedCount = value; }
-        }
-
-        private int _ID = 1;
-
-        public int ID
-        {
-            get { return _ID; }
-            set { _ID = value; }
+            get { return _id; }
+            set { _id = value; }
         }
 
         public override string ToString()
         {
-            return "ID:" + this.ID + " ListID:" + this.ListID + " Count:" + this.ListOverriedCount;
+            return "ID:" + Id + " ListID:" + ListId + " Count:" + ListOverriedCount;
         }
     }
 }

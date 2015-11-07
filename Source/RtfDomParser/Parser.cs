@@ -10,7 +10,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
+using System.Text;
 
 namespace RtfDomParser
 {
@@ -19,28 +19,51 @@ namespace RtfDomParser
     /// </summary>
     internal class RTFTextContainer
     {
+        private readonly ByteBuffer _myBuffer = new ByteBuffer();
+
+        private StringBuilder _myStr = new StringBuilder();
+
         /// <summary>
         /// initialize instance
         /// </summary>
         /// <param name="doc">owner document</param>
         public RTFTextContainer(RTFDomDocument doc)
         {
-            myDocument = doc;
+            Level = 0;
+            Document = doc;
         }
 
-        private ByteBuffer myBuffer = new ByteBuffer();
-
-        private RTFDomDocument myDocument = null;
         /// <summary>
         /// Owner document
         /// </summary>
-        public RTFDomDocument Document
+        public RTFDomDocument Document { get; set; }
+
+        /// <summary>
+        /// this container has some text
+        /// </summary>
+        public bool HasContent
         {
-            get { return myDocument; }
-            set { myDocument = value; }
+            get
+            {
+                CheckBuffer();
+                return _myStr.Length > 0;
+            }
         }
 
-        private System.Text.StringBuilder myStr = new System.Text.StringBuilder();
+        /// <summary>
+        /// text value
+        /// </summary>
+        public string Text
+        {
+            get
+            {
+                CheckBuffer();
+                return _myStr.ToString();
+            }
+        }
+
+        public int Level { get; set; }
+
         /// <summary>
         /// Append text content
         /// </summary>
@@ -50,7 +73,7 @@ namespace RtfDomParser
             if (string.IsNullOrEmpty(text) == false)
             {
                 CheckBuffer();
-                myStr.Append(text);
+                _myStr.Append(text);
             }
         }
 
@@ -58,8 +81,9 @@ namespace RtfDomParser
         /// Accept rtf token
         /// </summary>
         /// <param name="token">RTF token</param>
+        /// <param name="reader"></param>
         /// <returns>Is accept it?</returns>
-        public bool Accept(RTFToken token , RTFReader reader )
+        public bool Accept(RTFToken token, RTFReader reader)
         {
             if (token == null)
             {
@@ -69,15 +93,14 @@ namespace RtfDomParser
             {
                 if (reader != null)
                 {
-                    if ( token.Key[0] == '?' )
+                    if (token.Key[0] == '?')
                     {
                         if (reader.LastToken != null)
                         {
-                            if (reader.LastToken.Type == RTFTokenType.Keyword 
+                            if (reader.LastToken.Type == RTFTokenType.Keyword
                                 && reader.LastToken.Key == "u"
                                 && reader.LastToken.HasParam)
                             {
-                                // 紧跟在在“\uN”后面的问号忽略掉
                                 if (token.Key.Length > 0)
                                 {
                                     CheckBuffer();
@@ -89,7 +112,6 @@ namespace RtfDomParser
                     }
                     //else if (token.Key == "\"")
                     //{
-                    //    // 双引号开头,一直读取内容到双引号结束
                     //    CheckBuffer();
                     //    while (true)
                     //    {
@@ -114,79 +136,45 @@ namespace RtfDomParser
                     //}
                 }
                 CheckBuffer();
-                myStr.Append(token.Key);
-                return true ;
+                _myStr.Append(token.Key);
+                return true;
             }
-            else if (token.Type == RTFTokenType.Control 
-                && token.Key == "'" && token.HasParam )
+            if (token.Type == RTFTokenType.Control
+                && token.Key == "'" && token.HasParam)
             {
-                if( reader.CurrentLayerInfo.CheckUCValueCount())
+                if (reader.CurrentLayerInfo.CheckUcValueCount())
                 {
-                    myBuffer.Add((byte)token.Param);
+                    _myBuffer.Add((byte) token.Param);
                 }
                 return true;
             }
-            if (token.Key == RTFConsts._u && token.HasParam)
+            if (token.Key == RTFConsts.U && token.HasParam)
             {
                 // Unicode char
                 CheckBuffer();
-                // 不忽略 \u 指令
-                myStr.Append( (char)token.Param);
-                reader.CurrentLayerInfo.UCValueCount = reader.CurrentLayerInfo.UCValue;
+                _myStr.Append((char) token.Param);
+                reader.CurrentLayerInfo.UcValueCount = reader.CurrentLayerInfo.UcValue;
                 return true;
             }
-            if ( token.Key == "tab")
+            if (token.Key == "tab")
             {
                 CheckBuffer();
-                myStr.Append("\t");
+                _myStr.Append("\t");
                 return true;
             }
-            if ( token.Key == "emdash")
+            if (token.Key == "emdash")
             {
                 CheckBuffer();
-                myStr.Append('—');
+                _myStr.Append('—');
                 return true;
             }
-            if ( token.Key == "")
+            if (token.Key == "")
             {
-                // 提示未识别的字符
                 CheckBuffer();
-                myStr.Append('-');
+                _myStr.Append('-');
                 return true;
             }
             return false;
-        }
-
-        /// <summary>
-        /// this container has some text
-        /// </summary>
-        public bool HasContent
-        {
-            get
-            {
-                CheckBuffer();
-                return myStr.Length > 0;
-            }
-        }
-
-        /// <summary>
-        /// text value
-        /// </summary>
-        public string Text
-        {
-            get
-            {
-                CheckBuffer();   
-                return myStr.ToString();
-            }
-        }
-
-        private int intLevel = 0;
-
-        public int Level
-        {
-            get { return intLevel; }
-            set { intLevel = value; }
         }
 
         /// <summary>
@@ -194,51 +182,35 @@ namespace RtfDomParser
         /// </summary>
         public void Clear()
         {
-            myBuffer.Clear();
-            myStr = new System.Text.StringBuilder();
+            _myBuffer.Clear();
+            _myStr = new StringBuilder();
         }
+
         private void CheckBuffer()
         {
-            if (myBuffer.Count > 0)
+            if (_myBuffer.Count > 0)
             {
-                string txt = myBuffer.GetString(myDocument.RuntimeEncoding);
-                myStr.Append(txt);
-                myBuffer.Clear();
+                var txt = _myBuffer.GetString(Document.RuntimeEncoding);
+                _myStr.Append(txt);
+                _myBuffer.Clear();
             }
         }
     }
 
-	public class RTFReader : System.IDisposable
-	{
-		/// <summary>
-		/// initialize instance
-		/// </summary>
-		public RTFReader( )
-		{
-		}
+    public class RTFReader : IDisposable
+    {
+        //private RTFToken myLastToken = null;
+        //public RTFToken LastToken
+        //{
+        //    get
+        //    {
+        //        return myLastToken;
+        //    }
+        //}
 
+        private bool _enableDefaultProcess = true;
 
-        public RTFReader(System.IO.Stream stream)
-        {
-            System.IO.StreamReader reader = new System.IO.StreamReader(stream, System.Text.Encoding.GetEncoding("us-ascii"));
-            LoadReader(reader);
-            myBaseStream = stream;
-        }
-
-        public RTFReader(System.IO.TextReader reader)
-        {
-            LoadReader(reader);
-        }
-
-		private RTFLex myLex = null;
-		//private RTFToken myToken = null ;
-
-        private System.IO.TextReader myReader = null;
-
-        public System.IO.TextReader InnerReader
-        {
-            get { return myReader; }
-        }
+        private readonly Stack<RTFRawLayerInfo> _layerStack = new Stack<RTFRawLayerInfo>();
 
         //private System.Collections.ArrayList myTokenStack = new System.Collections.ArrayList();
         //public System.Collections.ArrayList TokenStack
@@ -249,141 +221,97 @@ namespace RtfDomParser
         //    }
         //}
 
-        private System.IO.Stream myBaseStream = null;
+        private Stream _myBaseStream;
 
-		/// <summary>
-		/// load rtf document
-		/// </summary>
-		/// <param name="strFileName">spcial file name</param>
-		/// <returns>is operation successful</returns>
-		public async Task LoadStream(Stream stream )
-		{
-			//myTokenStack.Clear();
-			myCurrentToken = null ;
-            //var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(strFileName);
-            //var randomAccessStream = await file.OpenReadAsync();
-            
-            //var stream = randomAccessStream.AsStreamForRead();
-
-            //System.IO.FileStream stream = new System.IO.FileStream( strFileName , System.IO.FileMode.Open , System.IO.FileAccess.Read );
-            myReader = new System.IO.StreamReader(stream, System.Text.Encoding.GetEncoding("us-ascii"));
-            myBaseStream = stream;
-			myLex = new RTFLex( myReader );
-		}
-		/// <summary>
-		/// load rtf document
-		/// </summary>
-		/// <param name="reader">text reader</param>
-		/// <returns>is operation successful</returns>
-		public bool LoadReader( System.IO.TextReader reader )
-		{
-			//myTokenStack.Clear();
-			myCurrentToken = null;
-			if( reader != null )
-			{
-				myReader = reader;
-				myLex = new RTFLex( myReader );
-				return true ;
-			}
-			return false;
-		}
-
-		/// <summary>
-		/// load rtf text
-		/// </summary>
-		/// <param name="strText">RTF text</param>
-		/// <returns>is operation successful</returns>
-		public bool LoadRTFText( string strText )
-		{
-			//myTokenStack.Clear();
-			myCurrentToken = null;
-			if( strText != null && strText.Length > 3 )
-			{
-				myReader = new System.IO.StringReader( strText );
-				myLex = new RTFLex( myReader );
-				return true ;
-			}
-			return false ;
-		}
-
-		public void Close()
-		{
-			if( myReader != null )
-			{
-				myReader.Dispose();
-				myReader = null ;
-			}
-		}
-		private RTFToken myCurrentToken = null;
-		/// <summary>
-		/// current token
-		/// </summary>
-		public RTFToken CurrentToken
-		{
-			get{ return myCurrentToken ;}
-		}
-		/// <summary>
-		/// current token's type
-		/// </summary>
-		public RTFTokenType TokenType
-		{
-			get
-			{
-				if( myCurrentToken == null )
-					return RTFTokenType.None ;
-				else
-					return myCurrentToken.Type ;
-			}
-		}
+        private RTFLex _myLex;
+        //private RTFToken myToken = null ;
 
         /// <summary>
-		/// current keyword
-		/// </summary>
-		public string Keyword
-		{
-			get
-			{
-				if( myCurrentToken == null )
-					return null;
-				else
-					return myCurrentToken.Key ;
-			}
-		}
-		/// <summary>
-		/// is current token has a parameter
-		/// </summary>
-		public bool HasParam
-		{
-			get
-			{
-				if( myCurrentToken == null )
-					return false ;
-				else
-					return myCurrentToken.HasParam ;
-			}
-		}
-		/// <summary>
-		/// current parameter
-		/// </summary>
-		public int Parameter
-		{
-			get
-			{
-				if( myCurrentToken == null )
-					return 0 ;
-				else
-					return myCurrentToken.Param ;
-			}
-		}
+        /// initialize instance
+        /// </summary>
+        public RTFReader()
+        {
+        }
+
+
+        public RTFReader(Stream stream)
+        {
+            var reader = new StreamReader(stream, Encoding.GetEncoding("us-ascii"));
+            LoadReader(reader);
+            _myBaseStream = stream;
+        }
+
+        public RTFReader(TextReader reader)
+        {
+            LoadReader(reader);
+        }
+
+        public TextReader InnerReader { get; private set; }
+
+        /// <summary>
+        /// current token
+        /// </summary>
+        public RTFToken CurrentToken { get; private set; }
+
+        /// <summary>
+        /// current token's type
+        /// </summary>
+        public RTFTokenType TokenType
+        {
+            get
+            {
+                if (CurrentToken == null)
+                    return RTFTokenType.None;
+                return CurrentToken.Type;
+            }
+        }
+
+        /// <summary>
+        /// current keyword
+        /// </summary>
+        public string Keyword
+        {
+            get
+            {
+                if (CurrentToken == null)
+                    return null;
+                return CurrentToken.Key;
+            }
+        }
+
+        /// <summary>
+        /// is current token has a parameter
+        /// </summary>
+        public bool HasParam
+        {
+            get
+            {
+                if (CurrentToken == null)
+                    return false;
+                return CurrentToken.HasParam;
+            }
+        }
+
+        /// <summary>
+        /// current parameter
+        /// </summary>
+        public int Parameter
+        {
+            get
+            {
+                if (CurrentToken == null)
+                    return 0;
+                return CurrentToken.Param;
+            }
+        }
 
         public int ContentPosition
         {
             get
             {
-                if (myBaseStream == null)
+                if (_myBaseStream == null)
                     return 0;
-                else
-                    return ( int ) myBaseStream.Position;
+                return (int) _myBaseStream.Position;
             }
         }
 
@@ -391,10 +319,113 @@ namespace RtfDomParser
         {
             get
             {
-                if (myBaseStream == null)
+                if (_myBaseStream == null)
                     return 0;
-                else
-                    return ( int ) myBaseStream.Length;
+                return (int) _myBaseStream.Length;
+            }
+        }
+
+        /// <summary>
+        /// Current token is the first token in owner group
+        /// </summary>
+        public bool FirstTokenInGroup { get; private set; }
+
+        /// <summary>
+        /// lost token
+        /// </summary>
+        public RTFToken LastToken { get; private set; }
+
+        public int Level { get; private set; }
+
+        /// <summary>
+        /// total of this object handle tokens
+        /// </summary>
+        public int TokenCount { get; set; }
+
+        public bool EnableDefaultProcess
+        {
+            get { return _enableDefaultProcess; }
+            set { _enableDefaultProcess = value; }
+        }
+
+        public RTFRawLayerInfo CurrentLayerInfo
+        {
+            get
+            {
+                if (_layerStack.Count == 0)
+                {
+                    _layerStack.Push(new RTFRawLayerInfo());
+                }
+                return _layerStack.Peek();
+            }
+        }
+
+        public void Dispose()
+        {
+            Close();
+        }
+
+        /// <summary>
+        /// load rtf document
+        /// </summary>
+        /// <returns>is operation successful</returns>
+        public void LoadStream(Stream stream)
+        {
+            //myTokenStack.Clear();
+            CurrentToken = null;
+            //var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(strFileName);
+            //var randomAccessStream = await file.OpenReadAsync();
+
+            //var stream = randomAccessStream.AsStreamForRead();
+
+            //System.IO.FileStream stream = new System.IO.FileStream( strFileName , System.IO.FileMode.Open , System.IO.FileAccess.Read );
+            InnerReader = new StreamReader(stream, Encoding.GetEncoding("us-ascii"));
+            _myBaseStream = stream;
+            _myLex = new RTFLex(InnerReader);
+        }
+
+        /// <summary>
+        /// load rtf document
+        /// </summary>
+        /// <param name="reader">text reader</param>
+        /// <returns>is operation successful</returns>
+        public bool LoadReader(TextReader reader)
+        {
+            //myTokenStack.Clear();
+            CurrentToken = null;
+            if (reader != null)
+            {
+                InnerReader = reader;
+                _myLex = new RTFLex(InnerReader);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// load rtf text
+        /// </summary>
+        /// <param name="strText">RTF text</param>
+        /// <returns>is operation successful</returns>
+        public bool LoadRTFText(string strText)
+        {
+            //myTokenStack.Clear();
+            CurrentToken = null;
+            if (strText != null && strText.Length > 3)
+            {
+                InnerReader = new StringReader(strText);
+                _myLex = new RTFLex(InnerReader);
+                return true;
+            }
+            return false;
+        }
+
+        public void Close()
+        {
+            if (InnerReader != null)
+            {
+                InnerReader.Dispose();
+                InnerReader = null;
             }
         }
 
@@ -404,160 +435,83 @@ namespace RtfDomParser
         /// <returns></returns>
         public RTFTokenType PeekTokenType()
         {
-            return myLex.PeekTokenType();
-        }
-
-        //private RTFToken myLastToken = null;
-        //public RTFToken LastToken
-        //{
-        //    get
-        //    {
-        //        return myLastToken;
-        //    }
-        //}
-
-        private bool bolFirstTokenInGroup = false;
-        /// <summary>
-        /// Current token is the first token in owner group
-        /// </summary>
-        public bool FirstTokenInGroup
-        {
-            get
-            {
-                return bolFirstTokenInGroup; 
-            }
-        }
-
-        private RTFToken myLastToken = null;
-        /// <summary>
-        /// lost token
-        /// </summary>
-        public RTFToken LastToken
-        {
-            get
-            {
-                return myLastToken; 
-            }
-        }
-
-        private int intLevel = 0;
-        public int Level
-        {
-            get
-            {
-                return intLevel;
-            }
-        }
-
-        private int intTokenCount = 0;
-        /// <summary>
-        /// total of this object handle tokens
-        /// </summary>
-        public int TokenCount
-        {
-            get
-            {
-                return intTokenCount; 
-            }
-            set
-            {
-                intTokenCount = value; 
-            }
-        }
-
-        private bool _EnableDefaultProcess = true;
-
-        public bool EnableDefaultProcess
-        {
-            get { return _EnableDefaultProcess; }
-            set { _EnableDefaultProcess = value; }
+            return _myLex.PeekTokenType();
         }
 
         public void DefaultProcess()
         {
-            if (this.CurrentToken != null)
+            if (CurrentToken != null)
             {
-                switch (this.CurrentToken.Key)
+                switch (CurrentToken.Key)
                 {
                     case "uc":
-                        this.CurrentLayerInfo.UCValue = this.Parameter;
+                        CurrentLayerInfo.UcValue = Parameter;
                         break;
                 }
             }
         }
-        private Stack<RTFRawLayerInfo> _LayerStack = new Stack<RTFRawLayerInfo>();
-        public RTFRawLayerInfo CurrentLayerInfo
+
+        /// <summary>
+        /// read token
+        /// </summary>
+        /// <returns>token readed</returns>
+        public RTFToken ReadToken()
         {
-            get
+            FirstTokenInGroup = false;
+            LastToken = CurrentToken;
+            if (LastToken != null && LastToken.Type == RTFTokenType.GroupStart)
             {
-                if (_LayerStack.Count == 0)
-                {
-                    _LayerStack.Push(new RTFRawLayerInfo());
-                }
-                return _LayerStack.Peek();
+                FirstTokenInGroup = true;
             }
-        }
-		/// <summary>
-		/// read token
-		/// </summary>
-		/// <returns>token readed</returns>
-		public RTFToken ReadToken()
-		{
-            bolFirstTokenInGroup = false;
-            myLastToken = myCurrentToken;
-            if (myLastToken != null && myLastToken.Type == RTFTokenType.GroupStart)
+            CurrentToken = _myLex.NextToken();
+            if (CurrentToken == null || CurrentToken.Type == RTFTokenType.Eof)
             {
-                bolFirstTokenInGroup = true;
+                CurrentToken = null;
+                return null;
             }
-			myCurrentToken = myLex.NextToken( );
-			if( myCurrentToken == null || myCurrentToken.Type == RTFTokenType.Eof )
-			{
-				myCurrentToken = null;
-				return null;
-			}
-            intTokenCount++;
-            if (myCurrentToken.Type == RTFTokenType.GroupStart)
+            TokenCount++;
+            if (CurrentToken.Type == RTFTokenType.GroupStart)
             {
-                if (_LayerStack.Count == 0)
+                if (_layerStack.Count == 0)
                 {
-                    _LayerStack.Push(new RTFRawLayerInfo());
+                    _layerStack.Push(new RTFRawLayerInfo());
                 }
                 else
                 {
-                    RTFRawLayerInfo info = _LayerStack.Peek();
-                    _LayerStack.Push(info.Clone());
+                    var info = _layerStack.Peek();
+                    _layerStack.Push(info.Clone());
                 }
-                intLevel++;
+                Level++;
             }
-            else if (myCurrentToken.Type == RTFTokenType.GroupEnd)
+            else if (CurrentToken.Type == RTFTokenType.GroupEnd)
             {
-                if (_LayerStack.Count > 0)
+                if (_layerStack.Count > 0)
                 {
-                    _LayerStack.Pop();
+                    _layerStack.Pop();
                 }
-                intLevel--;
+                Level--;
             }
-            if (this.EnableDefaultProcess)
+            if (EnableDefaultProcess)
             {
-                this.DefaultProcess();
+                DefaultProcess();
             }
             //if (myTokenStack.Count > 0)
             //{
             //    myCurrentToken.Parent = (RTFToken)myTokenStack[myTokenStack.Count - 1];
             //}
             //myTokenStack.Add( myCurrentToken );
-			return myCurrentToken ;
-		}
+            return CurrentToken;
+        }
 
         /// <summary>
         /// read and ignore data , until just the end of current group,preserve the end.
         /// </summary>
-        public void ReadToEndGround( )
+        public void ReadToEndGround()
         {
-            int level = 0;
+            var level = 0;
             while (true)
             {
-                int c = myReader.Peek();
+                var c = InnerReader.Peek();
                 if (c == -1)
                 {
                     break;
@@ -574,117 +528,104 @@ namespace RtfDomParser
                         break;
                     }
                 }
-                c = myReader.Read();
+                c = InnerReader.Read();
             }
         }
-
-		public void Dispose()
-		{
-			this.Close();
-		}
 
         public override string ToString()
         {
-            return "RTFReader Level:" + intLevel + " " + this.Keyword ;
+            return "RTFReader Level:" + Level + " " + Keyword;
         }
-	}
- 
-	public class RTFLex
-	{
-		/// <summary>
-		/// Initialize instance
-		/// </summary>
-		/// <param name="reader">reader</param>
-		public RTFLex( System.IO.TextReader reader )
-		{
-			myReader = reader ;
-		}
+    }
 
-		private System.IO.TextReader myReader = null;
-		private const int EOF = -1 ;
+    public class RTFLex
+    {
+        private const int Eof = -1;
+
+        private readonly TextReader _myReader;
+
+        /// <summary>
+        /// Initialize instance
+        /// </summary>
+        /// <param name="reader">reader</param>
+        public RTFLex(TextReader reader)
+        {
+            _myReader = reader;
+        }
 
         public RTFTokenType PeekTokenType()
         {
-            int c = myReader.Peek();
+            var c = _myReader.Peek();
 
             while (c == '\r'
-                || c == '\n'
-                || c == '\t'
-                || c == '\0')
+                   || c == '\n'
+                   || c == '\t'
+                   || c == '\0')
             {
-                c = myReader.Read();
-                c = myReader.Peek();
+                _myReader.Read();
+                c = _myReader.Peek();
             }
-            if (c == EOF)
+            if (c == Eof)
             {
                 return RTFTokenType.Eof;
             }
-            else
+            switch (c)
             {
-                switch (c)
-                {
-                    case '{':
-                        return RTFTokenType.GroupStart;
-                    case '}':
-                        return RTFTokenType.GroupEnd;
-                    case '\\':
-                        return RTFTokenType.Control;
-                    default:
-                        return RTFTokenType.Text;
-                }
+                case '{':
+                    return RTFTokenType.GroupStart;
+                case '}':
+                    return RTFTokenType.GroupEnd;
+                case '\\':
+                    return RTFTokenType.Control;
+                default:
+                    return RTFTokenType.Text;
             }
         }
 
 
-		/// <summary>
-		/// read next token
-		/// </summary>
-		/// <returns>token</returns>
-		public RTFToken NextToken( )
-		{
-			int c = 0 ;
-			RTFToken token = new RTFToken();
+        /// <summary>
+        /// read next token
+        /// </summary>
+        /// <returns>token</returns>
+        public RTFToken NextToken()
+        {
+            int c;
+            var token = new RTFToken();
 
-			//myReader.Read();
+            //myReader.Read();
 
-			c = myReader.Read();
+            c = _myReader.Read();
             if (c == '\"')
             {
-                // 以双引号开头，读取连续的字符
-                System.Text.StringBuilder str = new System.Text.StringBuilder();
+                var str = new StringBuilder();
                 while (true)
                 {
-                    c = myReader.Read();
+                    c = _myReader.Read();
                     if (c < 0)
                     {
-                        // 读取结束
                         break;
                     }
                     if (c == '\"')
                     {
-                        // 读取结束
                         break;
                     }
-                    else
-                    {
-                        str.Append((char)c);
-                    }
-                }//while
+                    str.Append((char) c);
+                } //while
                 token.Type = RTFTokenType.Text;
                 token.Key = str.ToString();
                 return token;
             }
 
-			while( c == '\r'
-				|| c == '\n'
-				|| c == '\t'
-				|| c == '\0' )
-			{
-				c = myReader.Read();
-				//c = myReader.Peek();
-			}
+            while (c == '\r'
+                   || c == '\n'
+                   || c == '\t'
+                   || c == '\0')
+            {
+                c = _myReader.Read();
+                //c = myReader.Peek();
+            }
 
-			//
+            //
 //			c = myReader.Read();
 //			while( c == '\r'
 //				|| c == '\n' 
@@ -693,212 +634,203 @@ namespace RtfDomParser
 //			{
 //				c = myReader.Read();
 //			}
-			if( c != EOF )
-			{
-				switch( c )
-				{
-					case '{' :
-						token.Type = RTFTokenType.GroupStart ;
-						break;
-					case '}' :
-						token.Type = RTFTokenType.GroupEnd ;
-						break;
-					case '\\' :
-						ParseKeyword( token );
-						break;
-					default:
-						token.Type = RTFTokenType.Text ;
+            if (c != Eof)
+            {
+                switch (c)
+                {
+                    case '{':
+                        token.Type = RTFTokenType.GroupStart;
+                        break;
+                    case '}':
+                        token.Type = RTFTokenType.GroupEnd;
+                        break;
+                    case '\\':
+                        ParseKeyword(token);
+                        break;
+                    default:
+                        token.Type = RTFTokenType.Text;
                         ParseText(c, token);
-						break;
-				}
-			}
-			else
-			{
-				token.Type = RTFTokenType.Eof ;
-			}
-			return token ;
-		}
+                        break;
+                }
+            }
+            else
+            {
+                token.Type = RTFTokenType.Eof;
+            }
+            return token;
+        }
 
-		private void ParseKeyword( RTFToken token )
-		{
-			int c = 0 ;
-			bool ext = false;
-			c = myReader.Peek();
-			if( char.IsLetter( ( char ) c ) == false )
-			{
-				myReader.Read();
-				if( c == '*' )
-				{
-					// expend keyword
-					token.Type = RTFTokenType.Keyword ;
-					myReader.Read();
-					//myReader.Read();
-					ext = true ;
-					goto ReadKeywrod ;
-				}
-				else if( c == '\\' || c == '{' || c == '}' )
-				{
-					// special character
-					token.Type = RTFTokenType.Text ;
-					token.Key = ( ( char ) c).ToString();
-				}
-				else
-				{
-					token.Type = RTFTokenType.Control ;
-					token.Key = ( ( char ) c ).ToString();
-					if( token.Key == "\'" )
-					{
-						// read 2 hex characters
-						System.Text.StringBuilder text = new System.Text.StringBuilder();
-						text.Append( ( char ) myReader.Read());
-						text.Append( ( char ) myReader.Read());
-						token.HasParam = true ;
-						token.Param = Convert.ToInt32( text.ToString().ToLower() , 16 );
-						if( token.Param == 0 )
-						{
-							token.Param = 0 ;
-						}
-					}
-				}
-				return ;
-			}//if( char.IsLetter( ( char ) c ) == false )
+        private void ParseKeyword(RTFToken token)
+        {
+            int c;
+            var ext = false;
+            c = _myReader.Peek();
+            if (char.IsLetter((char) c) == false)
+            {
+                _myReader.Read();
+                if (c == '*')
+                {
+                    // expend keyword
+                    token.Type = RTFTokenType.Keyword;
+                    _myReader.Read();
+                    //myReader.Read();
+                    ext = true;
+                    goto ReadKeywrod;
+                }
+                if (c == '\\' || c == '{' || c == '}')
+                {
+                    // special character
+                    token.Type = RTFTokenType.Text;
+                    token.Key = ((char) c).ToString();
+                }
+                else
+                {
+                    token.Type = RTFTokenType.Control;
+                    token.Key = ((char) c).ToString();
+                    if (token.Key == "\'")
+                    {
+                        // read 2 hex characters
+                        var text = new StringBuilder();
+                        text.Append((char) _myReader.Read());
+                        text.Append((char) _myReader.Read());
+                        token.HasParam = true;
+                        token.Param = Convert.ToInt32(text.ToString().ToLower(), 16);
+                        if (token.Param == 0)
+                        {
+                            token.Param = 0;
+                        }
+                    }
+                }
+                return;
+            } //if( char.IsLetter( ( char ) c ) == false )
 
-		ReadKeywrod :
+            ReadKeywrod :
 
-			// read keyword
-			System.Text.StringBuilder Keyword = new System.Text.StringBuilder();
-			c = myReader.Peek();
-			while( char.IsLetter ( ( char ) c ))
-			{
-				myReader.Read();
-				Keyword .Append( ( char ) c );
-				c = myReader.Peek();
-			}
+            // read keyword
+            var keyword = new StringBuilder();
+            c = _myReader.Peek();
+            while (char.IsLetter((char) c))
+            {
+                _myReader.Read();
+                keyword.Append((char) c);
+                c = _myReader.Peek();
+            }
 
-			if( ext )
-				token.Type = RTFTokenType.ExtKeyword ;
-			else
-				token.Type = RTFTokenType.Keyword ;
-			token.Key = Keyword.ToString();
+            if (ext)
+                token.Type = RTFTokenType.ExtKeyword;
+            else
+                token.Type = RTFTokenType.Keyword;
+            token.Key = keyword.ToString();
 
-			// read a interger
-			if( char.IsDigit( ( char ) c ) || c == '-' )
-			{
-				token.HasParam = true ;
-				bool Negative = false;
-				if( c == '-' )
-				{
-					Negative = true ;
-					myReader.Read();
-				}
-				c = myReader.Peek();
-				System.Text.StringBuilder text = new System.Text.StringBuilder();
-				while( char.IsDigit( ( char ) c ))
-				{
-					myReader.Read();
-					text.Append( ( char ) c );
-					c = myReader.Peek();
-				}
-				int p = Convert.ToInt32( text.ToString());
-				if( Negative )
-					p = - p ;
-				token.Param = p ;
-			}//if( char.IsDigit( ( char ) c ) || c == '-' )
+            // read a interger
+            if (char.IsDigit((char) c) || c == '-')
+            {
+                token.HasParam = true;
+                var negative = false;
+                if (c == '-')
+                {
+                    negative = true;
+                    _myReader.Read();
+                }
+                c = _myReader.Peek();
+                var text = new StringBuilder();
+                while (char.IsDigit((char) c))
+                {
+                    _myReader.Read();
+                    text.Append((char) c);
+                    c = _myReader.Peek();
+                }
+                var p = Convert.ToInt32(text.ToString());
+                if (negative)
+                    p = -p;
+                token.Param = p;
+            } //if( char.IsDigit( ( char ) c ) || c == '-' )
 
-			if( c == ' ' )
-			{
-				myReader.Read();
-			}
-		}
+            if (c == ' ')
+            {
+                _myReader.Read();
+            }
+        }
 
-		private void ParseText( int c , RTFToken token )
-		{
-			System.Text.StringBuilder myStr = new System.Text.StringBuilder( ( ( char ) c ).ToString());
+        private void ParseText(int c, RTFToken token)
+        {
+            var myStr = new StringBuilder(((char) c).ToString());
 
-			c = ClearWhiteSpace();
+            c = ClearWhiteSpace();
 
-			while( c != '\\' && c != '}' && c != '{' && c != EOF )
-			{
-				myReader.Read();
-				myStr.Append( ( char ) c );
-				c = ClearWhiteSpace();
-			}
+            while (c != '\\' && c != '}' && c != '{' && c != Eof)
+            {
+                _myReader.Read();
+                myStr.Append((char) c);
+                c = ClearWhiteSpace();
+            }
 
-			token.Key = myStr.ToString();
-		}
-		
-		private int ClearWhiteSpace( )
-		{
-			int c = myReader.Peek();
-			while( c == '\r'
-				|| c == '\n'
-				|| c == '\t'
-				|| c == '\0' )
-			{
-				myReader.Read();
-				c = myReader.Peek();
-			}
-			return c ;
-		}
-	}
-	/// <summary>
-	/// rtf token type
-	/// </summary>
-	public class RTFToken
-	{
-		private RTFTokenType intType = RTFTokenType.None ;
-		/// <summary>
-		/// type
-		/// </summary>
-		public RTFTokenType Type
-		{
-			get{ return intType ;}
-			set{ intType = value;}
-		}
+            token.Key = myStr.ToString();
+        }
 
-		private string strKey = null;
-		/// <summary>
-		/// keyword
-		/// </summary>
-		public string Key
-		{
-			get{ return strKey ;}
-			set{ strKey = value;}
-		}
+        private int ClearWhiteSpace()
+        {
+            var c = _myReader.Peek();
+            while (c == '\r'
+                   || c == '\n'
+                   || c == '\t'
+                   || c == '\0')
+            {
+                _myReader.Read();
+                c = _myReader.Peek();
+            }
+            return c;
+        }
+    }
 
-		private bool bolHasParam = false;
-		/// <summary>
-		/// 
-		/// </summary>
-		public bool HasParam
-		{
-			get{ return bolHasParam ;}
-			set{ bolHasParam = value;}
-		}
+    /// <summary>
+    /// rtf token type
+    /// </summary>
+    public class RTFToken
+    {
+        private RTFTokenType _intType = RTFTokenType.None;
 
-		private int intParam = 0 ;
-		public int Param
-		{
-			get{ return intParam ;}
-			set{ intParam = value;}
-		}
+        public RTFToken()
+        {
+            Parent = null;
+            Param = 0;
+            HasParam = false;
+            Key = null;
+        }
 
-        private RTFToken myParent = null;
+        /// <summary>
+        /// type
+        /// </summary>
+        public RTFTokenType Type
+        {
+            get { return _intType; }
+            set { _intType = value; }
+        }
+
+        /// <summary>
+        /// keyword
+        /// </summary>
+        public string Key { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool HasParam { get; set; }
+
+        public int Param { get; set; }
+
         /// <summary>
         /// parent token
         /// </summary>
-        public RTFToken Parent
-        {
-            get { return myParent; }
-            set { myParent = value; }
-        }
+        public RTFToken Parent { get; set; }
+
         public bool IsTextToken
         {
             get
             {
-                if (intType == RTFTokenType.Text)
+                if (_intType == RTFTokenType.Text)
                     return true;
-                if (intType == RTFTokenType.Control && strKey == "'" && bolHasParam)
+                if (_intType == RTFTokenType.Control && Key == "'" && HasParam)
                     return true;
                 return false;
             }
@@ -906,39 +838,38 @@ namespace RtfDomParser
 
         public override string ToString()
         {
-            if (intType == RTFTokenType.Keyword)
+            if (_intType == RTFTokenType.Keyword)
             {
-                return this.Key + this.Param;
+                return Key + Param;
             }
-            else if (intType == RTFTokenType.GroupStart)
+            if (_intType == RTFTokenType.GroupStart)
             {
                 return "{";
             }
-            else if (intType == RTFTokenType.GroupEnd)
+            if (_intType == RTFTokenType.GroupEnd)
             {
                 return "}";
             }
-            else if (intType == RTFTokenType.Text)
+            if (_intType == RTFTokenType.Text)
             {
-                return "Text:" + this.Param;
+                return "Text:" + Param;
             }
-            return intType.ToString() + ":" + this.Key + " " + this.Param;
+            return _intType + ":" + Key + " " + Param;
         }
-	}
+    }
 
-	/// <summary>
-	/// rtf token type
-	/// </summary>
-	public enum RTFTokenType
-	{
-		None ,
-		Keyword ,
-		ExtKeyword ,
-		Control ,
-		Text ,
-		Eof ,
-		GroupStart ,
-		GroupEnd 
-	}
-	
+    /// <summary>
+    /// rtf token type
+    /// </summary>
+    public enum RTFTokenType
+    {
+        None,
+        Keyword,
+        ExtKeyword,
+        Control,
+        Text,
+        Eof,
+        GroupStart,
+        GroupEnd
+    }
 }

@@ -8,316 +8,310 @@
  */
 
 using System;
+using System.Text;
 
 namespace RtfDomParser
 {
-	/// <summary>
+    /// <summary>
     /// RTF node group , this source code evolution from other software.
-	/// </summary>
-	public class RTFNodeGroup : RTFNode
-	{
-		/// <summary>
-		/// initialize instance
-		/// </summary>
-		public RTFNodeGroup()
-		{
-			this.intType = RTFNodeType.Group ;
-		}
-		/// <summary>
-		/// child node list
-		/// </summary>
-		protected RTFNodeList myNodes = new RTFNodeList();
-		/// <summary>
-		/// child node list
-		/// </summary>
-		public override RTFNodeList Nodes
-		{
-			get
-			{
-				return myNodes ;
-			}
-		}
+    /// </summary>
+    public class RTFNodeGroup : RTFNode
+    {
+        /// <summary>
+        /// child node list
+        /// </summary>
+        protected RTFNodeList MyNodes = new RTFNodeList();
 
-		/// <summary>
-		/// get all child node deeply
-		/// </summary>
-		/// <param name="IncludeGroupNode">contains group type node</param>
-		/// <returns>child nodes list</returns>
-		public RTFNodeList GetAllNodes( bool IncludeGroupNode )
-		{
-				RTFNodeList list = new RTFNodeList();
-				this.AddAllNodes( list , IncludeGroupNode );
-				return list ;
-		}
+        /// <summary>
+        /// initialize instance
+        /// </summary>
+        public RTFNodeGroup()
+        {
+            IntType = RTFNodeType.Group;
+        }
 
-		private void AddAllNodes( RTFNodeList list , bool IncludeGroupNode )
-		{
-			foreach( RTFNode node in myNodes )
-			{
-				if( node is RTFNodeGroup )
-				{
-					if( IncludeGroupNode )
-						list.Add( node );
-					( ( RTFNodeGroup ) node ).AddAllNodes( list , IncludeGroupNode );
-				}
-				else
-					list.Add( node );
-			}
-		}
+        /// <summary>
+        /// child node list
+        /// </summary>
+        public override RTFNodeList Nodes
+        {
+            get { return MyNodes; }
+        }
 
-		/// <summary>
-		/// first child node
-		/// </summary>
-		public RTFNode FirstNode
-		{
-			get
-			{
-				if( myNodes.Count > 0 )
-					return myNodes[ 0 ];
-				else
-					return null;
-			}
-		}
+        /// <summary>
+        /// first child node
+        /// </summary>
+        public RTFNode FirstNode
+        {
+            get
+            {
+                if (MyNodes.Count > 0)
+                    return MyNodes[0];
+                return null;
+            }
+        }
 
-		public override string Keyword
-		{
-			get
-			{
-				if( myNodes.Count > 0 )
-					return myNodes[ 0 ].Keyword ;
-				else
-					return null;
-			}
-			set
-			{
-				
-			}
-		}
+        public override string Keyword
+        {
+            get
+            {
+                if (MyNodes.Count > 0)
+                    return MyNodes[0].Keyword;
+                return null;
+            }
+            set { }
+        }
 
-		public override bool HasParameter
-		{
-			get
-			{
-				if( myNodes.Count > 0 )
-					return myNodes[ 0 ].HasParameter ;
-				else
-					return false;
-			}
-			set
-			{
-			}
-		}
+        public override bool HasParameter
+        {
+            get
+            {
+                if (MyNodes.Count > 0)
+                    return MyNodes[0].HasParameter;
+                return false;
+            }
+            set { }
+        }
 
-		public override int Parameter
-		{
-			get
-			{
-				if( myNodes.Count > 0 )
-					return myNodes[ 0 ].Parameter ;
-				else
-					return 0 ;
-			}
-		}
+        public override int Parameter
+        {
+            get
+            {
+                if (MyNodes.Count > 0)
+                    return MyNodes[0].Parameter;
+                return 0;
+            }
+        }
 
 
-		public virtual string Text
-		{
-			get
-			{
-				System.Text.StringBuilder myStr = new System.Text.StringBuilder();
-				foreach( RTFNode node in myNodes )
-				{
-					if( node is RTFNodeGroup )
-					{
-						myStr.Append( ( ( RTFNodeGroup ) node ).Text );
-					}
-					if( node.Type == RTFNodeType.Text )
-						myStr.Append( node.Keyword );
-				}
-				return myStr.ToString();
-			}
-		}
+        public virtual string Text
+        {
+            get
+            {
+                var myStr = new StringBuilder();
+                foreach (var node in MyNodes)
+                {
+                    if (node is RTFNodeGroup)
+                    {
+                        myStr.Append(((RTFNodeGroup) node).Text);
+                    }
+                    if (node.Type == RTFNodeType.Text)
+                        myStr.Append(node.Keyword);
+                }
+                return myStr.ToString();
+            }
+        }
 
-		internal void MergeText()
-		{
-			RTFNodeList list = new RTFNodeList();
-			System.Text.StringBuilder myStr = new System.Text.StringBuilder();
-			ByteBuffer buffer = new ByteBuffer();
-			//System.IO.MemoryStream ms = new System.IO.MemoryStream();
-			//System.Text.Encoding encode = myOwnerDocument.Encoding ;
-			foreach( RTFNode node in myNodes )
-			{
-				if( node.Type == RTFNodeType.Text )
-				{
-					AddString( myStr , buffer );
-					myStr.Append( node.Keyword );
-					continue ;
-				}
-				if( node.Type == RTFNodeType.Control 
-					&& node.Keyword == "\'"
-					&& node.HasParameter )
-				{
-					buffer.Add( ( byte ) node.Parameter );
-					continue ;
-				}
-				else if( node.Type == RTFNodeType.Control || node.Type == RTFNodeType.Keyword )
-				{
-					if( node.Keyword == "tab" )
-					{
-						AddString( myStr , buffer );
-						myStr.Append( '\t' );
-						continue ;
-					}
-					if( node.Keyword == "emdash")
-					{
-						AddString( myStr , buffer );
-						// notice!! This code may cause compiler error in OS which not support chinese character.
-						// you can change to myStr.Append('-');
-						myStr.Append( 'j');
-						continue ;
-					}
-					if( node.Keyword == "" )
-					{
-						AddString( myStr , buffer );
-						// notice!! This code may cause compiler error in OS which not support chinese character.
-						// you can change to myStr.Append('-');
-						myStr.Append( 'Ƀ' );
-						continue ;
-					}
-				}
-				AddString( myStr , buffer );
-				if( myStr.Length > 0 )
-				{
-					list.Add( new RTFNode( RTFNodeType.Text , myStr.ToString()));
-					myStr = new System.Text.StringBuilder();
-				}
-				list.Add( node );
-			}//foreach( RTFNode node in myNodes )
+        /// <summary>
+        /// get all child node deeply
+        /// </summary>
+        /// <param name="includeGroupNode">contains group type node</param>
+        /// <returns>child nodes list</returns>
+        public RTFNodeList GetAllNodes(bool includeGroupNode)
+        {
+            var list = new RTFNodeList();
+            AddAllNodes(list, includeGroupNode);
+            return list;
+        }
 
-			AddString( myStr , buffer );
-			if( myStr.Length > 0 )
-			{
-				list.Add( new RTFNode( RTFNodeType.Text , myStr.ToString()));
-			}
-			myNodes.Clear();
-			foreach( RTFNode node in list )
-			{
-				node.Parent = this ;
-				node.OwnerDocument = myOwnerDocument ;
-				myNodes.Add( node );
-			}
-		}
- 
-		private void AddString( System.Text.StringBuilder myStr , ByteBuffer buffer )
-		{
-			if( buffer.Count > 0 )
-			{
+        private void AddAllNodes(RTFNodeList list, bool includeGroupNode)
+        {
+            foreach (var node in MyNodes)
+            {
+                if (node is RTFNodeGroup)
+                {
+                    if (includeGroupNode)
+                        list.Add(node);
+                    ((RTFNodeGroup) node).AddAllNodes(list, includeGroupNode);
+                }
+                else
+                    list.Add(node);
+            }
+        }
+
+        internal void MergeText()
+        {
+            var list = new RTFNodeList();
+            var myStr = new StringBuilder();
+            var buffer = new ByteBuffer();
+            //System.IO.MemoryStream ms = new System.IO.MemoryStream();
+            //System.Text.Encoding encode = myOwnerDocument.Encoding ;
+            foreach (var node in MyNodes)
+            {
+                if (node.Type == RTFNodeType.Text)
+                {
+                    AddString(myStr, buffer);
+                    myStr.Append(node.Keyword);
+                    continue;
+                }
+                if (node.Type == RTFNodeType.Control
+                    && node.Keyword == "\'"
+                    && node.HasParameter)
+                {
+                    buffer.Add((byte) node.Parameter);
+                    continue;
+                }
+                if (node.Type == RTFNodeType.Control || node.Type == RTFNodeType.Keyword)
+                {
+                    if (node.Keyword == "tab")
+                    {
+                        AddString(myStr, buffer);
+                        myStr.Append('\t');
+                        continue;
+                    }
+                    if (node.Keyword == "emdash")
+                    {
+                        AddString(myStr, buffer);
+                        // notice!! This code may cause compiler error in OS which not support chinese character.
+                        // you can change to myStr.Append('-');
+                        myStr.Append('j');
+                        continue;
+                    }
+                    if (node.Keyword == "")
+                    {
+                        AddString(myStr, buffer);
+                        // notice!! This code may cause compiler error in OS which not support chinese character.
+                        // you can change to myStr.Append('-');
+                        myStr.Append('Ƀ');
+                        continue;
+                    }
+                }
+                AddString(myStr, buffer);
+                if (myStr.Length > 0)
+                {
+                    list.Add(new RTFNode(RTFNodeType.Text, myStr.ToString()));
+                    myStr = new StringBuilder();
+                }
+                list.Add(node);
+            } //foreach( RTFNode node in myNodes )
+
+            AddString(myStr, buffer);
+            if (myStr.Length > 0)
+            {
+                list.Add(new RTFNode(RTFNodeType.Text, myStr.ToString()));
+            }
+            MyNodes.Clear();
+            foreach (var node in list)
+            {
+                node.Parent = this;
+                node.OwnerDocument = MyOwnerDocument;
+                MyNodes.Add(node);
+            }
+        }
+
+        private void AddString(StringBuilder myStr, ByteBuffer buffer)
+        {
+            if (buffer.Count > 0)
+            {
                 //if( buffer.Count == 1 )
                 //{
                 //    myStr.Append( ( char ) buffer[0] );
                 //}
                 //else
-				{
-                    string txt = buffer.GetString(myOwnerDocument.RuntimeEncoding);
-					myStr.Append( txt );
-				}
-				buffer.Reset();
-			}
-		}
-		/// <summary>
-		/// write content to rtf document
-		/// </summary>
-		/// <param name="writer">RTF text writer</param>
-		public override void Write(RTFWriter writer)
-		{
-			writer.WriteStartGroup();
-			foreach( RTFNode node in myNodes )
-			{
-				node.Write( writer );
-			}
-			writer.WriteEndGroup();
-		}
+                {
+                    var txt = buffer.GetString(MyOwnerDocument.RuntimeEncoding);
+                    myStr.Append(txt);
+                }
+                buffer.Reset();
+            }
+        }
 
-		/// <summary>
-		/// search child node special keyword
-		/// </summary>
-		/// <param name="Key">special keyword</param>
-		/// <param name="Deeply">whether search deeplyl</param>
-		/// <returns>node find</returns>
-		public RTFNode SearchKey( string Key , bool Deeply )
-		{
-			foreach( RTFNode node in myNodes )
-			{
-				if( node.Type == RTFNodeType.Keyword 
-					|| node.Type == RTFNodeType.ExtKeyword 
-					|| node.Type == RTFNodeType.Control )
-				{
-					if( node.Keyword == Key )
-						return node ;
-				}
-				if( Deeply )
-				{
-					if( node is RTFNodeGroup )
-					{
-						RTFNodeGroup g = ( RTFNodeGroup ) node ;
-						RTFNode n = g.SearchKey( Key , true );
-						if( n != null )
-							return n ;
-					}
-				}
-			}
-			return null;
-		}
+        /// <summary>
+        /// write content to rtf document
+        /// </summary>
+        /// <param name="writer">RTF text writer</param>
+        public override void Write(RTFWriter writer)
+        {
+            writer.WriteStartGroup();
+            foreach (var node in MyNodes)
+            {
+                node.Write(writer);
+            }
+            writer.WriteEndGroup();
+        }
 
-		/// <summary>
-		/// append child node
-		/// </summary>
-		/// <param name="node">node</param>
-		public void AppendChild( RTFNode node )
-		{
-			CheckNodes();
-			if( node == null )
-				throw new System.ArgumentNullException("node");
-			if( node == this )
-				throw new System.ArgumentException("node != this");
-			node.Parent = this ;
-			node.OwnerDocument = myOwnerDocument ;
-			this.Nodes.Add( node );
-		}
-		/// <summary>
-		/// delete node
-		/// </summary>
-		/// <param name="node">node</param>
-		public void RemoveChild( RTFNode node )
-		{
-			CheckNodes();
-			if( node == null )
-				throw new System.ArgumentNullException("node");
-			if( node == this )
-				throw new System.ArgumentException("node != this");
-			this.Nodes.Remove( node );
-		}
-		/// <summary>
-		/// insert node
-		/// </summary>
-		/// <param name="index">index</param>
-		/// <param name="node">node</param>
-		public void InsertNode( int index , RTFNode node )
-		{
-			CheckNodes();
-			if( node == null )
-				throw new System.ArgumentNullException("node");
-			if( node == this )
-				throw new System.ArgumentException("node != this");
-			node.Parent = this ;
-			node.OwnerDocument = myOwnerDocument ;
-			this.Nodes.Insert( index , node );
-		}
+        /// <summary>
+        /// search child node special keyword
+        /// </summary>
+        /// <param name="key">special keyword</param>
+        /// <param name="deeply">whether search deeplyl</param>
+        /// <returns>node find</returns>
+        public RTFNode SearchKey(string key, bool deeply)
+        {
+            foreach (var node in MyNodes)
+            {
+                if (node.Type == RTFNodeType.Keyword
+                    || node.Type == RTFNodeType.ExtKeyword
+                    || node.Type == RTFNodeType.Control)
+                {
+                    if (node.Keyword == key)
+                        return node;
+                }
+                if (deeply)
+                {
+                    if (node is RTFNodeGroup)
+                    {
+                        var g = (RTFNodeGroup) node;
+                        var n = g.SearchKey(key, true);
+                        if (n != null)
+                            return n;
+                    }
+                }
+            }
+            return null;
+        }
 
-		private void CheckNodes()
-		{
-			if( this.Nodes == null )
-				throw new System.Exception("child node is invalidate");
-		}
-	}
+        /// <summary>
+        /// append child node
+        /// </summary>
+        /// <param name="node">node</param>
+        public void AppendChild(RTFNode node)
+        {
+            CheckNodes();
+            if (node == null)
+                throw new ArgumentNullException("node");
+            if (node == this)
+                throw new ArgumentException("node != this");
+            node.Parent = this;
+            node.OwnerDocument = MyOwnerDocument;
+            Nodes.Add(node);
+        }
+
+        /// <summary>
+        /// delete node
+        /// </summary>
+        /// <param name="node">node</param>
+        public void RemoveChild(RTFNode node)
+        {
+            CheckNodes();
+            if (node == null)
+                throw new ArgumentNullException("node");
+            if (node == this)
+                throw new ArgumentException("node != this");
+            Nodes.Remove(node);
+        }
+
+        /// <summary>
+        /// insert node
+        /// </summary>
+        /// <param name="index">index</param>
+        /// <param name="node">node</param>
+        public void InsertNode(int index, RTFNode node)
+        {
+            CheckNodes();
+            if (node == null)
+                throw new ArgumentNullException("node");
+            if (node == this)
+                throw new ArgumentException("node != this");
+            node.Parent = this;
+            node.OwnerDocument = MyOwnerDocument;
+            Nodes.Insert(index, node);
+        }
+
+        private void CheckNodes()
+        {
+            if (Nodes == null)
+                throw new Exception("child node is invalidate");
+        }
+    }
 }

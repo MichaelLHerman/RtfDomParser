@@ -9,45 +9,35 @@
 
 
 using System;
-using System.Collections ;
-using System.Collections.Generic ;
-using System.Text ;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
 
 namespace RtfDomParser
 {
-    
-
     /// <summary>
     /// font table
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Count={ Count }")]
-	public class RTFFontTable : List<RTFFont>
-	{
+    [DebuggerDisplay("Count={ Count }")]
+    public class RTFFontTable : List<RTFFont>
+    {
+        //private ArrayList myItems = new ArrayList();
 
-		/// <summary>
-		/// initialize instance
-		/// </summary>
-		public RTFFontTable()
-		{
-		}
-
-		//private ArrayList myItems = new ArrayList();
-
-		/// <summary>
-		/// get font information special index
-		/// </summary>
-		public RTFFont this[ int fontIndex ]
-		{
-			get
-			{
-                foreach (RTFFont item in this)
+        /// <summary>
+        /// get font information special index
+        /// </summary>
+        public RTFFont this[int fontIndex]
+        {
+            get
+            {
+                foreach (var item in this)
                 {
                     if (item.Index == fontIndex)
                         return item;
                 }
                 return null;
-			}
-		}
+            }
+        }
 
         /// <summary>
         /// get font object special name
@@ -58,7 +48,7 @@ namespace RtfDomParser
         {
             get
             {
-                foreach (RTFFont item in this)
+                foreach (var item in this)
                 {
                     if (item.Name == fontName)
                     {
@@ -76,116 +66,113 @@ namespace RtfDomParser
         /// <returns>font object</returns>
         public string GetFontName(int fontIndex)
         {
-            RTFFont font = this[fontIndex];
+            var font = this[fontIndex];
             if (font != null)
             {
                 return font.Name;
             }
-            else
-            {
-                return null;
-            }
-        } 
-
-		/// <summary>
-		/// add font
-		/// </summary>
-		/// <param name="f">font name</param>
-		public RTFFont Add( string f )
-		{
-            return Add(this.Count, f, Encoding.UTF8);
-		}
+            return null;
+        }
 
         /// <summary>
         /// add font
         /// </summary>
         /// <param name="f">font name</param>
-        public RTFFont Add(string f , Encoding encoding )
+        public RTFFont Add(string f)
         {
-            return Add(this.Count, f, encoding);
+            return Add(Count, f, Encoding.UTF8);
         }
 
-		/// <summary>
-		/// add font
-		/// </summary>
-		/// <param name="index">special font index</param>
-		/// <param name="f">font name</param>
+        /// <summary>
+        /// add font
+        /// </summary>
+        /// <param name="f">font name</param>
+        public RTFFont Add(string f, Encoding encoding)
+        {
+            return Add(Count, f, encoding);
+        }
+
+        /// <summary>
+        /// add font
+        /// </summary>
+        /// <param name="index">special font index</param>
+        /// <param name="f">font name</param>
         public RTFFont Add(int index, string f, Encoding encoding)
         {
             if (this[f] == null)
             {
-                RTFFont font = new RTFFont(index, f);
+                var font = new RTFFont(index, f);
                 if (encoding != null)
                 {
                     font.Charset = RTFFont.GetCharset(encoding);
                 }
-                this.Add(font);
+                Add(font);
                 return font;
             }
             return this[f];
         }
 
 
-		/// <summary>
-		/// Remove font
-		/// </summary>
-		/// <param name="f">font name</param>
-		public void Remove( string f )
-		{
-            RTFFont item = this[f];
+        /// <summary>
+        /// Remove font
+        /// </summary>
+        /// <param name="f">font name</param>
+        public void Remove(string f)
+        {
+            var item = this[f];
             if (item != null)
-                this.Remove( item );
-		}
+                Remove(item);
+        }
 
-		/// <summary>
-		/// Get font index special font name
-		/// </summary>
-		/// <param name="f">font name</param>
-		/// <returns>font index</returns>
-		public int IndexOf( string f )
-		{
-            foreach (RTFFont item in this)
+        /// <summary>
+        /// Get font index special font name
+        /// </summary>
+        /// <param name="f">font name</param>
+        /// <returns>font index</returns>
+        public int IndexOf(string f)
+        {
+            foreach (var item in this)
             {
                 if (item.Name == f)
                 {
                     return item.Index;
                 }
             }
-			return -1 ;
-		}
-		  
-		/// <summary>
-		/// Write font table rtf
-		/// </summary>
-		/// <param name="writer">rtf text writer</param>
-		public void Write( RTFWriter writer )
-		{
-			writer.WriteStartGroup();
-			writer.WriteKeyword( RTFConsts._fonttbl );
-			foreach( RTFFont item in this )
-			{
-				writer.WriteStartGroup();
-				writer.WriteKeyword( "f" + item.Index );
+            return -1;
+        }
+
+        /// <summary>
+        /// Write font table rtf
+        /// </summary>
+        /// <param name="writer">rtf text writer</param>
+        public void Write(RTFWriter writer)
+        {
+            writer.WriteStartGroup();
+            writer.WriteKeyword(RTFConsts.Fonttbl);
+            foreach (var item in this)
+            {
+                writer.WriteStartGroup();
+                writer.WriteKeyword("f" + item.Index);
                 if (item.Charset != 0)
                 {
                     writer.WriteKeyword("fcharset" + item.Charset);
                 }
-				writer.WriteText( item.Name );
-				writer.WriteEndGroup();
-			}
-			writer.WriteEndGroup();
-		}
+                writer.WriteText(item.Name);
+                writer.WriteEndGroup();
+            }
+            writer.WriteEndGroup();
+        }
 
-		public override string ToString()
-		{
-			System.Text.StringBuilder str = new System.Text.StringBuilder();
-			foreach( RTFFont item in this )
-			{
-				str.Append( System.Environment.NewLine );
-				str.Append( "Index " + item.Index + "   Name:" + item.Name );
-			}
-			return str.ToString();
-		}
+        public override string ToString()
+        {
+            var str = new StringBuilder();
+            foreach (var item in this)
+            {
+                str.Append(Environment.NewLine);
+                str.Append("Index " + item.Index + "   Name:" + item.Name);
+            }
+            return str.ToString();
+        }
 
         /// <summary>
         /// close object
@@ -193,21 +180,25 @@ namespace RtfDomParser
         /// <returns>new object</returns>
         public RTFFontTable Clone()
         {
-            RTFFontTable table = new RTFFontTable();
-            foreach (RTFFont item in this )
+            var table = new RTFFontTable();
+            foreach (var item in this)
             {
-                RTFFont newItem = item.Clone();
+                var newItem = item.Clone();
                 table.Add(newItem);
             }
             return table;
         }
-	}
+    }
 
     /// <summary>
     /// rtf font information
     /// </summary>
     public class RTFFont
     {
+        private static Dictionary<int, Encoding> _encodingCharsets;
+
+        private int _intCharset = 1;
+
         /// <summary>
         /// initialize instance
         /// </summary>
@@ -215,73 +206,47 @@ namespace RtfDomParser
         /// <param name="name">font name</param>
         public RTFFont(int index, string name)
         {
-            intIndex = index;
-            strName = name;
+            Encoding = null;
+            NilFlag = false;
+            Index = index;
+            Name = name;
         }
 
-        private int intIndex = 0;
         /// <summary>
         /// font index
         /// </summary>
-        public int Index
-        {
-            get
-            {
-                return intIndex; 
-            }
-            set
-            {
-                intIndex = value; 
-            }
-        }
+        public int Index { get; set; }
 
-        private bool _NilFlag = false;
+        public bool NilFlag { get; set; }
 
-        public bool NilFlag
-        {
-            get { return _NilFlag; }
-            set { _NilFlag = value; }
-        }
-
-        private string strName = null;
         /// <summary>
         /// font name
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return strName; 
-            }
-            set
-            {
-                strName = value; 
-            }
-        }
+        public string Name { get; set; }
 
-        private int intCharset = 1;
         /// <summary>
         /// charset 
         /// </summary>
         public int Charset
         {
-            get
-            {
-                return intCharset;
-            }
+            get { return _intCharset; }
             set
             {
-                intCharset = value;
-                myEncoding = GetRTFEncoding(intCharset);
+                _intCharset = value;
+                Encoding = GetRTFEncoding(_intCharset);
             }
         }
 
-        private static Dictionary<int, Encoding> _EncodingCharsets = null;
+        /// <summary>
+        /// encoding
+        /// </summary>
+        public Encoding Encoding { get; private set; }
+
         private static void CheckEncodingCharsets()
         {
-            if (_EncodingCharsets == null)
+            if (_encodingCharsets == null)
             {
-                _EncodingCharsets = new Dictionary<int, Encoding>();
+                _encodingCharsets = new Dictionary<int, Encoding>();
                 //_EncodingCharsets[0] = ANSIEncoding.Instance;
                 //_EncodingCharsets[1] = Encoding.Default;
                 //_EncodingCharsets[77] = Encoding.GetEncoding("macintosh");//Mac ,macintosh Î÷Å·×Ö·û(Mac)
@@ -306,19 +271,16 @@ namespace RtfDomParser
                 //_EncodingCharsets[204] = Encoding.GetEncoding(866);//Russian
                 //_EncodingCharsets[222] = Encoding.GetEncoding(874);//Thai
                 //_EncodingCharsets[255] = Encoding.GetEncoding(437);//OEM
-                _EncodingCharsets[255] = Encoding.GetEncoding("IBM437");//OEM
-
-
-
+                _encodingCharsets[255] = Encoding.GetEncoding("IBM437"); //OEM
             }
         }
 
         internal static int GetCharset(Encoding encoding)
         {
             CheckEncodingCharsets();
-            foreach (int key in _EncodingCharsets.Keys)
+            foreach (var key in _encodingCharsets.Keys)
             {
-                if (_EncodingCharsets[key] == encoding)
+                if (_encodingCharsets[key] == encoding)
                 {
                     return key;
                 }
@@ -326,28 +288,22 @@ namespace RtfDomParser
             return 1;
         }
 
-        internal static System.Text.Encoding GetRTFEncoding(int fchartset)
+        internal static Encoding GetRTFEncoding(int fchartset)
         {
             if (fchartset == 0)
             {
-                return ANSIEncoding.Instance;
+                return AnsiEncoding.Instance;
             }
-            else if (fchartset == 1)
+            if (fchartset == 1)
             {
                 return Encoding.UTF8;
             }
-            else
+            CheckEncodingCharsets();
+            if (_encodingCharsets.ContainsKey(fchartset))
             {
-                CheckEncodingCharsets();
-                if (_EncodingCharsets.ContainsKey(fchartset))
-                {
-                    return _EncodingCharsets[fchartset];
-                }
-                else
-                {
-                    return null;
-                }
+                return _encodingCharsets[fchartset];
             }
+            return null;
 
             //switch (fchartset)
             //{
@@ -355,108 +311,97 @@ namespace RtfDomParser
             //        return ANSIEncoding.Instance;
             //    case 1:	// Default
             //        return System.Text.Encoding.Default;
-                    
+
             //    //case 2:	// Symbol
             //    //case 3:	// Invalid
             //    case 77:   // Mac
             //        return System.Text.Encoding.GetEncoding(10000); //macintosh Î÷Å·×Ö·û(Mac)
-                    
+
             //    case 128:	// Shift Jis
             //        return System.Text.Encoding.GetEncoding(932);// ANSI/OEM - Japanese, Shift-JIS 
-                    
+
             //    //case 129:	// Hangul
             //    case 130:	// Johab
             //        return System.Text.Encoding.GetEncoding(1361);// Korean (Johab) 
-                    
+
             //    case 134:	// GB2312
             //        return System.Text.Encoding.GetEncoding(936);
-                    
+
             //    case 136:	// Big5
             //        return System.Text.Encoding.GetEncoding(10002);// MAC - Traditional Chinese (Big5) 
-                    
+
             //    case 161:	// Greek
             //        return System.Text.Encoding.GetEncoding(1253);// ANSI - Greek 
-                    
+
             //    case 162:	// Turkish
             //        return System.Text.Encoding.GetEncoding(1254);//ANSI - Turkish 
-                    
+
             //    case 163:	// Vietnamese
             //        return System.Text.Encoding.GetEncoding(1258);// ANSI/OEM - Vietnamese 
-                    
+
             //    case 177:	// Hebrew
             //        return System.Text.Encoding.GetEncoding(1255);// ANSI - Hebrew 
-                    
+
             //    case 178:	// Arabic
             //        return System.Text.Encoding.GetEncoding(864);//OEM - Arabic 
-                    
+
             //    case 179:	// Arabic Traditional
             //        return System.Text.Encoding.GetEncoding(864);//OEM - Arabic 
-                    
+
             //    case 180:	// Arabic user
             //        return System.Text.Encoding.GetEncoding(864);//OEM - Arabic 
-                    
+
             //    case 181:	// Hebrew user
             //        return System.Text.Encoding.GetEncoding(864);//OEM - Arabic 
-                    
+
             //    case 186:	// Baltic
             //        return System.Text.Encoding.GetEncoding(775);//OEM - Baltic 
-                    
+
             //    case 204:	// Russian
             //        return System.Text.Encoding.GetEncoding(866);//OEM - Russian 
-                    
+
             //    case 222:	// Thai
             //        return System.Text.Encoding.GetEncoding(874);//ANSI/OEM - Thai (same as 28605, ISO 8859-15) 
-                    
+
             //    //case 238:	// Eastern European
             //    //case 254:	// PC 437
             //    case 255:	// OEM
             //        return System.Text.Encoding.GetEncoding(437);//OEM - United States 
-                    
+
             //    default:
             //        return null;
             //}
         }
 
-        private System.Text.Encoding myEncoding = null ;
-        /// <summary>
-        /// encoding
-        /// </summary>
-        public System.Text.Encoding Encoding
-        {
-            get 
-            {
-                return myEncoding; 
-            }
-        }
-
         public RTFFont Clone()
         {
-            RTFFont f = new RTFFont( this.intIndex , this.strName );
-            f.intCharset = this.intCharset;
-            f.intIndex = this.intIndex;
-            f.myEncoding = this.myEncoding;
-            f.strName = this.strName;
+            var f = new RTFFont(Index, Name);
+            f._intCharset = _intCharset;
+            f.Index = Index;
+            f.Encoding = Encoding;
+            f.Name = Name;
             return f;
         }
 
         public override string ToString()
         {
-            return intIndex + ":" + strName + " Charset:" + intCharset;
+            return Index + ":" + Name + " Charset:" + _intCharset;
         }
     }
 
-    
+
     /// <summary>
     /// internal encoding for ansi
     /// </summary>
-    internal class ANSIEncoding : System.Text.Encoding
+    internal class AnsiEncoding : Encoding
     {
-        public static ANSIEncoding Instance = new ANSIEncoding();
+        public static AnsiEncoding Instance = new AnsiEncoding();
+
         public override string GetString(byte[] bytes, int index, int count)
         {
-            System.Text.StringBuilder str = new System.Text.StringBuilder();
-            int endIndex = Math.Min(bytes.Length-1, index + count -1);
-            for (int iCount = index ; iCount <= endIndex ; iCount++)
+            var str = new StringBuilder();
+            var endIndex = Math.Min(bytes.Length - 1, index + count - 1);
+            for (var iCount = index; iCount <= endIndex; iCount++)
             {
                 str.Append(System.Convert.ToChar(bytes[iCount]));
             }
@@ -467,26 +412,30 @@ namespace RtfDomParser
         {
             throw new Exception("The method or operation is not implemented.");
         }
+
         public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
         {
             throw new Exception("The method or operation is not implemented.");
         }
+
         public override int GetCharCount(byte[] bytes, int index, int count)
         {
             throw new Exception("The method or operation is not implemented.");
         }
+
         public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
         {
             throw new Exception("The method or operation is not implemented.");
         }
+
         public override int GetMaxByteCount(int charCount)
         {
             throw new Exception("The method or operation is not implemented.");
         }
+
         public override int GetMaxCharCount(int byteCount)
         {
             throw new Exception("The method or operation is not implemented.");
         }
-
     }
 }

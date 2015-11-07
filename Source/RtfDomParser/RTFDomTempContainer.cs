@@ -7,39 +7,24 @@
  * 
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace RtfDomParser
 {
-    public class RTFDomTempContainer: RTFDomElement
+    public class RTFDomTempContainer : RTFDomElement
     {
+        private DocumentFormatInfo _myFormat = new DocumentFormatInfo();
 
-        public RTFDomTempContainer()
-        { 
-        }
-
-        private DocumentFormatInfo myFormat = new DocumentFormatInfo();
         /// <summary>
         /// format
         /// </summary>
         public DocumentFormatInfo Format
         {
-            get
-            {
-                return myFormat;
-            }
-            set
-            {
-                myFormat = value;
-            }
+            get { return _myFormat; }
+            set { _myFormat = value; }
         }
 
         public override string ToString()
         {
             return "TempContainer";
         }
-
     }
 }

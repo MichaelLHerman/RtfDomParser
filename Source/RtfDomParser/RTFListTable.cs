@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace RtfDomParser
 {
     public class RTFListTable : List<RTFList>
     {
-        public RTFListTable()
+        public RTFList GetById(int id)
         {
-        }
-
-        public RTFList GetByID(int id)
-        {
-            foreach (RTFList list in this)
+            foreach (var list in this)
             {
-                if (list.ListID == id)
+                if (list.ListId == id)
                 {
                     return list;
                 }
@@ -25,119 +20,71 @@ namespace RtfDomParser
 
     public class RTFList
     {
-        private int _ListID = 0;
+        private LevelNumberType _levelNfc = LevelNumberType.None;
 
-        public int ListID
+        private int _levelStartAt = 1;
+
+        public RTFList()
         {
-            get { return _ListID; }
-            set { _ListID = value; }
+            LevelText = null;
+            FontName = null;
+            LevelFollow = 0;
+            LevelJc = 0;
+            ListStyleName = null;
+            ListName = null;
+            ListHybrid = false;
+            ListSimple = false;
+            ListTemplateId = 0;
+            ListId = 0;
         }
 
-        private int _ListTemplateID = 0;
+        public int ListId { get; set; }
 
-        public int ListTemplateID
-        {
-            get { return _ListTemplateID; }
-            set { _ListTemplateID = value; }
-        }
+        public int ListTemplateId { get; set; }
 
-        private bool _ListSimple = false;
+        public bool ListSimple { get; set; }
 
-        public bool ListSimple
-        {
-            get { return _ListSimple; }
-            set { _ListSimple = value; }
-        }
+        public bool ListHybrid { get; set; }
 
-        private bool _ListHybrid = false;
+        public string ListName { get; set; }
 
-        public bool ListHybrid
-        {
-            get { return _ListHybrid; }
-            set { _ListHybrid = value; }
-        }
-
-        private string _ListName = null;
-
-        public string ListName
-        {
-            get { return _ListName; }
-            set { _ListName = value; }
-        }
-
-        private string _ListStyleName = null;
-
-        public string ListStyleName
-        {
-            get { return _ListStyleName; }
-            set { _ListStyleName = value; }
-        }
-
-        private int _LevelStartAt = 1;
+        public string ListStyleName { get; set; }
 
         public int LevelStartAt
         {
-            get { return _LevelStartAt; }
-            set { _LevelStartAt = value; }
+            get { return _levelStartAt; }
+            set { _levelStartAt = value; }
         }
-
-        private LevelNumberType _LevelNfc =  LevelNumberType.None  ;
 
         public LevelNumberType LevelNfc
         {
-            get { return _LevelNfc; }
-            set { _LevelNfc = value; }
+            get { return _levelNfc; }
+            set { _levelNfc = value; }
         }
 
-        private int _LevelJc = 0;
+        public int LevelJc { get; set; }
 
-        public int LevelJc
-        {
-            get { return _LevelJc; }
-            set { _LevelJc = value; }
-        }
+        public int LevelFollow { get; set; }
 
-        private int _LevelFollow = 0;
-
-        public int LevelFollow
-        {
-            get { return _LevelFollow; }
-            set { _LevelFollow = value; }
-        }
-
-        private string _FontName = null;
         /// <summary>
         /// 字体名称
         /// </summary>
-        public string FontName
-        {
-            get { return _FontName; }
-            set { _FontName = value; }
-        }
+        public string FontName { get; set; }
 
-        private string _LevelText = null;
-
-        public string LevelText
-        {
-            get { return _LevelText; }
-            set { _LevelText = value; }
-        }
+        public string LevelText { get; set; }
 
         public override string ToString()
         {
-            if (this.LevelNfc == LevelNumberType.Bullet)
+            if (LevelNfc == LevelNumberType.Bullet)
             {
-                string text = "ID:" + this.ListID + "   Bullet:";
-                if (string.IsNullOrEmpty(this.LevelText) == false)
+                var text = "ID:" + ListId + "   Bullet:";
+                if (string.IsNullOrEmpty(LevelText) == false)
                 {
-                    text = text + "(" + Convert.ToString((short)this.LevelText[0]) + ")";
+                    text = text + "(" + Convert.ToString((short) LevelText[0]) + ")";
                 }
                 return text;
             }
-            else
-            {
-                return  "ID:" + this.ListID + " " + this.LevelNfc.ToString() + " Start:" + this.LevelStartAt;
-            }
+            return "ID:" + ListId + " " + LevelNfc + " Start:" + LevelStartAt;
         }
     }
 }
